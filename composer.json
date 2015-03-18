@@ -9,7 +9,8 @@
         "claroline/core-bundle": "~4.1",
          "ext-curl": "*",
          "ext-json": "*",
-         "paypal/rest-api-sdk-php" : "0.5.*"
+        "jms/payment-core-bundle": "master-dev",
+        "jms/payment-paypal-bundle": "dev-master"
     },
     "autoload": {
         "psr-0": { "FormaLibre\\Invoice": "" }
