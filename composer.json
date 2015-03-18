@@ -7,8 +7,6 @@
     "require": {
         "php": ">=5.4.1",
         "claroline/core-bundle": "~4.1",
-         "ext-curl": "*",
-         "ext-json": "*",
         "jms/payment-core-bundle": "master-dev",
         "jms/payment-paypal-bundle": "dev-master"
     },
