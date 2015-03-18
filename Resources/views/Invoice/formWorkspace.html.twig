@@ -1,0 +1,39 @@
+{#
+{% set layout = "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+{% if isDesktop() %}
+    {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+{% endif %}
+#}
+
+{% set layout = "ClarolineCoreBundle::layout.html.twig" %}
+
+{% extends layout %}
+
+
+{% block content %}
+
+<div class="section-content">
+    <div class="panel panel-default">
+        <div class="row">
+            <div class="col-md-3">
+                <form action="{{ path('workspace_payment_submit', {'order': order.getId()}) }}" method="post">
+                    {{ form_widget(form) }}
+                    <input type="submit" />
+                </form>
+            </div>
+            <div class="col-md-3">
+                <form action="{{ path('workspace_payment_submit', {'order': order.getId()}) }}" method="post">
+                    {{ form_widget(form) }}
+                    <input type="submit" />
+                </form>
+            </div>
+            <div class="col-md-3">
+                <form action="{{ path('workspace_payment_submit', {'order': order.getId()}) }}" method="post">
+                    {{ form_widget(form) }}
+                    <input type="submit" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

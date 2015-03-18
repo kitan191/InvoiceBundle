@@ -1,0 +1,5 @@
+jms_payment_paypal:
+    username: nicolas.godfraind-facilitator_api1.gmail.com
+    password: G58R5XS3EP4FKM9D
+    signature: Aq4JdqtzEOjJCsXDzrYABanKDensADzpi82xR4w65Q.RwVPCL-6hr.vV
+    debug: true

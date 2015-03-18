@@ -1,0 +1,5 @@
+parameters:
+    formalibre_workspace_invoice_base_price: 10
+    formalibre_workspace_invoice_free_month_time: 1
+    formalibre_workspace_invoice_reduction_coef: 0
+    formalibre_workspace_invoice_sent_url: ~

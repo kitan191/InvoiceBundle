@@ -1,0 +1,4 @@
+invoice_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/InvoiceController.php"
+    type: annotation
+    prefix: /
