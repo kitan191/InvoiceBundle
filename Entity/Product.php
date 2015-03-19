@@ -4,6 +4,7 @@ namespace FormaLibre\InvoiceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Table(name="formalibre_product")
@@ -20,14 +21,27 @@ class Product
 
     /**
      * @ORM\Column(unique=true)
-     * @Assert\NotBlank()
      */
     private $code;
+    
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $type;
 
     /**
      * @ORM\Column(type="json_array", nullable=true)
      */
     private $details;
+    
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\WorkspaceProduct",
+     *     mappedBy="product",
+     *     cascade={"persist"}
+     * )
+     */
+    private $workspaceProducts;
 
     public function __construct(
         $code,
@@ -38,6 +52,7 @@ class Product
         $this->code = $code;
         $this->price = $price;
         $this->description = $description;
+        $this->workspaceProducts = new ArrayCollection();
     }
 
     public function getId()
@@ -68,5 +83,10 @@ class Product
     public function getDescription()
     {
         return $this->description;
+    }
+    
+    public function setType($type)
+    {
+        $this->type = $type;
     }
 }

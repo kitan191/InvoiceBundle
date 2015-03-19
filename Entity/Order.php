@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 
 /**
- * @ORM\Table(name="formalibre_order_workspace")
+ * @ORM\Table(name="formalibre_order")
  * @ORM\Entity()
  */
 class WorkspaceOrder
