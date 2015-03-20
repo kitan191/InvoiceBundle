@@ -7,7 +7,7 @@ use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * @ORM\Table(name="formalibre_product")
+ * @ORM\Table(name="formalibre__product")
  * @ORM\Entity()
  */
 class Product
@@ -23,7 +23,7 @@ class Product
      * @ORM\Column(unique=true)
      */
     private $code;
-    
+
     /**
      * @ORM\Column(type="string")
      */
@@ -33,26 +33,29 @@ class Product
      * @ORM\Column(type="json_array", nullable=true)
      */
     private $details;
-    
+
     /**
      * @ORM\OneToMany(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\WorkspaceProduct",
      *     mappedBy="product",
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace",
      *     cascade={"persist"}
      * )
      */
-    private $workspaceProducts;
+    private $sharedWorkspaces;
 
-    public function __construct(
-        $code,
-        $price,
-        array $description
-    )
+    /**
+     * @ORM\OneToMany(
+     *     mappedBy="product",
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\PriceSolution",
+     *     cascade={"persist"}
+     * )
+     */
+    private $priceSolutions;
+
+    public function __construct()
     {
-        $this->code = $code;
-        $this->price = $price;
-        $this->description = $description;
-        $this->workspaceProducts = new ArrayCollection();
+        $this->sharedWorkspace = new ArrayCollection();
+        $this->priceSolutions = new ArrayCollection();
     }
 
     public function getId()
@@ -65,6 +68,11 @@ class Product
         $this->code = $code;
     }
 
+    public function getCode()
+    {
+        return $this->code;
+    }
+
     public function setPrice($price)
     {
         $this->price = $price;
@@ -75,18 +83,28 @@ class Product
         return $this->price;
     }
 
-    public function setDescription(array $description)
+    public function setDetails(array $details)
     {
-        $this->description = $description;
+        $this->details = $details;
     }
 
-    public function getDescription()
+    public function getDetails()
     {
-        return $this->description;
+        return $this->details;
     }
-    
+
     public function setType($type)
     {
         $this->type = $type;
+    }
+
+    public function addPriceSolution(PriceSolution $price)
+    {
+        $this->priceSolutions->add($price);
+    }
+
+    public function getPriceSolutions()
+    {
+        return $this->priceSolutions;
     }
 }

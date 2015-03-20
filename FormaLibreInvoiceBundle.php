@@ -46,7 +46,12 @@ class FormaLibreInvoiceBundle extends PluginBundle implements AutoConfigurableIn
 
     public function hasMigrations()
     {
-        return false;
+        return true;
+    }
+
+    public function getRequiredFixturesDirectory($environment)
+    {
+        return 'DataFixtures';
     }
 
     private function buildPath($file, $folder = 'suggested')

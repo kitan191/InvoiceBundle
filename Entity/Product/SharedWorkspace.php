@@ -1,15 +1,14 @@
 <?php
 
-namespace FormaLibre\InvoiceBundle\Entity;
+namespace FormaLibre\InvoiceBundle\Entity\Product;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 
 /**
- * @ORM\Table(name="formalibre_workspace_product")
+ * @ORM\Table(name="formalibre__shared_workspace")
  * @ORM\Entity()
  */
-class WorkspaceProduct
+class SharedWorkspace
 {
     /**
      * @ORM\Column(type="integer")
@@ -59,8 +58,14 @@ class WorkspaceProduct
     private $maxRes;
 
     /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $autoSubscribe = false;
+
+    /**
      * @ORM\ManyToOne(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product"
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product",
+     *     inversedBy="sharedWorkspaces"
      * )
      * @ORM\JoinColumn(name="product_id", onDelete="SET NULL")
      */
@@ -70,39 +75,49 @@ class WorkspaceProduct
     {
         return $this->id;
     }
-    
+
     public function setOwner(User $user)
     {
         $this->owner = $owner;
     }
-    
+
     public function setName($name)
     {
         $this->name = $name;
     }
-    
+
     public function setCode($code)
     {
         $this->code = $code;
     }
-    
+
     public function setExpDate(\DateTime $expDate)
     {
         $this->expDate = $expDate;
     }
-    
+
     public function setMaxSize($maxSize)
     {
         $this->maxSize = $maxSize;
     }
-    
+
     public function setMaxUser($maxUser)
     {
         $this->maxUser = $maxUser;
     }
-    
+
     public function setMaxRes($maxRes)
     {
         $this->maxRes = $maxRes;
+    }
+
+    public function setAutoSubscribe($bool)
+    {
+        $this->autoSubscribe = false;
+    }
+
+    public function getAutoSubscribe()
+    {
+        return $this->autoSubscribe;
     }
 }

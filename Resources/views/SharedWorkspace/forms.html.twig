@@ -1,0 +1,32 @@
+{#
+{% set layout = "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+{% if isDesktop() %}
+    {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+{% endif %}
+#}
+
+{% set layout = "ClarolineCoreBundle::layout.html.twig" %}
+
+{% extends layout %}
+
+
+{% block content %}
+
+<div class="section-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                {% for form in forms %}
+                <div class="col-md-3">
+                    <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId()}) }}" method="post">
+                        {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
+                        {{ form_widget(form['form']) }}
+                        <input type="submit" class="btn btn-primary"/>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
