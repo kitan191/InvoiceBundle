@@ -38,52 +38,48 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
                 'code' => 'SHARED_WS_A',
                 'type' => 'SHARED_WS',
                 'details' => array(
-                    'maxUser'               => 10,
-                    'maxRes'                => 50,
-                    'maxSize'               => '100MB',
-                    'description'           => 'Ici aussi mais moins encore',
+                    'max_users'      => 10,
+                    'max_resources' => 50,
+                    'max_storage'    => '100MB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'price' => 10)
+                    array('duration' => 1, 'base_price' => 10)
                 )
             ),
             array(
                 'code' => 'SHARED_WS_B',
                 'type' => 'SHARED_WS',
                 'details' => array(
-                    'maxUser'               => 30,
-                    'maxRes'                => 300,
-                    'maxSize'               => '1GB',
-                    'description'           => 'Ici on loue des choses',
+                    'max_users'      => 30,
+                    'max_resources' => 300,
+                    'max_storage'    => '1GB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'price' => 25)
+                    array('duration' => 1, 'base_price' => 25)
                 )
             ),
             array(
                 'code' => 'SHARED_WS_C',
                 'type' => 'SHARED_WS',
                 'details' => array(
-                    'maxUser'               => 75,
-                    'maxRes'                => 1000,
-                    'maxSize'               => '10GB',
-                    'description'           => 'Ici on loue un peu plus',
+                    'max_users'      => 75,
+                    'max_resources' => 1000,
+                    'max_storage'    => '10GB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'price' => 50)
+                    array('duration' => 1, 'base_price' => 50)
                 )
             ),
             array(
                 'code' => 'SHARED_WS_D',
                 'type' => 'SHARED_WS',
                 'details' => array(
-                    'maxUser'               => 200,
-                    'maxRes'                => 10000,
-                    'maxSize'               => '100GB',
-                    'description'           => 'Ici on loue beaucoup',
+                    'max_users'      => 200,
+                    'max_resources' => 10000,
+                    'max_storage'    => '100GB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'price' => 100)
+                    array('duration' => 1, 'base_price' => 100)
                 )
             )
         );
@@ -95,11 +91,13 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
             $product->setType($info['type']);
             $product->setDetails($info['details']);
 
+            $durations = array(1, 3, 6, 12);
+
             foreach ($info['pricing'] as $price) {
-                for ($i = 1; $i < 6; $i++) {
+                foreach ($durations as $i) {
                     $priceSolution = new PriceSolution();
                     $priceSolution->setMonthDuration($price['duration'] * $i);
-                    $priceSolution->setPrice($price['price'] * $i);
+                    $priceSolution->setPrice($price['base_price'] * $i - 0.01);
                     $priceSolution->setProduct($product);
                     $manager->persist($priceSolution);
                     $product->addPriceSolution($priceSolution);

@@ -68,6 +68,6 @@ class PriceSolution
 
     public function __toString()
     {
-        return $this->monthDuration . ' mois (' . $this->getPrice() . 'euros)';
+        return $this->monthDuration . ' mois (' . $this->getPrice() . ' €)';
     }
 }

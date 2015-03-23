@@ -18,6 +18,18 @@
             <div class="row">
                 {% for form in forms %}
                 <div class="col-md-3">
+                    <div class="well">
+                        {{
+                            'SHARE_WS_DESCRIPTION'|trans(
+                                {
+                                    '%users%': form['product'].details.max_users,
+                                    '%storage%': form['product'].details.max_storage,
+                                    '%resources%': form['product'].details.max_resources
+                                },
+                                'invoice'
+                            )|raw
+                        }}
+                    </div>
                     <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId()}) }}" method="post">
                         {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
                         {{ form_widget(form['form']) }}

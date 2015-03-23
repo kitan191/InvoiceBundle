@@ -16,22 +16,30 @@ class SharedWorkspaceForm extends AbstractType
     private $product;
     private $router;
     private $em;
+    private $translator;
 
     public function __construct(
         Product $product,
         $router,
-        $em
+        $em,
+        $translator
     )
     {
         $this->product = $product;
         $this->router = $router;
         $this->em = $em;
+        $this->translator = $translator;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $product = $this->product;
         $details = $product->getDetails();
+        $detailsInfo = $this->translator->trans(
+            'SHARE_WS_DESCRIPTION_PAYPAL',
+            array('%resources' => $details['max_resources'], '%users%' => $details['max_users'], '%storage%' => $details['max_storage']),
+            'invoice'
+        );
 
         $builder->add(
             'price',
@@ -69,7 +77,7 @@ class SharedWorkspaceForm extends AbstractType
                                 'order' => $this->product->getCode(),
                             ), true),
                             'checkout_params' => array(
-                                'L_PAYMENTREQUEST_0_DESC0' => $details['description'],
+                                'L_PAYMENTREQUEST_0_DESC0' => $detailsInfo,
                                 'L_PAYMENTREQUEST_0_QTY0' => '1',
                                 'L_PAYMENTREQUEST_0_AMT0'=> 0
                             )
@@ -79,6 +87,7 @@ class SharedWorkspaceForm extends AbstractType
             );
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, array($this, 'onPreSubmit'));
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, array($this, 'onPreSetData'));
     }
 
     public function onPreSubmit(FormEvent $event)
@@ -89,13 +98,19 @@ class SharedWorkspaceForm extends AbstractType
         $options = $form->get('payment')->getConfig()->getOptions();
         $options['amount'] = $amount;
         $options['predefined_data']['paypal_express_checkout']['checkout_params']['L_PAYMENTREQUEST_0_AMT0'] = $amount;
-
         $form->remove('payment');
         $form->add(
             'payment',
             'jms_choose_payment_method',
             $options
         );
+    }
+
+    public function onPreSetData(FormEvent $event)
+    {
+        $form = $event->getForm();
+        $data = $event->getData();
+        if ($form->has('captcha')) $form->remove('captcha');
     }
 
     public function getName()

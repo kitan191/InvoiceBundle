@@ -29,6 +29,9 @@ class SharedWorkspaceController extends Controller
     /** @DI\Inject("payment.plugin_controller") */
     private $ppc;
 
+    /** @DI\Inject("translator") */
+    private $translator;
+
     /**
      * @EXT\Route(
      *      "/products/form",
@@ -45,7 +48,7 @@ class SharedWorkspaceController extends Controller
 
         foreach ($products as $product) {
             //now we generate the forms !
-            $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em));
+            $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator));
             $forms[] = array(
                 'form' => $form->createView(),
                 'product' => $product
@@ -65,7 +68,7 @@ class SharedWorkspaceController extends Controller
      */
     public function submitWorkspaceAction(Product $product)
     {
-        $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em));
+        $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator));
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {

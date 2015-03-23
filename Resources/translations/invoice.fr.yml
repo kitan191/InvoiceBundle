@@ -1,0 +1,19 @@
+shared_workspace_product_form_SHARED_WS_A_payment_method: Méthode de payment
+shared_workspace_product_form_SHARED_WS_B_payment_method: Méthode de payment
+shared_workspace_product_form_SHARED_WS_C_payment_method: Méthode de payment
+shared_workspace_product_form_SHARED_WS_D_payment_method: Méthode de payment
+
+shared_workspace_product_form_SHARED_WS_A_payment_data_paypal_express_checkout: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_B_payment_data_paypal_express_checkout: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_C_payment_data_paypal_express_checkout: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_D_payment_data_paypal_express_checkout: ' ' #fuck this too
+
+form.label.paypal_express_checkout: paypal
+
+SHARE_WS_DESCRIPTION: |
+    %users% utilisateurs </br>
+    %storage% </br>
+    %resources% ressources
+
+
+SHARE_WS_DESCRIPTION_PAYPAL: Location d'espace d'activité.
