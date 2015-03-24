@@ -96,7 +96,7 @@ class SharedWorkspace
         $this->expDate = $expDate;
     }
 
-    public function setMaxSize($maxSize)
+    public function setMaxStorage($maxSize)
     {
         $this->maxSize = $maxSize;
     }

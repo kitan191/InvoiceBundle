@@ -32,6 +32,12 @@ class SharedWorkspaceController extends Controller
     /** @DI\Inject("translator") */
     private $translator;
 
+    /** @DI\Inject("security.context") */
+    private $sc;
+
+    /** @DI\Inject("session") */
+    private $session;
+
     /**
      * @EXT\Route(
      *      "/products/form",
@@ -68,14 +74,37 @@ class SharedWorkspaceController extends Controller
      */
     public function submitWorkspaceAction(Product $product)
     {
+        if ($this->session->has('form_payment_data')) {
+            $instruction = $this->session->get('form_payment_data');
+            $priceSolution = $this->session->get('form_price_data');
+            $this->session->remove('form_payment_data');
+            $this->session->remove('form_price_data');
+        }
+
         $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator));
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
+                //do that stuff here
+            if (!$this->sc->isGranted('ROLE_USER')) {
+                $this->session->set('form_payment_data', $form->get('payment')->getData());
+                $this->session->set('form_price_data', $form->get('price')->getData());
+                $redirectRoute =  $this->router->generate('workspace_product_payment_submit', array('product' => $product->getId()));
+                $this->session->set('redirect_route', $redirectRoute);
+                $route = $this->router->generate('claro_security_login', array());
+
+                return new RedirectResponse($route);
+            }
+
             $instruction = $form->get('payment')->getData();
+            $priceSolution = $form->get('price')->getData();
+        }
+
+        if ($instruction && $priceSolution) {
+            //refresh
+            $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
             $order = new Order();
             $order->setProduct($product);
-            $priceSolution = $form->get('price')->getData();
             $this->ppc->createPaymentInstruction($instruction);
             $order->setPaymentInstruction($instruction);
             $order->setPriceSolution($priceSolution);
@@ -85,7 +114,11 @@ class SharedWorkspaceController extends Controller
             return new RedirectResponse($this->router->generate('workspace_product_payment_complete', array(
                 'order' => $order->getId(),
             )));
+        } else {
+            throw new \Exception('Shared workspace invoice data not found');
         }
+
+        throw new \Exception('Errors were found: ' . $form->getErrorsAsString());
     }
 
     /**
