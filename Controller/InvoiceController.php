@@ -17,7 +17,7 @@ class InvoiceController extends Controller
     /**
      * @EXT\Route(
      *      "/show",
-     *      name="invoice/show/all"
+     *      name="invoice_show_all"
      * )
      * @EXT\Template
      *
@@ -27,9 +27,22 @@ class InvoiceController extends Controller
     {
         $user = $this->sc->getToken()->getUser();
         $sharedWorkspaces = $this->productManager->getSharedWorkspaceByUser($user);
+        $data = array();
 
-        return array(
-            'sharedWorkspaces' => $sharedWorkspaces
-        );
+        foreach ($sharedWorkspaces as $sharedWorkspace) {
+            $el = array();
+            $workspace = $this->productManager->getWorkspaceData($sharedWorkspace);
+            $el['shared_workspace'] = $sharedWorkspace;
+
+            if ($workspace) {
+                $el['workspace'] = $workspace;
+            } else {
+                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
+            }
+
+            $data[] = $el;
+        }
+
+        return array('data' => $data);
     }
 }

@@ -43,7 +43,10 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
                     'max_storage'    => '100MB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'base_price' => 10)
+                    '1' => 10,
+                    '3' => 25,
+                    '6' => 50,
+                    '12' => 100
                 )
             ),
             array(
@@ -55,7 +58,10 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
                     'max_storage'    => '1GB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'base_price' => 25)
+                    '1' => 25,
+                    '3' => 65,
+                    '6' => 125,
+                    '12' => 250
                 )
             ),
             array(
@@ -67,7 +73,10 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
                     'max_storage'    => '10GB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'base_price' => 50)
+                    '1' => 50,
+                    '3' => 125,
+                    '6' => 250,
+                    '12' => 500
                 )
             ),
             array(
@@ -79,7 +88,10 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
                     'max_storage'    => '100GB'
                 ),
                 'pricing' => array(
-                    array('duration' => 1, 'base_price' => 100)
+                    '1' => 100,
+                    '3' => 250,
+                    '6' => 500,
+                    '12' => 1000
                 )
             )
         );
@@ -91,17 +103,13 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
             $product->setType($info['type']);
             $product->setDetails($info['details']);
 
-            $durations = array(1, 3, 6, 12);
-
-            foreach ($info['pricing'] as $price) {
-                foreach ($durations as $i) {
-                    $priceSolution = new PriceSolution();
-                    $priceSolution->setMonthDuration($price['duration'] * $i);
-                    $priceSolution->setPrice($price['base_price'] * $i - 0.01);
-                    $priceSolution->setProduct($product);
-                    $manager->persist($priceSolution);
-                    $product->addPriceSolution($priceSolution);
-                }
+            foreach ($info['pricing'] as $duration => $price) {
+                $priceSolution = new PriceSolution();
+                $priceSolution->setMonthDuration($duration);
+                $priceSolution->setPrice($price);
+                $priceSolution->setProduct($product);
+                $manager->persist($priceSolution);
+                $product->addPriceSolution($priceSolution);
             }
 
             $manager->persist($product);

@@ -9,3 +9,16 @@ shared_workspace_product_form_SHARED_WS_C_payment_data_paypal_express_checkout: 
 shared_workspace_product_form_SHARED_WS_D_payment_data_paypal_express_checkout: ' ' #fuck this too
 
 form.label.paypal_express_checkout: paypal
+
+SHARE_WS_DESCRIPTION: |
+    %users% users </br>
+    %storage% </br>
+    %resources% resources
+
+increase_expiration_date: Increase expiration date
+max_storage: Disk storage
+max_resources: Max. amount of resources
+max_users: Max. amount of users
+expiration_date: Expiration date
+my_workspaces: My workspaces
+subscription: Subscription

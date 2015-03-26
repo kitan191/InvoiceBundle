@@ -1,0 +1,54 @@
+{% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+
+{% extends layout %}
+
+{% block breadcrumb %}
+    {{
+        macros.desktopBreadcrumbs([
+            {
+                'name': 'formalibre'|trans({}, 'platform'),
+                'href': path('invoice_show_all')
+            },
+            {
+                'name': workspace.name,
+                'href': ''
+            }
+        ])
+    }}
+{% endblock %}
+
+{% block content %}
+
+<div class="section-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-md-3">
+                <div class="well">
+                    {{
+                        'SHARE_WS_DESCRIPTION'|trans(
+                            {
+                                '%users%': product.details.max_users,
+                                '%storage%': product.details.max_storage,
+                                '%resources%': product.details.max_resources
+                            },
+                            'invoice'
+                        )|raw
+                    }}
+                </div>
+                {% set action = path('workspace_product_payment_submit', {'product': product.getId(), 'order': order.getId(), 'swsId': sws.getId() }) %}
+                <form action="{{ action }}" method="post">
+                    {% form_theme form 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
+                    {{ form_widget (form) }}
+                    <input type="submit" class="btn btn-primary" value="{{ 'add'|trans({}, 'platform') }}"/>
+                </form>
+            </div>
+            <div class="col-md-9">
+                <div class="well">
+                    {{ 'expiration_date'|trans({}, 'invoice')}}: {{ workspace.expiration_date|date('d/m/Y') }} </br>
+                    Under construction...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

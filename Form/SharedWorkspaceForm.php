@@ -3,7 +3,7 @@
 namespace FormaLibre\InvoiceBundle\Form;
 
 use FormaLibre\InvoiceBundle\Entity\Product;
-
+use FormaLibre\InvoiceBundle\Entity\Order;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -17,18 +17,24 @@ class SharedWorkspaceForm extends AbstractType
     private $router;
     private $em;
     private $translator;
+    private $order;
+    private $swsId;
 
     public function __construct(
         Product $product,
         $router,
         $em,
-        $translator
+        $translator,
+        Order $order,
+        $swsId = 0
     )
     {
         $this->product = $product;
         $this->router = $router;
         $this->em = $em;
         $this->translator = $translator;
+        $this->order = $order;
+        $this->swsId = $swsId;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -39,6 +45,11 @@ class SharedWorkspaceForm extends AbstractType
             'SHARE_WS_DESCRIPTION_PAYPAL',
             array('%resources' => $details['max_resources'], '%users%' => $details['max_users'], '%storage%' => $details['max_storage']),
             'invoice'
+        );
+
+        $returnUrl = $this->router->generate(
+            'workspace_product_payment_complete',
+            array('order' => $this->order->getId(), 'swsId' => $this->swsId), true
         );
 
         $builder->add(
@@ -70,9 +81,7 @@ class SharedWorkspaceForm extends AbstractType
                         'label' => 'test',
                         'paypal_express_checkout' => array(
                             'label' => 'checkout',
-                            'return_url' => $this->router->generate('workspace_product_payment_complete', array(
-                                'order' => $this->product->getCode(),
-                            ), true),
+                            'return_url' => $returnUrl,
                             'cancel_url' => $this->router->generate('workspace_product_payment_cancel', array(
                                 'order' => $this->product->getCode(),
                             ), true),
@@ -94,7 +103,8 @@ class SharedWorkspaceForm extends AbstractType
     {
         $form = $event->getForm();
         $data = $event->getData();
-        $amount = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($data['price'])->getPrice();
+        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($data['price']);
+        $amount = $priceSolution->getPrice();
         $options = $form->get('payment')->getConfig()->getOptions();
         $options['amount'] = $amount;
         $options['predefined_data']['paypal_express_checkout']['checkout_params']['L_PAYMENTREQUEST_0_AMT0'] = $amount;

@@ -2,3 +2,8 @@ workspace_shared_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/SharedWorkspaceController.php"
     type: annotation
     prefix: /workspace
+
+invoice_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/InvoiceController.php"
+    type: annotation
+    prefix: /

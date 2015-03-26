@@ -1,14 +1,27 @@
-{#
-{% set layout = "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+{% set layout = "ClarolineCoreBundle::layout.html.twig" %}
+
 {% if isDesktop() %}
     {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
 {% endif %}
-#}
-
-{% set layout = "ClarolineCoreBundle::layout.html.twig" %}
 
 {% extends layout %}
 
+{% if isDesktop() %}
+    {% block breadcrumb %}
+        {{
+            macros.desktopBreadcrumbs([
+                {
+                    'name': 'formalibre'|trans({}, 'platform'),
+                    'href': path('invoice_show_all')
+                },
+                {
+                    'name': 'subscription'|trans({}, 'invoice'),
+                    'href': ''
+                }
+            ])
+        }}
+    {% endblock %}
+{% endif %}
 
 {% block content %}
 
@@ -30,10 +43,10 @@
                             )|raw
                         }}
                     </div>
-                    <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId()}) }}" method="post">
+                    <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId(), 'order': form['order'].getId() }) }}" method="post">
                         {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
                         {{ form_widget(form['form']) }}
-                        <input type="submit" class="btn btn-primary"/>
+                        <input type="submit" class="btn btn-primary" value="{{'add'|trans({}, 'platform')}}"/>
                     </form>
                 </div>
                 {% endfor %}

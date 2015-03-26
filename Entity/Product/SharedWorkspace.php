@@ -3,6 +3,8 @@
 namespace FormaLibre\InvoiceBundle\Entity\Product;
 
 use Doctrine\ORM\Mapping as ORM;
+use Claroline\CoreBundle\Entity\User;
+use FormaLibre\InvoiceBundle\Entity\Product;
 
 /**
  * @ORM\Table(name="formalibre__shared_workspace")
@@ -17,6 +19,9 @@ class SharedWorkspace
      */
     private $id;
 
+    /** @ORM\Column(type="integer") */
+    private $remoteId;
+
     /**
      * @ORM\ManyToOne(
      *     targetEntity="Claroline\CoreBundle\Entity\User",
@@ -25,17 +30,6 @@ class SharedWorkspace
      * @ORM\JoinColumn(onDelete="CASCADE", nullable=false)
      */
     protected $owner;
-
-
-    /**
-     * @ORM\Column(name="code", length=256)
-     */
-    private $code;
-
-    /**
-     * @ORM\Column(name="name", length=256)
-     */
-    private $name;
 
     /**
      * @ORM\Column(name="end_date", type="datetime", nullable=true)
@@ -76,19 +70,9 @@ class SharedWorkspace
         return $this->id;
     }
 
-    public function setOwner(User $user)
+    public function setOwner(User $owner)
     {
         $this->owner = $owner;
-    }
-
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    public function setCode($code)
-    {
-        $this->code = $code;
     }
 
     public function setExpDate(\DateTime $expDate)
@@ -96,9 +80,19 @@ class SharedWorkspace
         $this->expDate = $expDate;
     }
 
+    public function getExpDate()
+    {
+        return $this->expDate;
+    }
+
     public function setMaxStorage($maxSize)
     {
         $this->maxSize = $maxSize;
+    }
+
+    public function getMaxStorage()
+    {
+        return $this->maxSize;
     }
 
     public function setMaxUser($maxUser)
@@ -106,9 +100,19 @@ class SharedWorkspace
         $this->maxUser = $maxUser;
     }
 
+    public function getMaxUser()
+    {
+        return $this->maxUser;
+    }
+
     public function setMaxRes($maxRes)
     {
         $this->maxRes = $maxRes;
+    }
+
+    public function getMaxRes()
+    {
+        return $this->maxRes;
     }
 
     public function setAutoSubscribe($bool)
@@ -119,5 +123,25 @@ class SharedWorkspace
     public function getAutoSubscribe()
     {
         return $this->autoSubscribe;
+    }
+
+    public function setRemoteId($remoteId)
+    {
+        $this->remoteId = $remoteId;
+    }
+
+    public function getRemoteId()
+    {
+        return $this->remoteId;
+    }
+
+    public function setProduct(Product $product)
+    {
+        $this->product = $product;
+    }
+
+    public function getProduct()
+    {
+        return $this->product;
     }
 }

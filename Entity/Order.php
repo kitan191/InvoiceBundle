@@ -61,4 +61,14 @@ class Order
     {
         $this->priceSolution = $priceSolution;
     }
+
+    public function getProduct()
+    {
+        return $this->product;
+    }
+
+    public function getPriceSolution()
+    {
+        return $this->priceSolution;
+    }
 }

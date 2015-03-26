@@ -17,3 +17,11 @@ SHARE_WS_DESCRIPTION: |
 
 
 SHARE_WS_DESCRIPTION_PAYPAL: Location d'espace d'activité.
+
+increase_expiration_date: Augmenter la date d'expiration
+max_storage: Espace disque
+max_resources: Nombre de resource max.
+max_users: Nombre d'utilisateur max.
+expiration_date: Date d'expiration
+my_workspaces: Mes espaces d'activités
+subscription: Abonnements

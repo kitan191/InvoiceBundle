@@ -2,4 +2,6 @@ parameters:
     formalibre_workspace_invoice_base_price: 10
     formalibre_workspace_invoice_free_month_time: 1
     formalibre_workspace_invoice_reduction_coef: 0
-    formalibre_workspace_invoice_sent_url: ~
+    #generate it with scrypt, bcrypt or PBKDF2
+    formalibre_encryption_secret: bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3 #you obv need to change it
+    formalibre_target_platform_url: "localhost/nico/Claroline/web/app_dev.php"
