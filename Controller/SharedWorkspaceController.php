@@ -76,6 +76,20 @@ class SharedWorkspaceController extends Controller
 
     /**
      * @EXT\Route(
+     *      "/products/form/iframe",
+     *      name="workspace_products_form_iframe"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function iframeFormsAction()
+    {
+        return $this->formsAction();
+    }
+
+    /**
+     * @EXT\Route(
      *      "/payment/workspace/submit/{product}/Order/{order}/{swsId}",
      *      name="workspace_product_payment_submit",
      *      defaults={"swsId" = 0}
