@@ -37,6 +37,51 @@ class Order
      */
     private $priceSolution;
 
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $vatAmount;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $vatRate;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $ipAddress;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $countryCode;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $vatNumber;
+
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $amount;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isExecuted = false;
+
+    /**
+     * @ORM\ManyToOne(
+     *     targetEntity="Claroline\CoreBundle\Entity\User",
+     *     cascade={"persist"}
+     * )
+     * @ORM\JoinColumn(onDelete="CASCADE", nullable=true)
+     */
+    private $owner;
+
     public function getId()
     {
         return $this->id;
@@ -70,5 +115,50 @@ class Order
     public function getPriceSolution()
     {
         return $this->priceSolution;
+    }
+
+    public function setCountryCode($code)
+    {
+        $this->countryCode = $code;
+    }
+
+    public function setVatAmount($amount)
+    {
+        $this->vatAmount = $amount;
+    }
+
+    public function setVatRate($vatRate)
+    {
+        $this->vatRate = $vatRate;
+    }
+
+    public function setIpAddress($ip)
+    {
+        $this->ipAddress = $ip;
+    }
+
+    public function setVatNumber($number)
+    {
+        $this->vatNumber = $number;
+    }
+
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+    }
+
+    public function setIsExecuted($boolean)
+    {
+        $this->isExecuted = true;
+    }
+
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    public function setOwner($user)
+    {
+        $this->owner = $user;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace FormaLibre\InvoiceBundle\Migrations\drizzle_pdo_mysql;
+namespace FormaLibre\InvoiceBundle\Migrations\pdo_mysql;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/03/25 11:41:21
+ * Generation date: 2015/03/27 01:53:35
  */
-class Version20150325114120 extends AbstractMigration
+class Version20150327135335 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -19,22 +19,31 @@ class Version20150325114120 extends AbstractMigration
                 id INT AUTO_INCREMENT NOT NULL, 
                 code VARCHAR(255) NOT NULL, 
                 type VARCHAR(255) NOT NULL, 
-                details TEXT DEFAULT NULL COMMENT '(DC2Type:json_array)', 
-                PRIMARY KEY(id), 
-                UNIQUE INDEX UNIQ_53C6972477153098 (code)
-            )
+                details LONGTEXT DEFAULT NULL COMMENT '(DC2Type:json_array)', 
+                UNIQUE INDEX UNIQ_53C6972477153098 (code), 
+                PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
         $this->addSql("
             CREATE TABLE formalibre__order (
                 id INT AUTO_INCREMENT NOT NULL, 
                 product_id INT DEFAULT NULL, 
                 price_solution_id INT DEFAULT NULL, 
+                owner_id INT DEFAULT NULL, 
+                vatAmount DOUBLE PRECISION DEFAULT NULL, 
+                vatRate DOUBLE PRECISION DEFAULT NULL, 
+                ipAddress VARCHAR(255) DEFAULT NULL, 
+                countryCode VARCHAR(255) DEFAULT NULL, 
+                vatNumber VARCHAR(255) DEFAULT NULL, 
+                amount DOUBLE PRECISION DEFAULT NULL, 
+                isExecuted TINYINT(1) DEFAULT NULL, 
                 paymentInstruction_id INT DEFAULT NULL, 
-                PRIMARY KEY(id), 
                 UNIQUE INDEX UNIQ_62CE339EFD913E4D (paymentInstruction_id), 
                 INDEX IDX_62CE339E4584665A (product_id), 
-                INDEX IDX_62CE339E1BD2AD95 (price_solution_id)
-            )
+                INDEX IDX_62CE339E1BD2AD95 (price_solution_id), 
+                INDEX IDX_62CE339E7E3C61F9 (owner_id), 
+                PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
         $this->addSql("
             CREATE TABLE formalibre__price_solution (
@@ -42,9 +51,9 @@ class Version20150325114120 extends AbstractMigration
                 product_id INT DEFAULT NULL, 
                 monthDuration INT NOT NULL, 
                 price DOUBLE PRECISION NOT NULL, 
-                PRIMARY KEY(id), 
-                INDEX IDX_E2B632A84584665A (product_id)
-            )
+                INDEX IDX_E2B632A84584665A (product_id), 
+                PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
         $this->addSql("
             CREATE TABLE formalibre__shared_workspace (
@@ -56,11 +65,11 @@ class Version20150325114120 extends AbstractMigration
                 maxSize VARCHAR(255) NOT NULL, 
                 maxUser INT NOT NULL, 
                 maxRes INT NOT NULL, 
-                autoSubscribe BOOLEAN NOT NULL, 
-                PRIMARY KEY(id), 
+                autoSubscribe TINYINT(1) NOT NULL, 
                 INDEX IDX_1559C4C27E3C61F9 (owner_id), 
-                INDEX IDX_1559C4C24584665A (product_id)
-            )
+                INDEX IDX_1559C4C24584665A (product_id), 
+                PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
         $this->addSql("
             ALTER TABLE formalibre__order 
@@ -78,6 +87,12 @@ class Version20150325114120 extends AbstractMigration
             ADD CONSTRAINT FK_62CE339E1BD2AD95 FOREIGN KEY (price_solution_id) 
             REFERENCES formalibre__price_solution (id) 
             ON DELETE SET NULL
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre__order 
+            ADD CONSTRAINT FK_62CE339E7E3C61F9 FOREIGN KEY (owner_id) 
+            REFERENCES claro_user (id) 
+            ON DELETE CASCADE
         ");
         $this->addSql("
             ALTER TABLE formalibre__price_solution 

@@ -19,6 +19,7 @@ class SharedWorkspaceForm extends AbstractType
     private $translator;
     private $order;
     private $swsId;
+    private $vatManager;
 
     public function __construct(
         Product $product,
@@ -26,6 +27,7 @@ class SharedWorkspaceForm extends AbstractType
         $em,
         $translator,
         Order $order,
+        $vatManager,
         $swsId = 0
     )
     {
@@ -35,6 +37,7 @@ class SharedWorkspaceForm extends AbstractType
         $this->translator = $translator;
         $this->order = $order;
         $this->swsId = $swsId;
+        $this->vatManager = $vatManager;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -86,9 +89,9 @@ class SharedWorkspaceForm extends AbstractType
                                 'order' => $this->product->getCode(),
                             ), true),
                             'checkout_params' => array(
+                                //'L_PAYMENTREQUEST_0_AMT0' => 0,
                                 'L_PAYMENTREQUEST_0_DESC0' => $detailsInfo,
-                                'L_PAYMENTREQUEST_0_QTY0' => '1',
-                                'L_PAYMENTREQUEST_0_AMT0'=> 0
+                                'L_PAYMENTREQUEST_0_QTY0' => '1'
                             )
                         )
                     )
@@ -105,9 +108,16 @@ class SharedWorkspaceForm extends AbstractType
         $data = $event->getData();
         $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($data['price']);
         $amount = $priceSolution->getPrice();
+        $vat = $this->vatManager->getVat($amount);
+        $totalAmount = $amount + $vat;
         $options = $form->get('payment')->getConfig()->getOptions();
-        $options['amount'] = $amount;
+        $options['amount'] = $totalAmount;
+
         $options['predefined_data']['paypal_express_checkout']['checkout_params']['L_PAYMENTREQUEST_0_AMT0'] = $amount;
+        $options['predefined_data']['paypal_express_checkout']['checkout_params']['PAYMENTREQUEST_0_ITEMAMT'] = $amount;
+        $options['predefined_data']['paypal_express_checkout']['checkout_params']['PAYMENTREQUEST_0_TAXAMT'] = $vat;
+        $options['predefined_data']['paypal_express_checkout']['checkout_params']['PAYMENTREQUEST_0_AMT'] = $totalAmount;
+
         $form->remove('payment');
         $form->add(
             'payment',

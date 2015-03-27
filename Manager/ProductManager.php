@@ -19,16 +19,20 @@ class ProductManager
     private $productRepository;
     private $targetPlatformUrl;
     private $logger;
+    private $vatManager;
+    private $sc;
 
     /**
      * @DI\InjectParams({
      *     "om" = @DI\Inject("claroline.persistence.object_manager"),
      *     "secret" = @DI\Inject("%formalibre_encryption_secret%"),
      *     "targetPlatformUrl" = @DI\Inject("%formalibre_target_platform_url%"),
-     *     "logger" = @DI\Inject("logger")
+     *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
+     *     "logger" = @DI\Inject("logger"),
+     *     "sc" = @DI\Inject("security.context")
      * })
      */
-    public function __construct(ObjectManager $om, $secret, $targetPlatformUrl, $logger)
+    public function __construct(ObjectManager $om, $secret, $targetPlatformUrl, $vatManager, $logger, $sc)
     {
         $this->secret = $secret;
         $this->om = $om;
@@ -36,6 +40,8 @@ class ProductManager
         $this->sharedWorkspaceRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
         $this->targetPlatformUrl = $targetPlatformUrl;
         $this->logger = $logger;
+        $this->vatManager = $vatManager;
+        $this->sc = $sc;
     }
 
     public function getProductsByType($type)
@@ -192,5 +198,17 @@ class ProductManager
         $ciphertextencoded = base64_encode($ciphertext);
 
         return $ciphertextencoded;
+    }
+
+    public function endOrder(Order $order)
+    {
+        $order->setCountryCode($this->vatManager->getClientLocation());
+        $order->setAmount($order->getPriceSolution()->getPrice());
+        $order->setVatRate($this->vatManager->getVATRate($this->vatManager->getClientLocation()));
+        $order->setVatAmount($this->vatManager->getVAT($order->getAmount()));
+        $order->setIpAddress($_SERVER['REMOTE_ADDR']);
+        $order->setOwner($this->sc->getToken()->getUser());
+        //add the vat number here ()
+        $order->setIsExecuted(true);
     }
 }

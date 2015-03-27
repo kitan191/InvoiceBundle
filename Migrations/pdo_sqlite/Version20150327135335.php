@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/03/25 11:41:21
+ * Generation date: 2015/03/27 01:53:35
  */
-class Version20150325114120 extends AbstractMigration
+class Version20150327135335 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -31,6 +31,14 @@ class Version20150325114120 extends AbstractMigration
                 id INTEGER NOT NULL, 
                 product_id INTEGER DEFAULT NULL, 
                 price_solution_id INTEGER DEFAULT NULL, 
+                owner_id INTEGER DEFAULT NULL, 
+                vatAmount DOUBLE PRECISION DEFAULT NULL, 
+                vatRate DOUBLE PRECISION DEFAULT NULL, 
+                ipAddress VARCHAR(255) DEFAULT NULL, 
+                countryCode VARCHAR(255) DEFAULT NULL, 
+                vatNumber VARCHAR(255) DEFAULT NULL, 
+                amount DOUBLE PRECISION DEFAULT NULL, 
+                isExecuted BOOLEAN DEFAULT NULL, 
                 paymentInstruction_id INTEGER DEFAULT NULL, 
                 PRIMARY KEY(id)
             )
@@ -43,6 +51,9 @@ class Version20150325114120 extends AbstractMigration
         ");
         $this->addSql("
             CREATE INDEX IDX_62CE339E1BD2AD95 ON formalibre__order (price_solution_id)
+        ");
+        $this->addSql("
+            CREATE INDEX IDX_62CE339E7E3C61F9 ON formalibre__order (owner_id)
         ");
         $this->addSql("
             CREATE TABLE formalibre__price_solution (

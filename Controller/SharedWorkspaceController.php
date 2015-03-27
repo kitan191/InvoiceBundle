@@ -44,6 +44,9 @@ class SharedWorkspaceController extends Controller
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
 
+    /** @DI\Inject("formalibre.manager.vat_manager") */
+    private $vatManager;
+
     /**
      * @EXT\Route(
      *      "/products/form",
@@ -55,6 +58,7 @@ class SharedWorkspaceController extends Controller
      */
     public function formsAction()
     {
+        //it would be better if I was able to avoid creating a new order everytime...
         $order = new Order();
         $this->em->persist($order);
         $this->em->flush();
@@ -63,7 +67,7 @@ class SharedWorkspaceController extends Controller
 
         foreach ($products as $product) {
             //now we generate the forms !
-            $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator, $order));
+            $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator, $order, $this->vatManager));
             $forms[] = array(
                 'form' => $form->createView(),
                 'product' => $product,
@@ -107,7 +111,7 @@ class SharedWorkspaceController extends Controller
             $this->session->remove('form_price_data');
         }
 
-        $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator, $order, $swsId));
+        $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator, $order, $this->vatManager, $swsId));
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
@@ -189,6 +193,8 @@ class SharedWorkspaceController extends Controller
             throw new \RuntimeException('Transaction was not successful: '. $result->getReasonCode());
         }
 
+        $this->productManager->endOrder($order);
+
         if ($swsId == 0) {
             $this->addRemoteWorkspace($this->sc->getToken()->getUser(), $order);
         } else {
@@ -220,6 +226,7 @@ class SharedWorkspaceController extends Controller
             $this->em,
             $this->translator,
             $order,
+            $this->vatManager,
             $sws->getId()
         );
 

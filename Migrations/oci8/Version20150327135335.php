@@ -1,6 +1,6 @@
 <?php
 
-namespace FormaLibre\InvoiceBundle\Migrations\pdo_oci;
+namespace FormaLibre\InvoiceBundle\Migrations\oci8;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/03/25 11:41:21
+ * Generation date: 2015/03/27 01:53:35
  */
-class Version20150325114120 extends AbstractMigration
+class Version20150327135335 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -62,6 +62,14 @@ class Version20150325114120 extends AbstractMigration
                 id NUMBER(10) NOT NULL, 
                 product_id NUMBER(10) DEFAULT NULL, 
                 price_solution_id NUMBER(10) DEFAULT NULL, 
+                owner_id NUMBER(10) DEFAULT NULL, 
+                vatAmount DOUBLE PRECISION DEFAULT NULL, 
+                vatRate DOUBLE PRECISION DEFAULT NULL, 
+                ipAddress VARCHAR2(255) DEFAULT NULL, 
+                countryCode VARCHAR2(255) DEFAULT NULL, 
+                vatNumber VARCHAR2(255) DEFAULT NULL, 
+                amount DOUBLE PRECISION DEFAULT NULL, 
+                isExecuted NUMBER(1) DEFAULT NULL, 
                 paymentInstruction_id NUMBER(10) DEFAULT NULL, 
                 PRIMARY KEY(id)
             )
@@ -102,6 +110,9 @@ class Version20150325114120 extends AbstractMigration
         ");
         $this->addSql("
             CREATE INDEX IDX_62CE339E1BD2AD95 ON formalibre__order (price_solution_id)
+        ");
+        $this->addSql("
+            CREATE INDEX IDX_62CE339E7E3C61F9 ON formalibre__order (owner_id)
         ");
         $this->addSql("
             CREATE TABLE formalibre__price_solution (
@@ -207,6 +218,12 @@ class Version20150325114120 extends AbstractMigration
             ADD CONSTRAINT FK_62CE339E1BD2AD95 FOREIGN KEY (price_solution_id) 
             REFERENCES formalibre__price_solution (id) 
             ON DELETE SET NULL
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre__order 
+            ADD CONSTRAINT FK_62CE339E7E3C61F9 FOREIGN KEY (owner_id) 
+            REFERENCES claro_user (id) 
+            ON DELETE CASCADE
         ");
         $this->addSql("
             ALTER TABLE formalibre__price_solution 
