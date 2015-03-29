@@ -6,7 +6,6 @@
     "license": "GPL-3.0+",
     "require": {
         "php": ">=5.4.1",
-        "ext-mcrypt": "*",
         "claroline/core-bundle": "~4.1",
         "jms/payment-core-bundle": "master-dev",
         "jms/payment-paypal-bundle": "dev-master"
