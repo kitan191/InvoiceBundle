@@ -22,6 +22,8 @@ class VatValidator extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint)
     {
+        if ($value === '' || !$value) return;
+        
         $vat = str_replace(' ', '', $value);
         $countryCode = substr($vat, 0, 2);
         $vat = substr($value, 2);
