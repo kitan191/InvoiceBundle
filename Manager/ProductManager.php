@@ -29,10 +29,11 @@ class ProductManager
      *     "targetPlatformUrl" = @DI\Inject("%formalibre_target_platform_url%"),
      *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
      *     "logger" = @DI\Inject("logger"),
-     *     "sc" = @DI\Inject("security.context")
+     *     "sc" = @DI\Inject("security.context"),
+     *     "encrypt" = @DI\Inject("%formalibre_encrypt%")
      * })
      */
-    public function __construct(ObjectManager $om, $secret, $targetPlatformUrl, $vatManager, $logger, $sc)
+    public function __construct(ObjectManager $om, $secret, $targetPlatformUrl, $vatManager, $logger, $sc, $encrypt)
     {
         $this->secret = $secret;
         $this->om = $om;
@@ -42,6 +43,7 @@ class ProductManager
         $this->logger = $logger;
         $this->vatManager = $vatManager;
         $this->sc = $sc;
+        $this->encrypt = $encrypt;
     }
 
     public function getProductsByType($type)
@@ -180,6 +182,10 @@ class ProductManager
 
     private function encrypt($payload)
     {
+        if (!$this->encrypt) {
+            return $payload;
+        }
+
         $key = pack('H*', $this->secret);
         $ivSize = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_192, MCRYPT_MODE_CBC);
         $iv = mcrypt_create_iv($ivSize, MCRYPT_RAND);
