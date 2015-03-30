@@ -82,6 +82,7 @@ class ProductManager
             'first_name' => $user->getFirstName(),
             'last_name' => $user->getLastName(),
             'password' => $user->getPassword(),
+            'salt' => $user->getSalt(),
             'email' => $user->getMail()
         );
 
