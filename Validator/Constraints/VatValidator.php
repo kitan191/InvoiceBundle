@@ -30,7 +30,6 @@ class VatValidator extends ConstraintValidator
         $vat = str_replace('.', '', $vat);
         $vat = str_replace(' ', '', $vat);
         $data = file_get_contents("http://isvat.appspot.com/{$countryCode}/{$vat}");
-        //$data = file_get_contents("http://isvat.appspot.com/BE/0599995379/");
 
         if ($data === 'true') {
             // its ok
