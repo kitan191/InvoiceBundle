@@ -15,17 +15,18 @@ class VATManager
     }
 
     public function getVATRate($countryCode) {
-        //check if we have a valid vat number
+        //https://github.com/modmore/euvatrates.com
+        $json = file_get_contents('https://euvatrates.com/rates.json');
+        $data = json_decode($json);
+        $rates = $data->rates;
 
-        switch ($countryCode) {
-            case 'BE': return 0.21;
-        }
+        if (property_exists($rates, $countryCode)) return $rates->$countryCode->standard_rate / 100;
 
         return 0.21;
     }
 
     public function getClientLocation()
     {
-        return file_get_contents('http://api.hostip.info/country.php?ip=' . $_SERVER['REMOTE_ADDR']);
+        return strtoupper(file_get_contents('http://api.hostip.info/country.php?ip=' . $_SERVER['REMOTE_ADDR']));
     }
 }
