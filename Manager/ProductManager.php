@@ -21,29 +21,32 @@ class ProductManager
     private $logger;
     private $vatManager;
     private $sc;
+    private $ch;
 
     /**
      * @DI\InjectParams({
      *     "om" = @DI\Inject("claroline.persistence.object_manager"),
-     *     "secret" = @DI\Inject("%formalibre_encryption_secret%"),
-     *     "targetPlatformUrl" = @DI\Inject("%formalibre_target_platform_url%"),
      *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
      *     "logger" = @DI\Inject("logger"),
      *     "sc" = @DI\Inject("security.context"),
-     *     "encrypt" = @DI\Inject("%formalibre_encrypt%")
+     *     "ch" = @DI\Inject("claroline.config.platform_config_handler")
      * })
      */
-    public function __construct(ObjectManager $om, $secret, $targetPlatformUrl, $vatManager, $logger, $sc, $encrypt)
+    public function __construct(
+        ObjectManager $om,
+        VATManager $vatManager,
+        $logger,
+        $sc,
+        $ch
+    )
     {
-        $this->secret = $secret;
         $this->om = $om;
         $this->productRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
         $this->sharedWorkspaceRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
-        $this->targetPlatformUrl = $targetPlatformUrl;
         $this->logger = $logger;
         $this->vatManager = $vatManager;
         $this->sc = $sc;
-        $this->encrypt = $encrypt;
+        $this->ch = $ch;
     }
 
     public function getProductsByType($type)
@@ -100,6 +103,8 @@ class ProductManager
         $targetUrl = $this->targetPlatformUrl . '/workspacesubscription/create';
         $serverOutput = $this->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
+
+                var_dump($data);
         //double equal because it's a string
 
         if ($data->code == 200) {
@@ -124,7 +129,7 @@ class ProductManager
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $id = $sws->getRemoteId();
-        $targetUrl = $this->targetPlatformUrl . '/workspacesubscription/workspace/' . $id;
+        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $id;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $targetUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -181,11 +186,11 @@ class ProductManager
 
     private function encrypt($payload)
     {
-        if (!$this->encrypt) {
+        if (!$this->ch->getParameter('formalibre_encrypt')) {
             return $payload;
         }
 
-        $key = pack('H*', $this->secret);
+        $key = pack('H*', $this->ch->getParameter('formalibre_encryption_secret_encrypt'));
         $ivSize = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_192, MCRYPT_MODE_CBC);
         $iv = mcrypt_create_iv($ivSize, MCRYPT_RAND);
         $ciphertext = mcrypt_encrypt(
