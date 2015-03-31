@@ -103,7 +103,6 @@ class ProductManager
         $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/create';
         $serverOutput = $this->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
-
         //double equal because it's a string
 
         if ($data->code == 200) {
@@ -152,9 +151,8 @@ class ProductManager
         $payload = $this->encrypt($payload);
         $targetUrl = $targetUrl = $this->targetPlatformUrl . '/workspacesubscription/workspace/' . $sws->getRemoteId() . '/exp_date/increase';
         $serverOutput = $this->sendPost($payload, $targetUrl);
-        $data = json_decode($serverOutput);
-        //double equal because it's a string
 
+        //double equal because it's a string
         if ($data->code == 200) {
             $updatedDate = new \DateTime();
             $updatedDate->setTimeStamp($expDate->getTimeStamp());
