@@ -100,11 +100,10 @@ class ProductManager
         ));
 
         $payload = $this->encrypt($payload);
-        $targetUrl = $this->targetPlatformUrl . '/workspacesubscription/create';
+        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/create';
         $serverOutput = $this->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
 
-                var_dump($data);
         //double equal because it's a string
 
         if ($data->code == 200) {
