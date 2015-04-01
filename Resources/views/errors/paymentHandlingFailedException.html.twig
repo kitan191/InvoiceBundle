@@ -1,0 +1,34 @@
+{% set layout = "ClarolineCoreBundle::layout.html.twig" %}
+
+{% if isDesktop() %}
+    {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+{% endif %}
+
+{% extends layout %}
+
+{% if isDesktop() %}
+    {% block breadcrumb %}
+        {{
+            macros.desktopBreadcrumbs([
+                {
+                    'name': 'formalibre'|trans({}, 'platform'),
+                    'href': path('invoice_show_all')
+                },
+                {
+                    'name': 'subscription'|trans({}, 'invoice'),
+                    'href': ''
+                }
+            ])
+        }}
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+<div class="section-content">
+    <div class="panel panel-default">
+        <div class="panel-body alert alert-danger">
+            {{ 'payment_handling_exception_message'|trans({}, 'invoice') }}
+        </div>
+    </div>
+</div>
+{% endblock %}

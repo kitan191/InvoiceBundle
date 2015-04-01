@@ -4,11 +4,13 @@ namespace FormaLibre\InvoiceBundle\Manager;
 
 use JMS\DiExtraBundle\Annotation as DI;
 use Claroline\CoreBundle\Persistence\ObjectManager;
+use Claroline\CoreBundle\Manager\MailManager;
 use Claroline\CoreBundle\Entity\User;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Entity\Order;
+use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 
 /**
 * @DI\Service("formalibre.manager.product_manager")
@@ -22,6 +24,7 @@ class ProductManager
     private $vatManager;
     private $sc;
     private $ch;
+    private $mailManager;
 
     /**
      * @DI\InjectParams({
@@ -29,7 +32,8 @@ class ProductManager
      *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
      *     "logger" = @DI\Inject("logger"),
      *     "sc" = @DI\Inject("security.context"),
-     *     "ch" = @DI\Inject("claroline.config.platform_config_handler")
+     *     "ch" = @DI\Inject("claroline.config.platform_config_handler"),
+     *     "mailManager" = @DI\Inject("claroline.manager.mail_manager")
      * })
      */
     public function __construct(
@@ -37,16 +41,18 @@ class ProductManager
         VATManager $vatManager,
         $logger,
         $sc,
-        $ch
+        $ch,
+        $mailManager
     )
     {
-        $this->om = $om;
-        $this->productRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
+        $this->om                        = $om;
+        $this->productRepository         = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
         $this->sharedWorkspaceRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
-        $this->logger = $logger;
-        $this->vatManager = $vatManager;
-        $this->sc = $sc;
-        $this->ch = $ch;
+        $this->logger                    = $logger;
+        $this->vatManager                = $vatManager;
+        $this->sc                        = $sc;
+        $this->ch                        = $ch;
+        $this->mailManager               = $mailManager;
     }
 
     public function getProductsByType($type)
@@ -103,7 +109,10 @@ class ProductManager
         $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/create';
         $serverOutput = $this->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
-        //double equal because it's a string
+
+        if ($data === null) {
+            $this->handleError($sws);
+        }
 
         if ($data->code == 200) {
             $id = $data->workspace->id;
@@ -114,9 +123,7 @@ class ProductManager
             return;
         }
 
-        //send a mail with ws Ids.
-
-        throw new \Exception('An error occured during the workspace creation');
+        $this->handleError($sws);
     }
 
     public function getSharedWorkspaceByUser(User $user)
@@ -151,6 +158,11 @@ class ProductManager
         $payload = $this->encrypt($payload);
         $targetUrl = $targetUrl = $this->targetPlatformUrl . '/workspacesubscription/workspace/' . $sws->getRemoteId() . '/exp_date/increase';
         $serverOutput = $this->sendPost($payload, $targetUrl);
+        $data = json_decode($serverOutput);
+
+        if ($data === null) {
+            $this->handleError($sws);
+        }
 
         //double equal because it's a string
         if ($data->code == 200) {
@@ -163,7 +175,7 @@ class ProductManager
             return;
         }
 
-        throw new \Exception('An error occured during the expiration date increase');
+        $this->handleError($sws);
     }
 
     private function sendPost($payload, $url)
@@ -217,5 +229,31 @@ class ProductManager
         $order->setOwner($this->sc->getToken()->getUser());
         //add the vat number here ()
         $order->setIsExecuted(true);
+    }
+
+    public function handleError(SharedWorkspace $sws)
+    {
+        $this->sendMailError($sws);
+
+        throw new PaymentHandlingFailedException();
+    }
+
+    public function sendMailError(SharedWorkspace $sws)
+    {
+        $subject = 'Erreur lors de la gestion des espaces commerciaux.';
+        $body = '<div> Un espace d\'activité a été payé par ' . $sws->getOwner()->getUsername() . ' </div>';
+        $body = '<div> Son email est ' . $sws->getOwner()->getMail() . ' </div>';
+        $body .= '<div> Une erreur est survenue après son payment </div>';
+        $body .= '<div> La commande consiste en un espace dont la date d\'expiration est ' . $sws->getExpDate()->format(\DateTime::RFC2822) . '</div>';
+        $body .= "<div> Nombre d'utilisateur: {$sws->getMaxUser()} - Nombre de ressource: {$sws->getMaxRes()} - Taille maximale: {$sws->getMaxStorage()} </div>";
+        $to = $this->ch->getParameter('formalibre_commercial_email_support');
+
+        $this->mailManager->send(
+            $subject,
+            $body,
+            array(),
+            null,
+            array('to' => array($to))
+        );
     }
 }

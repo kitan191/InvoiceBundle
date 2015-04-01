@@ -17,6 +17,7 @@ use JMS\Payment\CoreBundle\PluginController\Result;
 use JMS\Payment\CoreBundle\Entity\Payment;
 use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
+use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 
 class SharedWorkspaceController extends Controller
 {
@@ -195,11 +196,20 @@ class SharedWorkspaceController extends Controller
 
         $this->productManager->endOrder($order);
 
-        if ($swsId == 0) {
-            $this->addRemoteWorkspace($this->sc->getToken()->getUser(), $order);
-        } else {
-            $sws = $this->em->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
-            $this->productManager->addRemoteWorkspaceExpDate($order, $sws);
+        try {
+            if ($swsId == 0) {
+                $this->addRemoteWorkspace($this->sc->getToken()->getUser(), $order);
+            } else {
+                $sws = $this->em->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
+                $this->productManager->addRemoteWorkspaceExpDate($order, $sws);
+            }
+        } catch (PaymentHandlingFailedException $e) {
+
+            $content = $this->renderView(
+                'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
+            );
+
+            return new Response($content);
         }
 
         return new RedirectResponse($this->router->generate('invoice_show_all', array()));

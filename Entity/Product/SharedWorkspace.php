@@ -75,6 +75,11 @@ class SharedWorkspace
         $this->owner = $owner;
     }
 
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
     public function setExpDate(\DateTime $expDate)
     {
         $this->expDate = $expDate;

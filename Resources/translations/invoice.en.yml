@@ -22,3 +22,5 @@ max_users: Max. amount of users
 expiration_date: Expiration date
 my_workspaces: My workspaces
 subscription: Subscription
+
+payment_handling_exception_message: An error occured. An email was sent to the support team.
