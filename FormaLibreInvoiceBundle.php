@@ -7,21 +7,25 @@ use Claroline\KernelBundle\Bundle\ConfigurationBuilder;
 use Claroline\BundleBundle\Installation\AdditionalInstaller;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Claroline\KernelBundle\Bundle\AutoConfigurableInterface;
+use FormaLibre\InvoiceBundle\DependencyInjection\Compiler\DynamicConfigPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Claroline\KernelBundle\Bundle\ConfigurationProviderInterface;
 
 /**
  * Bundle class.
- * Uncomment if necessary.
  */
 class FormaLibreInvoiceBundle extends PluginBundle implements AutoConfigurableInterface, ConfigurationProviderInterface
 {
-    public function getConfiguration($environment)
+    public function build(ContainerBuilder $container)
     {
-        $config = new ConfigurationBuilder();
+        parent::build($container);
 
-        return $config->addRoutingResource(__DIR__ . '/Resources/config/routing.yml', null, 'invoice');
+        $container->addCompilerPass(new DynamicConfigPass());
     }
 
+    /**
+     * @todo find a way to remove this without breaking everything
+     */
     public function suggestConfigurationFor(Bundle $bundle, $environment)
     {
         $bundleClass = get_class($bundle);
@@ -35,6 +39,13 @@ class FormaLibreInvoiceBundle extends PluginBundle implements AutoConfigurableIn
         if (isset($simpleConfigs[$bundleClass])) {
             return $config->addContainerResource($this->buildPath($simpleConfigs[$bundleClass]));
         }
+    }
+
+    public function getConfiguration($environment)
+    {
+        $config = new ConfigurationBuilder();
+
+        return $config->addRoutingResource(__DIR__ . '/Resources/config/routing.yml', null, 'invoice');
     }
 
     /*

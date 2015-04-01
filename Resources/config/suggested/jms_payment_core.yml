@@ -1,2 +1,3 @@
+#this file should be removed if I manage to remove the suggestConfiguration method from FormaLibreInvoiceBundle
 jms_payment_core:
-    secret: 1234
+    secret: 666
