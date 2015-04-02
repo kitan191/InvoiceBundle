@@ -18,6 +18,7 @@ use JMS\Payment\CoreBundle\Entity\Payment;
 use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
+use JMS\Payment\CoreBundle\Model\PaymentInterface;
 
 class SharedWorkspaceController extends Controller
 {
@@ -44,6 +45,9 @@ class SharedWorkspaceController extends Controller
 
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
+
+    /** @DI\Inject("formalibre.manager.payment_manager") */
+    private $paymentManager;
 
     /** @DI\Inject("formalibre.manager.vat_manager") */
     private $vatManager;
@@ -139,16 +143,16 @@ class SharedWorkspaceController extends Controller
             //refresh
             $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
             $order->setProduct($product);
+            $order->setOwner($this->sc->getToken()->getUser());
             $this->ppc->createPaymentInstruction($instruction);
             $order->setPaymentInstruction($instruction);
             $order->setPriceSolution($priceSolution);
             $this->em->persist($order);
             $this->em->flush($order);
+            $extData = $instruction->getExtendedData();
 
-            return new RedirectResponse($this->router->generate('workspace_product_payment_complete', array(
-                'order' => $order->getId(),
-                'swsId' => $swsId
-            )));
+            return new RedirectResponse($extData->get('return_url'));
+
         } else {
             throw new \Exception('Shared workspace invoice data not found');
         }
@@ -195,10 +199,15 @@ class SharedWorkspaceController extends Controller
         }
 
         $this->productManager->endOrder($order);
+        /*
+        $payment->setState(PaymentInterface::STATE_APPROVED);
+        $this->em->persist($payment);
+        $this->em->flush();
+        */
 
         try {
             if ($swsId == 0) {
-                $this->addRemoteWorkspace($this->sc->getToken()->getUser(), $order);
+                $this->addRemoteWorkspace($order);
             } else {
                 $sws = $this->em->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
                 $this->productManager->addRemoteWorkspaceExpDate($order, $sws);
@@ -212,7 +221,29 @@ class SharedWorkspaceController extends Controller
             return new Response($content);
         }
 
+        if ($this->sc->isGranted('ROLE_ADMIN')) {
+            return new RedirectResponse($this->router->generate('admin_invoice_open', array()));
+        }
+
         return new RedirectResponse($this->router->generate('invoice_show_all', array()));
+    }
+
+
+    /**
+     * @EXT\Route(
+     *      "/payment_pending/workspace/{order}",
+     *      name="workspace_product_payment_pending"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function pendingPaymentAction(Order $order)
+    {
+        $instruction = $order->getPaymentInstruction();
+        $extra = $instruction->getExtendedData();
+
+        return array('communication' => $extra->get('communication'));
     }
 
     /**
@@ -260,12 +291,30 @@ class SharedWorkspaceController extends Controller
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
 
-    private function addRemoteWorkspace(
-        User $user,
-        Order $order
-    )
+    private function addRemoteWorkspace(Order $order)
     {
+        $user = $order->getOwner();
         $sws = $this->productManager->addSharedWorkspace($user, $order);
         $this->productManager->createRemoteSharedWorkspace($sws, $user);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/bank_transfer_validate/{payment}",
+     *      name="formalibre_validate_bank_transfer"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function validateBankTransferAction(Payment $payment)
+    {
+        /* do some stuff
+        $this->em->persist($payment);
+        $this->em->flush();
+        $order = $this->paymentManager->getOrderFromPayment($payment);
+        */
+
+        return new RedirectResponse($this->router->generate('workspace_product_payment_complete', array('order' => $order->getId())));
     }
 }

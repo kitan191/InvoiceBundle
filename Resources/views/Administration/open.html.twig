@@ -1,0 +1,60 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block title %}{{ parent() ~ ' - ' ~ 'appearance' | trans({}, 'platform') | striptags | raw }}{% endblock %}
+
+{% block breadcrumb %}
+    {{
+        macros.breadcrumbs([
+            {
+                'icon': 'fa fa-cog',
+                'name': 'administration'|trans({}, 'platform'),
+                'href': path('claro_admin_index')
+            },
+            {
+                'name': 'invoices'|trans({}, 'invoice'),
+                'href': path('claro_admin_index')
+            },
+            {
+                'name': 'bank_tranfer'|trans({}, 'invoice'),
+                'href': ''
+            }
+        ])
+    }}
+{% endblock %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ 'invoices'|trans({}, 'invoice') }}</h3>
+    </div>
+    <div class="panel-body">
+         <div class="table-responsive">
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>
+                            {{ 'communication'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'amount'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'execute'|trans({}, 'platform') }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transfer in transfers %}
+                    <tr>
+                        <td> {{ transfer.getPaymentInstruction().getExtendedData().get('communication')}} </td>
+                        <td> {{ transfer.getApprovingAmount() }}</td>
+                        <td> <a href="{{ path('formalibre_validate_bank_transfer', {'payment': transfer.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel-footer">
+
+    </div>
+{% endblock %}

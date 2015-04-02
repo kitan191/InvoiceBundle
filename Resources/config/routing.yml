@@ -7,3 +7,8 @@ invoice_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/InvoiceController.php"
     type: annotation
     prefix: /
+
+admin_invoice_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/AdministrationController.php"
+    type: annotation
+    prefix: /

@@ -20,6 +20,7 @@ class SharedWorkspaceForm extends AbstractType
     private $order;
     private $swsId;
     private $vatManager;
+    private $communication;
 
     public function __construct(
         Product $product,
@@ -38,6 +39,7 @@ class SharedWorkspaceForm extends AbstractType
         $this->order = $order;
         $this->swsId = $swsId;
         $this->vatManager = $vatManager;
+        $this->communication = $this->getCommunication();
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -50,9 +52,14 @@ class SharedWorkspaceForm extends AbstractType
             'invoice'
         );
 
-        $returnUrl = $this->router->generate(
+        $returnSuccessUrl = $this->router->generate(
             'workspace_product_payment_complete',
             array('order' => $this->order->getId(), 'swsId' => $this->swsId), true
+        );
+
+        $pendingUrl = $this->router->generate(
+            'workspace_product_payment_pending',
+            array('order' => $this->order->getId()), true
         );
 
         $builder->add(
@@ -79,12 +86,13 @@ class SharedWorkspaceForm extends AbstractType
                     'label' => ' ', //fuck you label
                     'amount'   => 0,
                     'currency' => 'EUR',
+                    'allowed_methods' => array('bank_transfer', 'paypal_express_checkout'),
                     'default_method' => 'payment_paypal',
                     'predefined_data' => array(
                         'label' => 'test',
                         'paypal_express_checkout' => array(
-                            'label' => 'checkout',
-                            'return_url' => $returnUrl,
+                            'label' => '',
+                            'return_url' => $returnSuccessUrl,
                             'cancel_url' => $this->router->generate('workspace_product_payment_cancel', array(
                                 'order' => $this->product->getCode(),
                             ), true),
@@ -93,6 +101,14 @@ class SharedWorkspaceForm extends AbstractType
                                 'L_PAYMENTREQUEST_0_DESC0' => $detailsInfo,
                                 'L_PAYMENTREQUEST_0_QTY0' => '1'
                             )
+                        ),
+                        'bank_transfer' => array(
+                            'return_url' => $returnSuccessUrl,
+                            'pending_url' => $pendingUrl,
+                            'cancel_url' => $this->router->generate('workspace_product_payment_cancel', array(
+                                'order' => $this->product->getCode(),
+                            ), true),
+                            'communication' => $this->communication
                         )
                     )
                 )
@@ -145,4 +161,11 @@ class SharedWorkspaceForm extends AbstractType
         );
     }
 
+    private function getCommunication()
+    {
+         $base = rand(1000000000, 9999999999);
+         $ctrl = $base % 97;
+
+         return "$base" + "$ctrl";
+    }
 }

@@ -5,3 +5,13 @@ services:
         class: FormaLibre\InvoiceBundle\Form\Extension\VatExtension
         tags:
             - { name: form.type_extension, alias: form }
+
+    payment.plugin.bank_transfer:
+        class: FormaLibre\InvoiceBundle\Payment\BankTransferPlugin
+        tags: [{name: payment.plugin}]
+
+    bank_transfer_type:
+        class: FormaLibre\InvoiceBundle\Payment\BankTransferType
+        tags:
+            - { name: form.type, alias: bank_transfer }
+            - { name: payment.method_form_type }

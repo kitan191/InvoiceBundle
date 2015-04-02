@@ -13,6 +13,7 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Claroline\CoreBundle\Event\DisplayToolEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Claroline\CoreBundle\Event\OpenAdministrationToolEvent;
 
 /**
 * @DI\Service()
@@ -54,5 +55,24 @@ class Listener
         $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
 
         return $response->getContent();
+    }
+
+    /**
+     * @DI\Observe("administration_tool_formalibre_admin_invoice")
+     *
+     * @param DisplayToolEvent $event
+     */
+    public function onDisplayAdminInvoice(OpenAdministrationToolEvent $event)
+    {
+        $event->setResponse($this->openAdminPendingOperations());
+    }
+
+    private function openAdminPendingOperations()
+    {
+        $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:open');
+        $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+        $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+
+        return $response;
     }
 }

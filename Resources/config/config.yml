@@ -6,3 +6,7 @@ plugin:
           is_displayable_in_workspace: false
           is_displayable_in_desktop: true
           class: dollar
+
+    admin_tools:
+        - name: formalibre_admin_invoice
+          class: dollar

@@ -7,8 +7,13 @@ shared_workspace_product_form_SHARED_WS_A_payment_data_paypal_express_checkout: 
 shared_workspace_product_form_SHARED_WS_B_payment_data_paypal_express_checkout: ' ' #fuck this too
 shared_workspace_product_form_SHARED_WS_C_payment_data_paypal_express_checkout: ' ' #fuck this too
 shared_workspace_product_form_SHARED_WS_D_payment_data_paypal_express_checkout: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_A_payment_data_bank_transfer: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_B_payment_data_bank_transfer: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_C_payment_data_bank_transfer: ' ' #fuck this too
+shared_workspace_product_form_SHARED_WS_D_payment_data_bank_transfer: ' ' #fuck this too
 
-form.label.paypal_express_checkout: paypal
+form.label.paypal_express_checkout: Paypal
+form.label.bank_transfer: Virement bancaire
 
 SHARE_WS_DESCRIPTION: |
     %users% utilisateurs </br>

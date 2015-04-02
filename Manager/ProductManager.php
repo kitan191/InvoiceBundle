@@ -111,7 +111,7 @@ class ProductManager
         $data = json_decode($serverOutput);
 
         if ($data === null) {
-            $this->handleError($sws);
+            $this->handleError($sws, $serverOutput);
         }
 
         if ($data->code == 200) {
@@ -134,7 +134,7 @@ class ProductManager
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $id = $sws->getRemoteId();
-        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $id;
+        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesub=ription/workspace/' . $id;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $targetUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -161,7 +161,7 @@ class ProductManager
         $data = json_decode($serverOutput);
 
         if ($data === null) {
-            $this->handleError($sws);
+            $this->handleError($sws, $serverOutput);
         }
 
         //double equal because it's a string
@@ -226,19 +226,19 @@ class ProductManager
         $order->setVatRate($this->vatManager->getVATRate($this->vatManager->getClientLocation()));
         $order->setVatAmount($this->vatManager->getVAT($order->getAmount()));
         $order->setIpAddress($_SERVER['REMOTE_ADDR']);
-        $order->setOwner($this->sc->getToken()->getUser());
+        $order->setOwner($order->getOwner());
         //add the vat number here ()
         $order->setIsExecuted(true);
     }
 
-    public function handleError(SharedWorkspace $sws)
+    public function handleError(SharedWorkspace $sws, $serverOutput = null)
     {
-        $this->sendMailError($sws);
+        $this->sendMailError($sws, $serverOutput);
 
         throw new PaymentHandlingFailedException();
     }
 
-    public function sendMailError(SharedWorkspace $sws)
+    public function sendMailError(SharedWorkspace $sws, $serverOutput = null)
     {
         $subject = 'Erreur lors de la gestion des espaces commerciaux.';
         $body = '<div> Un espace d\'activité a été payé par ' . $sws->getOwner()->getUsername() . ' </div>';
@@ -247,6 +247,10 @@ class ProductManager
         $body .= '<div> La commande consiste en un espace dont la date d\'expiration est ' . $sws->getExpDate()->format(\DateTime::RFC2822) . '</div>';
         $body .= "<div> Nombre d'utilisateur: {$sws->getMaxUser()} - Nombre de ressource: {$sws->getMaxRes()} - Taille maximale: {$sws->getMaxStorage()} </div>";
         $to = $this->ch->getParameter('formalibre_commercial_email_support');
+
+        if ($serverOutput) {
+            $body .= "<div>{$serverOutput}</div>";
+        }
 
         $this->mailManager->send(
             $subject,

@@ -161,4 +161,9 @@ class Order
     {
         $this->owner = $user;
     }
+
+    public function getOwner()
+    {
+        return $this->owner;
+    }
 }

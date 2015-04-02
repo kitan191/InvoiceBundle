@@ -17,8 +17,9 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
+use Claroline\CoreBundle\Entity\Facet\FieldFacet;
 
-class LoadParametersData extends AbstractFixture implements ContainerAwareInterface
+class LoadFacetData extends AbstractFixture implements ContainerAwareInterface
 {
     /**
      * {@inheritDoc}
@@ -33,12 +34,9 @@ class LoadParametersData extends AbstractFixture implements ContainerAwareInterf
      */
     public function load(ObjectManager $manager)
     {
-        $configHandler = $this->container->get('claroline.config.platform_config_handler');
-        $configHandler->setParameter('formalibre_free_month_duration', 1);
-        $configHandler->setParameter('auto_logging_after_registration', true);
-        $configHandler->setParameter('commercial_email_support', 'changeme@email.com');
-        $configHandler->setParameter('formalibre_target_platform_url', 'localhost/nico/Claroline/web/app_dev.php');
-        $configHandler->setParameter('formalibre_encrypt', true);
-        $configHandler->setParameter('formalibre_encryption_secret_encrypt', 'bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3'); //change me bro
+        $facetManager = $this->container->get('claroline.manager.facet_manager');
+        $facet = $facetManager->createFacet('formalibre', true);
+        $panel = $facetManager->addPanel($facet, 'info', true);
+        $field = $facetManager->addField($panel, 'formalibre_vat', FieldFacet::STRING_TYPE);
     }
 }
