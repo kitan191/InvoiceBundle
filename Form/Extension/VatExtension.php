@@ -42,7 +42,8 @@ class VatExtension extends AbstractTypeExtension
                         'label'  => $this->translator->trans('formalibre_vat', array(), 'invoice'),
                         'mapped' => false,
                         'required' => false,
-                        'constraints' => array(new Vat())
+                        'constraints' => array(new Vat()),
+                        'attr' => array('facet' => 'company')
                     )
                 );
             }

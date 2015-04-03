@@ -43,16 +43,3 @@ class AdministrationController extends Controller
         return array('pager' => $pager, 'search' => $search);
     }
 }
-    /**
-     * @EXT\Route(
-     *     "/page/{page}/max/{max}/order/{order}/direction/{direction}",
-     *     name="claro_admin_user_list",
-     *     defaults={"page"=1, "search"="", "max"=50, "order"="id","direction"="ASC"},
-     *     options = {"expose"=true}
-     * )
-     * @EXT\Route(
-     *     "/users/page/{page}/search/{search}/max/{max}/order/{order}/direction/{direction}",
-     *     name="claro_admin_user_list_search",
-     *     defaults={"page"=1, "max"=50, "order"="id","direction"="ASC"},
-     *     options = {"expose"=true}
-     * )

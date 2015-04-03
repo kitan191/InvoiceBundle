@@ -35,8 +35,18 @@ class LoadFacetData extends AbstractFixture implements ContainerAwareInterface
     public function load(ObjectManager $manager)
     {
         $facetManager = $this->container->get('claroline.manager.facet_manager');
-        $facet = $facetManager->createFacet('formalibre', true);
-        $panel = $facetManager->addPanel($facet, 'info', true);
-        $field = $facetManager->addField($panel, 'formalibre_vat', FieldFacet::STRING_TYPE);
+
+        $localisation = $facetManager->createFacet('localisation', true);
+        $localisationPanel = $facetManager->addPanel($localisation, 'info', true);
+        $field = $facetManager->addField($localisationPanel, 'formalibre_street', FieldFacet::STRING_TYPE);
+        $field = $facetManager->addField($localisationPanel, 'formalibre_cp', FieldFacet::STRING_TYPE);
+        $field = $facetManager->addField($localisationPanel, 'formalibre_town', FieldFacet::STRING_TYPE);
+        $field = $facetManager->addField($localisationPanel, 'formalibre_country', FieldFacet::STRING_TYPE);
+        $field = $facetManager->addField($localisationPanel, 'formalibre_tel', FieldFacet::STRING_TYPE);
+
+        $company = $facetManager->createFacet('company', true);
+        $companyPanel = $facetManager->addPanel($company, 'info', true);
+        $field = $facetManager->addField($companyPanel, 'formalibre_company_name', FieldFacet::STRING_TYPE);
+        $field = $facetManager->addField($companyPanel, 'formalibre_vat', FieldFacet::STRING_TYPE);
     }
 }
