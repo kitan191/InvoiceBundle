@@ -25,10 +25,10 @@ class PaymentManager
         $this->em = $em;
     }
 
-    public function getPendingBankTransfer()
+    public function getPendingBankTransfer($getQuery = false)
     {
         //approving state means we didn't got the money yet.
-        $pendingState = FinancialTransactionInterface::STATE_APPROVING;
+        $approvingState = Payment::STATE_APPROVING;
 
         $query = $this->em->createQuery("
             SELECT p FROM JMS\Payment\CoreBundle\Entity\Payment p
@@ -37,12 +37,32 @@ class PaymentManager
             AND p.state = {$approvingState}
         ");
 
+        if ($getQuery) return $query;
+
         return $query->getResult();
     }
 
-    public function searchBankTransferByCommunication($communication)
+    public function getBankTransferByCommunication($search, $getQuery = false)
     {
+        //approving state means we didn't got the money yet.
+        $approvingState = Payment::STATE_APPROVING;
 
+        $query = $this->em->createQuery("
+            SELECT p FROM JMS\Payment\CoreBundle\Entity\Payment p
+            JOIN p.paymentInstruction pi
+            WHERE p.state = {$approvingState}
+            AND pi in (
+                SELECT opi.id FROM FormaLibre\InvoiceBundle\Entity\Order o
+                JOIN o.paymentInstruction opi
+                WHERE o.extendedData LIKE :search
+            )
+        ");
+
+        $query->setParameter('search', "%{$search}%");
+
+        if ($getQuery) return $query;
+
+        return $query->getResult();
     }
 
     public function getOrderFromPayment(Payment $payment)

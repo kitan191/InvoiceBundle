@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/03/27 01:53:35
+ * Generation date: 2015/04/03 03:26:26
  */
-class Version20150327135335 extends AbstractMigration
+class Version20150403152625 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -36,17 +36,17 @@ class Version20150327135335 extends AbstractMigration
         ");
         $this->addSql("
             CREATE TRIGGER FORMALIBRE__PRODUCT_AI_PK BEFORE INSERT ON FORMALIBRE__PRODUCT FOR EACH ROW DECLARE last_Sequence NUMBER; last_InsertID NUMBER; BEGIN 
-            SELECT FORMALIBRE__PRODUCT_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__PRODUCT_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; IF (
-                : NEW.ID IS NULL 
-                OR : NEW.ID = 0
+                :NEW.ID IS NULL 
+                OR :NEW.ID = 0
             ) THEN 
-            SELECT FORMALIBRE__PRODUCT_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__PRODUCT_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; ELSE 
             SELECT NVL(Last_Number, 0) INTO last_Sequence 
             FROM User_Sequences 
             WHERE Sequence_Name = 'FORMALIBRE__PRODUCT_ID_SEQ'; 
-            SELECT : NEW.ID INTO last_InsertID 
+            SELECT :NEW.ID INTO last_InsertID 
             FROM DUAL; WHILE (last_InsertID > last_Sequence) LOOP 
             SELECT FORMALIBRE__PRODUCT_ID_SEQ.NEXTVAL INTO last_Sequence 
             FROM DUAL; END LOOP; END IF; END;
@@ -69,7 +69,7 @@ class Version20150327135335 extends AbstractMigration
                 countryCode VARCHAR2(255) DEFAULT NULL, 
                 vatNumber VARCHAR2(255) DEFAULT NULL, 
                 amount DOUBLE PRECISION DEFAULT NULL, 
-                isExecuted NUMBER(1) DEFAULT NULL, 
+                extendedData CLOB DEFAULT NULL, 
                 paymentInstruction_id NUMBER(10) DEFAULT NULL, 
                 PRIMARY KEY(id)
             )
@@ -87,17 +87,17 @@ class Version20150327135335 extends AbstractMigration
         ");
         $this->addSql("
             CREATE TRIGGER FORMALIBRE__ORDER_AI_PK BEFORE INSERT ON FORMALIBRE__ORDER FOR EACH ROW DECLARE last_Sequence NUMBER; last_InsertID NUMBER; BEGIN 
-            SELECT FORMALIBRE__ORDER_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__ORDER_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; IF (
-                : NEW.ID IS NULL 
-                OR : NEW.ID = 0
+                :NEW.ID IS NULL 
+                OR :NEW.ID = 0
             ) THEN 
-            SELECT FORMALIBRE__ORDER_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__ORDER_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; ELSE 
             SELECT NVL(Last_Number, 0) INTO last_Sequence 
             FROM User_Sequences 
             WHERE Sequence_Name = 'FORMALIBRE__ORDER_ID_SEQ'; 
-            SELECT : NEW.ID INTO last_InsertID 
+            SELECT :NEW.ID INTO last_InsertID 
             FROM DUAL; WHILE (last_InsertID > last_Sequence) LOOP 
             SELECT FORMALIBRE__ORDER_ID_SEQ.NEXTVAL INTO last_Sequence 
             FROM DUAL; END LOOP; END IF; END;
@@ -113,6 +113,9 @@ class Version20150327135335 extends AbstractMigration
         ");
         $this->addSql("
             CREATE INDEX IDX_62CE339E7E3C61F9 ON formalibre__order (owner_id)
+        ");
+        $this->addSql("
+            COMMENT ON COLUMN formalibre__order.extendedData IS '(DC2Type:json_array)'
         ");
         $this->addSql("
             CREATE TABLE formalibre__price_solution (
@@ -136,17 +139,17 @@ class Version20150327135335 extends AbstractMigration
         ");
         $this->addSql("
             CREATE TRIGGER FORMALIBRE__PRICE_SOLUTION_AI_PK BEFORE INSERT ON FORMALIBRE__PRICE_SOLUTION FOR EACH ROW DECLARE last_Sequence NUMBER; last_InsertID NUMBER; BEGIN 
-            SELECT FORMALIBRE__PRICE_SOLUTION_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__PRICE_SOLUTION_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; IF (
-                : NEW.ID IS NULL 
-                OR : NEW.ID = 0
+                :NEW.ID IS NULL 
+                OR :NEW.ID = 0
             ) THEN 
-            SELECT FORMALIBRE__PRICE_SOLUTION_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__PRICE_SOLUTION_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; ELSE 
             SELECT NVL(Last_Number, 0) INTO last_Sequence 
             FROM User_Sequences 
             WHERE Sequence_Name = 'FORMALIBRE__PRICE_SOLUTION_ID_SEQ'; 
-            SELECT : NEW.ID INTO last_InsertID 
+            SELECT :NEW.ID INTO last_InsertID 
             FROM DUAL; WHILE (last_InsertID > last_Sequence) LOOP 
             SELECT FORMALIBRE__PRICE_SOLUTION_ID_SEQ.NEXTVAL INTO last_Sequence 
             FROM DUAL; END LOOP; END IF; END;
@@ -181,17 +184,17 @@ class Version20150327135335 extends AbstractMigration
         ");
         $this->addSql("
             CREATE TRIGGER FORMALIBRE__SHARED_WORKSPACE_AI_PK BEFORE INSERT ON FORMALIBRE__SHARED_WORKSPACE FOR EACH ROW DECLARE last_Sequence NUMBER; last_InsertID NUMBER; BEGIN 
-            SELECT FORMALIBRE__SHARED_WORKSPACE_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__SHARED_WORKSPACE_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; IF (
-                : NEW.ID IS NULL 
-                OR : NEW.ID = 0
+                :NEW.ID IS NULL 
+                OR :NEW.ID = 0
             ) THEN 
-            SELECT FORMALIBRE__SHARED_WORKSPACE_ID_SEQ.NEXTVAL INTO : NEW.ID 
+            SELECT FORMALIBRE__SHARED_WORKSPACE_ID_SEQ.NEXTVAL INTO :NEW.ID 
             FROM DUAL; ELSE 
             SELECT NVL(Last_Number, 0) INTO last_Sequence 
             FROM User_Sequences 
             WHERE Sequence_Name = 'FORMALIBRE__SHARED_WORKSPACE_ID_SEQ'; 
-            SELECT : NEW.ID INTO last_InsertID 
+            SELECT :NEW.ID INTO last_InsertID 
             FROM DUAL; WHILE (last_InsertID > last_Sequence) LOOP 
             SELECT FORMALIBRE__SHARED_WORKSPACE_ID_SEQ.NEXTVAL INTO last_Sequence 
             FROM DUAL; END LOOP; END IF; END;

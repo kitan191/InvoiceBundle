@@ -69,9 +69,9 @@ class Order
     private $amount;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="json_array", nullable=true)
      */
-    private $isExecuted = false;
+    protected $extendedData;
 
     /**
      * @ORM\ManyToOne(
@@ -165,5 +165,15 @@ class Order
     public function getOwner()
     {
         return $this->owner;
+    }
+
+    public function setExtendedData(array $data)
+    {
+        $this->extendedData = $data;
+    }
+
+    public function getExtendedData()
+    {
+        return $this->data;
     }
 }

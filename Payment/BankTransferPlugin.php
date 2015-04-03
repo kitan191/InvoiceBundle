@@ -20,12 +20,25 @@ class BankTransferPlugin extends AbstractPlugin
 
     public function approveAndDeposit(FinancialTransactionInterface $transaction, $retry)
     {
+        $this->deposit($transaction, $retry);
+    }
+
+    public function deposit(FinancialTransactionInterface $transaction, $retry)
+    {
         $data = $transaction->getExtendedData();
         //this should set the status to "pending"
         $actionRequest = new ActionRequiredException('User has not done the bank transfer yet');
         $actionRequest->setFinancialTransaction($transaction);
         $actionRequest->setAction(new VisitUrl($data->get('pending_url')));
         throw $actionRequest;
+    }
+
+    public function approve(FinancialTransactionInterface $transaction, $retry)
+    {
+        //$transaction->setReferenceNumber();
+        $transaction->setProcessedAmount(1);
+        $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
+        $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
     }
 
     public function processes($name)

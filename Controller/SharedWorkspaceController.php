@@ -187,6 +187,7 @@ class SharedWorkspaceController extends Controller
 
         if (Result::STATUS_PENDING === $result->getStatus()) {
             $ex = $result->getPluginException();
+
             if ($ex instanceof ActionRequiredException) {
                 $action = $ex->getAction();
                 if ($action instanceof VisitUrl) {
@@ -194,26 +195,20 @@ class SharedWorkspaceController extends Controller
                 }
                 throw $ex;
             }
+
+            $content = $this->renderView(
+                'FormaLibreInvoiceBundle:errors:paymentPendingException.html.twig'
+            );
+
+            return new Response($content);
+
         } else if (Result::STATUS_SUCCESS !== $result->getStatus()) {
             throw new \RuntimeException('Transaction was not successful: '. $result->getReasonCode());
         }
 
-        $this->productManager->endOrder($order);
-        /*
-        $payment->setState(PaymentInterface::STATE_APPROVED);
-        $this->em->persist($payment);
-        $this->em->flush();
-        */
-
         try {
-            if ($swsId == 0) {
-                $this->addRemoteWorkspace($order);
-            } else {
-                $sws = $this->em->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
-                $this->productManager->addRemoteWorkspaceExpDate($order, $sws);
-            }
+            $this->productManager->executeWorkspceOrder($order, $swsId);
         } catch (PaymentHandlingFailedException $e) {
-
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
             );
@@ -242,6 +237,9 @@ class SharedWorkspaceController extends Controller
     {
         $instruction = $order->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
+        $order->setExtendedData(array('communication' => $extra->get('communication')));
+        $this->em->persist($order);
+        $this->em->flush();
 
         return array('communication' => $extra->get('communication'));
     }
@@ -291,13 +289,6 @@ class SharedWorkspaceController extends Controller
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
 
-    private function addRemoteWorkspace(Order $order)
-    {
-        $user = $order->getOwner();
-        $sws = $this->productManager->addSharedWorkspace($user, $order);
-        $this->productManager->createRemoteSharedWorkspace($sws, $user);
-    }
-
     /**
      * @EXT\Route(
      *      "/bank_transfer_validate/{payment}",
@@ -309,12 +300,10 @@ class SharedWorkspaceController extends Controller
      */
     public function validateBankTransferAction(Payment $payment)
     {
-        /* do some stuff
-        $this->em->persist($payment);
-        $this->em->flush();
         $order = $this->paymentManager->getOrderFromPayment($payment);
-        */
+        $this->ppc->approve($payment, $payment->getApprovingAmount());
+        $route = $this->router->generate('workspace_product_payment_complete', array('order' => $order->getId()));
 
-        return new RedirectResponse($this->router->generate('workspace_product_payment_complete', array('order' => $order->getId())));
+        return new RedirectResponse($route);
     }
 }

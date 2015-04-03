@@ -30,5 +30,5 @@ max_users: Nombre d'utilisateur max.
 expiration_date: Date d'expiration
 my_workspaces: Mes espaces d'activités
 subscription: Abonnements
-
+bank_tranfer: Virement bancaire
 payment_handling_exception_message: Une erreur est survenue. Un email a été envoyé a l'équipe de support.

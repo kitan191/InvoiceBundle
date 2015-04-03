@@ -260,4 +260,23 @@ class ProductManager
             array('to' => array($to))
         );
     }
+
+    public function executeWorkspceOrder(Order $order, $swsId)
+    {
+        $this->endOrder($order);
+
+        if ($swsId == 0) {
+            $this->addRemoteWorkspace($order);
+        } else {
+            $sws = $this->em->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
+            $this->addRemoteWorkspaceExpDate($order, $sws);
+        }
+    }
+
+    private function addRemoteWorkspace(Order $order)
+    {
+        $user = $order->getOwner();
+        $sws = $this->addSharedWorkspace($user, $order);
+        $this->createRemoteSharedWorkspace($sws, $user);
+    }
 }

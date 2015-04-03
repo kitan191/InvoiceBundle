@@ -2,7 +2,6 @@ shared_workspace_product_form_SHARED_WS_A_payment_method: Payment method
 shared_workspace_product_form_SHARED_WS_B_payment_method: Payment method
 shared_workspace_product_form_SHARED_WS_C_payment_method: Payment method
 shared_workspace_product_form_SHARED_WS_D_payment_method: Payment method
-
 shared_workspace_product_form_SHARED_WS_A_payment_data_paypal_express_checkout: ' ' #fuck this too
 shared_workspace_product_form_SHARED_WS_B_payment_data_paypal_express_checkout: ' ' #fuck this too
 shared_workspace_product_form_SHARED_WS_C_payment_data_paypal_express_checkout: ' ' #fuck this too
@@ -11,15 +10,12 @@ shared_workspace_product_form_SHARED_WS_A_payment_data_bank_transfer: ' ' #fuck 
 shared_workspace_product_form_SHARED_WS_B_payment_data_bank_transfer: ' ' #fuck this too
 shared_workspace_product_form_SHARED_WS_C_payment_data_bank_transfer: ' ' #fuck this too
 shared_workspace_product_form_SHARED_WS_D_payment_data_bank_transfer: ' ' #fuck this too
-
 form.label.paypal_express_checkout: Paypal
 form.label.bank_transfer: Bank transfer
-
 SHARE_WS_DESCRIPTION: |
     %users% users </br>
     %storage% </br>
     %resources% resources
-
 increase_expiration_date: Increase expiration date
 max_storage: Disk storage
 max_resources: Max. amount of resources
@@ -27,5 +23,5 @@ max_users: Max. amount of users
 expiration_date: Expiration date
 my_workspaces: My workspaces
 subscription: Subscription
-
 payment_handling_exception_message: An error occured. An email was sent to the support team.
+bank_tranfer: Bank transfer
