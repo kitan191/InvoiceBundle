@@ -109,6 +109,14 @@ class SharedWorkspaceController extends Controller
      */
     public function submitWorkspaceAction(Product $product, Order $order, $swsId)
     {
+        if ($order->getPaymentInstruction()) {
+            $content = $this->renderView(
+                'FormaLibreInvoiceBundle:errors:orderAlreadySubmitedException.html.twig'
+            );
+
+            return new Response($content);
+        }
+
         if ($this->session->has('form_payment_data')) {
             $instruction = $this->session->get('form_payment_data');
             $priceSolution = $this->session->get('form_price_data');
