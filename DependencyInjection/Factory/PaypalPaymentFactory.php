@@ -55,8 +55,10 @@ class PaypalPaymentFactory
 
     public function getEncryptionService()
     {
+        $secret = $this->configHandler->getParameter('formalibre_encryption_secret_encrypt') ;
+        
         return new MCryptEncryptionService(
-            $this->configHandler->getParameter('jms_payment_core_secret'),
+            $secret,
             'rijndael-256',
             'ctr'
         );
