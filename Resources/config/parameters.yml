@@ -2,7 +2,7 @@ services:
     formalibre.var_extension:
         arguments:
             - "@service_container"
-        class: FormaLibre\InvoiceBundle\Form\Extension\VatExtension
+        class: FormaLibre\InvoiceBundle\Form\Extension\RegistrationExtension
         tags:
             - { name: form.type_extension, alias: form }
 
