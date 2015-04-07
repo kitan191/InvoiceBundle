@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+      <title> formalibre </title>
+      <style>
+          ul, li {
+            list-style-type: none;
+            list-style-position:inside;
+            margin:0;
+            padding:0;
+          }
+
+          .top-margin {
+              margin-top: 10%;
+          }
+
+          .footer {
+              text-align:center;
+          }
+
+          .default-block {
+              margin-left:10%;
+          }
+
+          .client-info {
+              margin-left:60%;
+          }
+
+          .logo {
+                max-width:20%;
+                height: auto;
+          }
+
+          .top-span {
+              display: inline-block;
+          }
+      </style>
+    </head>
+
+    <body>
+        <div class="top default-block top-margin">
+            <img src="{{ asset('bundles/formalibreinvoice/images/invoice_logo.jpg', absolute=true) }}" class="logo" alt="logo"/>
+            <span class="top-span">
+                <ul>
+                    <li> Facture n° xxxx </li>
+                    <li> Date d'émission </li>
+                </ul>
+
+            </span>
+        </div>
+        <div class="client-info top-margin">
+            <ul>
+                <li> Nom du client </li>
+                <li> Numéro de TVA </li>
+                <li> Adresse </li>
+                <li> Code postal </li>
+                <li> Pays </li>
+            </ul>
+        </div>
+        <div class="payment-type default-block top-margin">
+            <ul style="list-style-type: none;">
+                <li> Date d'achat: date </li>
+                <li> Mode de paiment: mode </li>
+            </ul>
+        </div>
+        <div class="item-description default-block top-margin">
+            <table>
+                <thead>
+                    <tr>
+                        <th> Item </th>
+                        <th> Description </th>
+                        <th> Quant.</th>
+                        <th> VAT </th>
+                        <th> Unit Price </th>
+                        <th> VAT included </th>
+                        <th> Net value </th>
+                        <th> Total </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td> item </td>
+                        <td> descr </td>
+                        <td> quant </td>
+                        <td> vat </td>
+                        <td> unit price </td>
+                        <td> vat inclided </td>
+                        <td> net value </td>
+                        <td> total </td>
+                </tbody>
+            </table>
+        </div>
+        <div class="payment-total default-block top-margin">
+            <ul style="list-style-type: none; list-style: none;">
+                <li> Réduction: </li>
+                <li> Total net: </li>
+                <li> Total TVA: </li>
+                <li> Total (EUR): </li>
+            </ul>
+        </div>
+        <div id="footer" class="footer top-margin">
+            <small>
+                Forma­Libre S.A. ­ Siège Social: Chemin du Cyclotron 6, 1348 Louvain­la­Neuve – TVA BE0599.995.379 </br>
+                site : www.claroline.com – E­mail: info@claroline.com
+            </small>
+        </div>
+    </body>
+
+</html>

@@ -25,6 +25,7 @@ class ProductManager
     private $sc;
     private $ch;
     private $mailManager;
+    private $container;
 
     /**
      * @DI\InjectParams({
@@ -33,7 +34,8 @@ class ProductManager
      *     "logger" = @DI\Inject("logger"),
      *     "sc" = @DI\Inject("security.context"),
      *     "ch" = @DI\Inject("claroline.config.platform_config_handler"),
-     *     "mailManager" = @DI\Inject("claroline.manager.mail_manager")
+     *     "mailManager" = @DI\Inject("claroline.manager.mail_manager"),
+     *     "container" = @DI\Inject("service_container")
      * })
      */
     public function __construct(
@@ -42,7 +44,8 @@ class ProductManager
         $logger,
         $sc,
         $ch,
-        $mailManager
+        $mailManager,
+        $container
     )
     {
         $this->om                        = $om;
@@ -53,6 +56,7 @@ class ProductManager
         $this->sc                        = $sc;
         $this->ch                        = $ch;
         $this->mailManager               = $mailManager;
+        $this->container                 = $container;
     }
 
     public function getProductsByType($type)
@@ -238,6 +242,26 @@ class ProductManager
         throw new PaymentHandlingFailedException();
     }
 
+    public function sendSuccessMail(SharedWorkspace $sws, Order $order)
+    {
+        $user = $this->sc->getToken()->getUser();
+        $snappy = $this->container->get('knp_snappy.pdf');
+        $view = $this->container->get('templating')->render(
+            'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
+            array()
+        );
+        //@todo: the path should include the invoice numbe
+        $path = $this->container->getParameter('claroline.param.pdf_directory') . '/' . uniqid() . '.pdf';
+        @mkdir($this->container->getParameter('claroline.param.pdf_directory'));
+        $snappy->generateFromHtml($view, $path);
+        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'platform');
+        $body = $this->container->get('templating')->render(
+            'FormaLibreInvoiceBundle:Mail:workspace_subscription.html.twig'
+        );
+
+        return $this->mailManager->send($subject, $body, array($user), null, array('attachment' => $path));
+    }
+
     public function sendMailError(SharedWorkspace $sws, $serverOutput = null)
     {
         $subject = 'Erreur lors de la gestion des espaces commerciaux.';
@@ -261,16 +285,18 @@ class ProductManager
         );
     }
 
-    public function executeWorkspceOrder(Order $order, $swsId)
+    public function executeWorkspaceOrder(Order $order, $swsId)
     {
         $this->endOrder($order);
+        $sws = $this->om->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
 
         if ($swsId == 0) {
-            $this->addRemoteWorkspace($order);
+            $sws = $this->addRemoteWorkspace($order);
         } else {
-            $sws = $this->em->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
             $this->addRemoteWorkspaceExpDate($order, $sws);
         }
+
+        $this->sendSuccessMail($sws, $order);
     }
 
     private function addRemoteWorkspace(Order $order)
@@ -278,5 +304,7 @@ class ProductManager
         $user = $order->getOwner();
         $sws = $this->addSharedWorkspace($user, $order);
         $this->createRemoteSharedWorkspace($sws, $user);
+
+        return $sws;
     }
 }

@@ -36,7 +36,7 @@ class BankTransferPlugin extends AbstractPlugin
     public function approve(FinancialTransactionInterface $transaction, $retry)
     {
         //$transaction->setReferenceNumber();
-        $transaction->setProcessedAmount(1);
+        $transaction->setProcessedAmount($transaction->getRequestedAmount());
         $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
         $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
     }

@@ -155,6 +155,7 @@ class SharedWorkspaceController extends Controller
             $this->ppc->createPaymentInstruction($instruction);
             $order->setPaymentInstruction($instruction);
             $order->setPriceSolution($priceSolution);
+            $order->setAmount($instruction->getAmount());
             $this->em->persist($order);
             $this->em->flush($order);
             $extData = $instruction->getExtendedData();
@@ -215,17 +216,13 @@ class SharedWorkspaceController extends Controller
         }
 
         try {
-            $this->productManager->executeWorkspceOrder($order, $swsId);
+            $this->productManager->executeWorkspaceOrder($order, $swsId);
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
             );
 
             return new Response($content);
-        }
-
-        if ($this->sc->isGranted('ROLE_ADMIN')) {
-            return new RedirectResponse($this->router->generate('admin_invoice_open', array()));
         }
 
         return new RedirectResponse($this->router->generate('invoice_show_all', array()));
@@ -309,8 +306,9 @@ class SharedWorkspaceController extends Controller
     public function validateBankTransferAction(Payment $payment)
     {
         $order = $this->paymentManager->getOrderFromPayment($payment);
-        $this->ppc->approve($payment, $payment->getApprovingAmount());
-        $route = $this->router->generate('workspace_product_payment_complete', array('order' => $order->getId()));
+        $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
+        $this->productManager->executeWorkspaceOrder($order, 0);
+        $route = $this->router->generate('admin_invoice_open');
 
         return new RedirectResponse($route);
     }
