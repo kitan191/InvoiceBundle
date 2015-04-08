@@ -1,1 +1,9 @@
-formalibre_vat: numéro de TVA
+formalibre_vat: Numéro de TVA
+formalibre_private: Particulier
+formalibre_organisation: Organisation
+formalibre_street: Rue
+formalibre_cp: Code postal
+formalibre_town: Ville
+formalibre_tel: Téléphone
+formalibre_country: Pays
+formalibre_company_name: Nom de l'organisation

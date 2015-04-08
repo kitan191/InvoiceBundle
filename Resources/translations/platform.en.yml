@@ -1,1 +1,9 @@
 formalibre_vat: VAT number
+formalibre_private: Private
+formalibre_organisation: Organisation
+formalibre_street: Street
+formalibre_cp: Postal code
+formalibre_town: Town
+formalibre_tel: Phone
+formalibre_country: Country
+formalibre_company_name: Company name

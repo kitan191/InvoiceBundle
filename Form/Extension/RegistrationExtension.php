@@ -66,7 +66,7 @@ class RegistrationExtension extends AbstractTypeExtension
             'formalibre_country',
             'choice',
             array(
-                'label'  => $this->translator->trans('formalibre_country', array(), 'invoice'),
+                'label'  => $this->translator->trans('formalibre_country', array(), 'platform'),
                 'mapped' => false,
                 'required' => false,
                 'choices' => $this->getCountries(),
@@ -83,12 +83,13 @@ class RegistrationExtension extends AbstractTypeExtension
             'formalibre_user_type_choice',
             'choice',
             array(
-                'label' => $this->translator->trans('formalibre_user_type_choice', array(), 'invoice'),
+                'label' => ' ', //no label please
                 'mapped' => false,
                 'required' => true,
-                'choices' => array('h' => 'human', 'c' => 'company'),
+                'choices' => array('h' => 'formalibre_private', 'c' => 'formalibre_organisation'),
                 'multiple' => false,
-                'expanded' => true
+                'expanded' => true,
+                'data' => 'h'
             )
         );
     }

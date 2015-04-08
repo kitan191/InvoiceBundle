@@ -36,7 +36,7 @@ class LoadFacetData extends AbstractFixture implements ContainerAwareInterface
     {
         $facetManager = $this->container->get('claroline.manager.facet_manager');
 
-        $localisation = $facetManager->createFacet('localisation', true);
+        $localisation = $facetManager->createFacet('Localisation', true);
         $localisationPanel = $facetManager->addPanel($localisation, 'info', true);
         $field = $facetManager->addField($localisationPanel, 'formalibre_street', FieldFacet::STRING_TYPE);
         $field = $facetManager->addField($localisationPanel, 'formalibre_cp', FieldFacet::STRING_TYPE);
@@ -44,7 +44,7 @@ class LoadFacetData extends AbstractFixture implements ContainerAwareInterface
         $field = $facetManager->addField($localisationPanel, 'formalibre_country', FieldFacet::STRING_TYPE);
         $field = $facetManager->addField($localisationPanel, 'formalibre_tel', FieldFacet::STRING_TYPE);
 
-        $company = $facetManager->createFacet('company', true);
+        $company = $facetManager->createFacet('Organisation', true);
         $companyPanel = $facetManager->addPanel($company, 'info', true);
         $field = $facetManager->addField($companyPanel, 'formalibre_company_name', FieldFacet::STRING_TYPE);
         $field = $facetManager->addField($companyPanel, 'formalibre_vat', FieldFacet::STRING_TYPE);
