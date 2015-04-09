@@ -86,9 +86,8 @@
             $('.company').show();
         }
 
-        hideCompanySection();
-
-        $('#profile_form_formalibre_user_type_choice').on('change', function(event) {
+        function changeDisplay()
+        {
             var val = $("input[name='profile_form[formalibre_user_type_choice]']:checked").val();
 
             if (val === 'c') {
@@ -96,6 +95,12 @@
             } else {
                 hideCompanySection();
             }
+        }
+
+        changeDisplay();
+
+        $('#profile_form_formalibre_user_type_choice').on('change', function(event) {
+            changeDisplay();
         });
 
     </script>

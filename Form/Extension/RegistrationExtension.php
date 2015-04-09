@@ -18,6 +18,8 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use FormaLibre\InvoiceBundle\Validator\Constraints\Vat;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\ExecutionContextInterface;
 
 class RegistrationExtension extends AbstractTypeExtension
 {
@@ -38,6 +40,7 @@ class RegistrationExtension extends AbstractTypeExtension
                 $this->addVAT($form);
                 $this->addCountryList($form);
                 $this->addUserTypeChoice($form);
+                $this->addCompanyValidation($form);
             }
         });
     }
@@ -61,7 +64,6 @@ class RegistrationExtension extends AbstractTypeExtension
     private function addCountryList($form)
     {
         $form->remove('formalibre_country');
-
         $form->add(
             'formalibre_country',
             'choice',
@@ -92,6 +94,36 @@ class RegistrationExtension extends AbstractTypeExtension
                 'data' => 'h'
             )
         );
+    }
+
+    private function addCompanyValidation($form)
+    {
+        $form->remove('formalibre_company_name');
+        $form->add(
+            'formalibre_company_name',
+            'text',
+            array(
+                'label' => 'formalibre_company_name',
+                'mapped' => false,
+                'required' => false,
+                'attr' => array('facet' => 'company'),
+                'constraints' => array(
+                    new Callback(array('callback' => array($this, 'validateOrder')))
+                )
+            )
+        );
+    }
+
+    public function validateOrder($data, ExecutionContextInterface $context)
+    {
+        /** @var \Symfony\Component\Form\Form $form */
+        $form = $context->getRoot();
+        $name = $form->get('formalibre_company_name')->getData();
+        $name = str_replace(' ', '', $name);
+
+        if ($form->get('formalibre_user_type_choice')->getData() === 'c' && $name === '') {
+            $context->addViolation('organization_name_required');
+        }
     }
 
     /**
