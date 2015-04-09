@@ -76,20 +76,20 @@
     {{ parent() }}
     <script>
         function hideCompanySection() {
-            $('.company').hide();
+            $('.Company').hide();
             $('#profile_form_formalibre_company_name').val('');
             $('#profile_form_formalibre_vat').val('');
         }
 
         function showCompanySection()
         {
-            $('.company').show();
+            $('.Company').show();
         }
 
         function changeDisplay()
         {
             var val = $("input[name='profile_form[formalibre_user_type_choice]']:checked").val();
-
+            
             if (val === 'c') {
                 showCompanySection();
             } else {

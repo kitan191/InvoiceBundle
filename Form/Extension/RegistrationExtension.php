@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use FormaLibre\InvoiceBundle\Validator\Constraints\Vat;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegistrationExtension extends AbstractTypeExtension
 {
@@ -38,6 +39,9 @@ class RegistrationExtension extends AbstractTypeExtension
 
             if ($form->has('formalibre_vat')) {
                 $this->addVAT($form);
+                $this->addStreet($form);
+                $this->addCp($form);
+                $this->addTown($form);
                 $this->addCountryList($form);
                 $this->addUserTypeChoice($form);
                 $this->addCompanyValidation($form);
@@ -74,7 +78,56 @@ class RegistrationExtension extends AbstractTypeExtension
                 'choices' => $this->getCountries(),
                 'attr' => array('facet' => 'Localisation'),
                 'multiple' => false,
-                'expanded' => false
+                'expanded' => false,
+                'constraints' => array(new NotBlank()),
+            )
+        );
+    }
+
+    private function addStreet($form)
+    {
+        $form->remove('formalibre_street');
+        $form->add(
+            'formalibre_street',
+            'text',
+            array(
+                'label'  => $this->translator->trans('formalibre_street', array(), 'platform'),
+                'mapped' => false,
+                'required' => true,
+                'attr' => array('facet' => 'Localisation'),
+                'constraints' => array(new NotBlank()),
+            )
+        );
+    }
+
+    private function addCp($form)
+    {
+        $form->remove('formalibre_cp');
+        $form->add(
+            'formalibre_cp',
+            'text',
+            array(
+                'label'  => $this->translator->trans('formalibre_cp', array(), 'platform'),
+                'mapped' => false,
+                'required' => true,
+                'attr' => array('facet' => 'Localisation'),
+                'constraints' => array(new NotBlank()),
+            )
+        );
+    }
+
+    private function addTown($form)
+    {
+        $form->remove('formalibre_town');
+        $form->add(
+            'formalibre_town',
+            'text',
+            array(
+                'label'  => $this->translator->trans('formalibre_town', array(), 'platform'),
+                'mapped' => false,
+                'required' => true,
+                'attr' => array('facet' => 'Localisation'),
+                'constraints' => array(new NotBlank()),
             )
         );
     }
