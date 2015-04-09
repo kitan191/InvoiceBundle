@@ -32,3 +32,9 @@ my_workspaces: Mes espaces d'activités
 subscription: Abonnements
 bank_tranfer: Virement bancaire
 payment_handling_exception_message: Une erreur est survenue. Un email a été envoyé a l'équipe de support.
+order_already_submitted_exception : Cette commande a déjà été soumise.
+payment_pending_exception_message: Une erreur est survenue et le payment n'a pas été effectué.
+SHARED_WS_A: Groupe
+SHARED_WS_B: Classe
+SHARED_WS_C: Amphi
+SHARED_WS_D: Promotion

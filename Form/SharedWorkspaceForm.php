@@ -48,7 +48,12 @@ class SharedWorkspaceForm extends AbstractType
         $details = $product->getDetails();
         $detailsInfo = $this->translator->trans(
             'SHARE_WS_DESCRIPTION_PAYPAL',
-            array('%resources' => $details['max_resources'], '%users%' => $details['max_users'], '%storage%' => $details['max_storage']),
+            array(
+                '%resources' => $details['max_resources'],
+                '%users%' => $details['max_users'],
+                '%storage%' => $details['max_storage'],
+                '%code%' => $product->getCode()
+            ),
             'invoice'
         );
 

@@ -13,6 +13,7 @@ shared_workspace_product_form_SHARED_WS_D_payment_data_bank_transfer: ' ' #fuck 
 form.label.paypal_express_checkout: Paypal
 form.label.bank_transfer: Bank transfer
 SHARE_WS_DESCRIPTION: |
+    %code% </br>
     %users% users </br>
     %storage% </br>
     %resources% resources
@@ -25,3 +26,10 @@ my_workspaces: My workspaces
 subscription: Subscription
 payment_handling_exception_message: An error occured. An email was sent to the support team.
 bank_tranfer: Bank transfer
+order_already_submitted_exception: Order already submitted.
+payment_pending_exception_message: Une erreur est survenue et le payment n'a pas été effectué.
+payment_pending_exception_message: An error occured and the payment was canceled.
+SHARED_WS_A: Group
+SHARED_WS_B: Class
+SHARED_WS_C: Amphi
+SHARED_WS_D: Promotion

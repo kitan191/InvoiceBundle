@@ -35,6 +35,7 @@
                         {{
                             'SHARE_WS_DESCRIPTION'|trans(
                                 {
+                                    '%code%': form['product'].getCode()|trans({}, 'invoice'),
                                     '%users%': form['product'].details.max_users,
                                     '%storage%': form['product'].details.max_storage,
                                     '%resources%': form['product'].details.max_resources
