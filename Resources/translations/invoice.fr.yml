@@ -16,6 +16,7 @@ form.label.paypal_express_checkout: Paypal
 form.label.bank_transfer: Virement bancaire
 
 SHARE_WS_DESCRIPTION: |
+    %code% </br>
     %users% utilisateurs </br>
     %storage% </br>
     %resources% ressources
