@@ -56,7 +56,7 @@ class RegistrationExtension extends AbstractTypeExtension
                 'mapped' => false,
                 'required' => false,
                 'constraints' => array(new Vat()),
-                'attr' => array('facet' => 'company')
+                'attr' => array('facet' => 'Company')
             )
         );
     }
@@ -72,7 +72,7 @@ class RegistrationExtension extends AbstractTypeExtension
                 'mapped' => false,
                 'required' => false,
                 'choices' => $this->getCountries(),
-                'attr' => array('facet' => 'localisation'),
+                'attr' => array('facet' => 'Localisation'),
                 'multiple' => false,
                 'expanded' => false
             )
@@ -106,7 +106,7 @@ class RegistrationExtension extends AbstractTypeExtension
                 'label' => 'formalibre_company_name',
                 'mapped' => false,
                 'required' => false,
-                'attr' => array('facet' => 'company'),
+                'attr' => array('facet' => 'Company'),
                 'constraints' => array(
                     new Callback(array('callback' => array($this, 'validateOrder')))
                 )
