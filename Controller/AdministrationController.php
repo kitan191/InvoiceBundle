@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
 use JMS\Payment\CoreBundle\Entity\Payment;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class AdministrationController extends Controller
 {
@@ -30,6 +31,7 @@ class AdministrationController extends Controller
      *      options = {"expose"=true}
      * )
      * @EXT\Template
+     * @Security("has_role('ROLE_ADMIN')")
      *
      * @return Response
      */

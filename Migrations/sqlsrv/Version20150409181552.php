@@ -1,6 +1,6 @@
 <?php
 
-namespace FormaLibre\InvoiceBundle\Migrations\pdo_sqlsrv;
+namespace FormaLibre\InvoiceBundle\Migrations\sqlsrv;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/04/03 03:26:26
+ * Generation date: 2015/04/09 06:15:53
  */
-class Version20150403152625 extends AbstractMigration
+class Version20150409181552 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -40,6 +40,8 @@ class Version20150403152625 extends AbstractMigration
                 vatNumber NVARCHAR(255), 
                 amount DOUBLE PRECISION, 
                 extendedData VARCHAR(MAX), 
+                creation_date DATETIME2(6) NOT NULL, 
+                validation_date DATETIME2(6), 
                 paymentInstruction_id INT, 
                 PRIMARY KEY (id)
             )

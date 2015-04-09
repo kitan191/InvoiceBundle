@@ -246,13 +246,32 @@ class ProductManager
     {
         $user = $this->sc->getToken()->getUser();
         $snappy = $this->container->get('knp_snappy.pdf');
+        $owner = $order->getOwner();
+        $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
+        $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
+
+        $streetField = $fieldRepo->findOneByName('formalibre_street');
+        $cpField = $fieldRepo->findOneByName('formalibre_cp');
+        $townField = $fieldRepo->findOneByName('formalibre_town');
+        $countryField = $fieldRepo->findOneByName('formalibre_country');
+        $order->setValidationDate(new \DateTime());
+        $this->om->persist($order);
+        $this->om->flush();
+
         $view = $this->container->get('templating')->render(
             'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
-            array()
+            array(
+                'order' => $order,
+                'street' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $streetField))->getValue(),
+                'cp' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $cpField))->getValue(),
+                'town' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $townField))->getValue(),
+                'country' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $countryField))->getValue()
+            )
         );
         //@todo: the path should include the invoice numbe
-        $path = $this->container->getParameter('claroline.param.pdf_directory') . '/' . uniqid() . '.pdf';
+        $path = $this->container->getParameter('claroline.param.pdf_directory') . '/invoice/' . $order->getId() . '.pdf';
         @mkdir($this->container->getParameter('claroline.param.pdf_directory'));
+        @mkdir($this->container->getParameter('claroline.param.pdf_directory')) . '/invoice';
         $snappy->generateFromHtml($view, $path);
         $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'platform');
         $body = $this->container->get('templating')->render(
@@ -265,9 +284,9 @@ class ProductManager
     public function sendMailError(SharedWorkspace $sws, $serverOutput = null)
     {
         $subject = 'Erreur lors de la gestion des espaces commerciaux.';
-        $body = '<div> Un espace d\'activité a été payé par ' . $sws->getOwner()->getUsername() . ' </div>';
+        $body = '<div> Un espace d\'activit� a �t� pay� par ' . $sws->getOwner()->getUsername() . ' </div>';
         $body = '<div> Son email est ' . $sws->getOwner()->getMail() . ' </div>';
-        $body .= '<div> Une erreur est survenue après son payment </div>';
+        $body .= '<div> Une erreur est survenue apr�s son payment </div>';
         $body .= '<div> La commande consiste en un espace dont la date d\'expiration est ' . $sws->getExpDate()->format(\DateTime::RFC2822) . '</div>';
         $body .= "<div> Nombre d'utilisateur: {$sws->getMaxUser()} - Nombre de ressource: {$sws->getMaxRes()} - Taille maximale: {$sws->getMaxStorage()} </div>";
         $to = $this->ch->getParameter('formalibre_commercial_email_support');

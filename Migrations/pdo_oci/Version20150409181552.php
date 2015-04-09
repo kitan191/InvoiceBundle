@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/04/03 03:26:26
+ * Generation date: 2015/04/09 06:15:53
  */
-class Version20150403152625 extends AbstractMigration
+class Version20150409181552 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -70,6 +70,8 @@ class Version20150403152625 extends AbstractMigration
                 vatNumber VARCHAR2(255) DEFAULT NULL, 
                 amount DOUBLE PRECISION DEFAULT NULL, 
                 extendedData CLOB DEFAULT NULL, 
+                creation_date TIMESTAMP(0) NOT NULL, 
+                validation_date TIMESTAMP(0) DEFAULT NULL, 
                 paymentInstruction_id NUMBER(10) DEFAULT NULL, 
                 PRIMARY KEY(id)
             )

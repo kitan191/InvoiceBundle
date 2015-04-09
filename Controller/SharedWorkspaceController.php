@@ -19,6 +19,7 @@ use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use JMS\Payment\CoreBundle\Model\PaymentInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class SharedWorkspaceController extends Controller
 {
@@ -255,6 +256,7 @@ class SharedWorkspaceController extends Controller
      *      name="shared_workspace_expiration_increase_form"
      * )
      * @EXT\Template
+     * @Security("has_role('ROLE_ADMIN')")
      *
      * @return Response
      */
@@ -300,6 +302,7 @@ class SharedWorkspaceController extends Controller
      *      name="formalibre_validate_bank_transfer"
      * )
      * @EXT\Template
+     * @Security("has_role('ROLE_ADMIN')")
      *
      * @return Response
      */

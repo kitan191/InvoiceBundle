@@ -4,6 +4,7 @@ namespace FormaLibre\InvoiceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Table(name="formalibre__order")
@@ -82,6 +83,17 @@ class Order
      */
     private $owner;
 
+    /**
+     * @ORM\Column(name="creation_date", type="datetime")
+     * @Gedmo\Timestampable(on="create")
+     */
+    protected $creationDate;
+
+    /**
+     * @ORM\Column(name="validation_date", type="datetime", nullable=true)
+     */
+    protected $validationDate;
+
     public function getId()
     {
         return $this->id;
@@ -127,9 +139,19 @@ class Order
         $this->vatAmount = $amount;
     }
 
+    public function getVatAmount()
+    {
+        return $this->vatAmount;
+    }
+
     public function setVatRate($vatRate)
     {
         $this->vatRate = $vatRate;
+    }
+
+    public function getVatRate()
+    {
+        return $this->vatRate;
     }
 
     public function setIpAddress($ip)
@@ -140,6 +162,11 @@ class Order
     public function setVatNumber($number)
     {
         $this->vatNumber = $number;
+    }
+
+    public function getVatNumber()
+    {
+        return $this->vatNumber;
     }
 
     public function setAmount($amount)
@@ -175,5 +202,20 @@ class Order
     public function getExtendedData()
     {
         return $this->data;
+    }
+
+    public function getCreationDate()
+    {
+        return $this->creationDate;
+    }
+
+    public function setValidationDate($date)
+    {
+        $this->validationDate = $date;
+    }
+
+    public function getValidationDate()
+    {
+        return $this->validationDate;
     }
 }

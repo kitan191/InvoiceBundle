@@ -43,25 +43,25 @@
             <img src="{{ asset('bundles/formalibreinvoice/images/invoice_logo.jpg', absolute=true) }}" class="logo" alt="logo"/>
             <span class="top-span">
                 <ul>
-                    <li> Facture n° xxxx </li>
-                    <li> Date d'émission </li>
+                    <li> Facture n° {{ order.getId() }} </li>
+                    <li> Date d'émission: {{ order.getValidationDate().getTimeStamp()|date('d/m/Y')}} </li>
                 </ul>
 
             </span>
         </div>
         <div class="client-info top-margin">
             <ul>
-                <li> Nom du client </li>
-                <li> Numéro de TVA </li>
-                <li> Adresse </li>
-                <li> Code postal </li>
-                <li> Pays </li>
+                <li> {{ order.getOwner().getFirstName() }} {{ order.getOwner().getLastName() }} </li>
+                <li> {{ order.getVatNumber() }} </li>
+                <li> {{ street }} </li>
+                <li> {{ cp }} </li>
+                <li> {{ country }} </li>
             </ul>
         </div>
         <div class="payment-type default-block top-margin">
             <ul style="list-style-type: none;">
-                <li> Date d'achat: date </li>
-                <li> Mode de paiment: mode </li>
+                <li> Date d'achat: {{ order.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
+                <li> Mode de paiment: {{ order.getPaymentInstruction().getPaymentSystemName() }} </li>
             </ul>
         </div>
         <div class="item-description default-block top-margin">
@@ -80,14 +80,14 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td> item </td>
+                        <td> {{ order.getProduct().getCode|trans({}, 'invoice') }} </td>
                         <td> descr </td>
-                        <td> quant </td>
-                        <td> vat </td>
-                        <td> unit price </td>
-                        <td> vat inclided </td>
+                        <td> 1 </td>
+                        <td> {{ order.getVatRate() }} </td>
+                        <td> {{ order.getPriceSolution().getPrice() }} </td>
+                        <td> {{ order.getVatAmount() }}</td>
                         <td> net value </td>
-                        <td> total </td>
+                        <td> {{ order.getAmount() }} </td>
                 </tbody>
             </table>
         </div>
