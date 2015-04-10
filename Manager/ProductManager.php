@@ -10,6 +10,7 @@ use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Entity\Order;
+use FormaLibre\InvoiceBundle\Entity\FreeTestMonthUsage;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 
 /**
@@ -64,13 +65,11 @@ class ProductManager
         return $this->productRepository->findByType($type);
     }
 
-    public function addSharedWorkspace(User $user, Order $order)
+    public function addSharedWorkspace(User $user, Order $order, $monthDuration)
     {
         $product = $order->getProduct();
-        $priceSolution = $order->getPriceSolution();
         //get the duration right
         $details = $product->getDetails();
-        $monthDuration = $priceSolution->getMonthDuration();
         $expDate = new \DateTime();
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
@@ -115,7 +114,7 @@ class ProductManager
         $data = json_decode($serverOutput);
 
         if ($data === null) {
-            $this->handleError($sws, $serverOutput);
+            $this->handleError($sws, $serverOutput, $targetUrl);
         }
 
         if ($data->code == 200) {
@@ -127,7 +126,7 @@ class ProductManager
             return;
         }
 
-        $this->handleError($sws);
+        $this->handleError($sws, $serverOutput, $targetUrl);
     }
 
     public function getSharedWorkspaceByUser(User $user)
@@ -165,7 +164,7 @@ class ProductManager
         $data = json_decode($serverOutput);
 
         if ($data === null) {
-            $this->handleError($sws, $serverOutput);
+            $this->handleError($sws, $serverOutput, $targetUrl);
         }
 
         //double equal because it's a string
@@ -179,7 +178,7 @@ class ProductManager
             return;
         }
 
-        $this->handleError($sws);
+        $this->handleError($sws, $serverOutput, $targetUrl);
     }
 
     private function sendPost($payload, $url)
@@ -223,21 +222,24 @@ class ProductManager
         return $ciphertextencoded;
     }
 
-    public function endOrder(Order $order)
+    public function endOrder(Order $order, $addVat = true)
     {
         $order->setCountryCode($this->vatManager->getClientLocation());
-        $order->setAmount($order->getPriceSolution()->getPrice());
-        $order->setVatRate($this->vatManager->getVATRate($this->vatManager->getClientLocation()));
-        $order->setVatAmount($this->vatManager->getVAT($order->getAmount()));
         $order->setIpAddress($_SERVER['REMOTE_ADDR']);
         $order->setOwner($order->getOwner());
+
+        if ($addVat) {
+            $order->setAmount($order->getPriceSolution()->getPrice());
+            $order->setVatRate($this->vatManager->getVATRate($this->vatManager->getClientLocation()));
+            $order->setVatAmount($this->vatManager->getVAT($order->getAmount()));
+        }
         //add the vat number here ()
         $order->setIsExecuted(true);
     }
 
-    public function handleError(SharedWorkspace $sws, $serverOutput = null)
+    public function handleError(SharedWorkspace $sws, $serverOutput = null, $target = null)
     {
-        $this->sendMailError($sws, $serverOutput);
+        $this->sendMailError($sws, $serverOutput, $target);
 
         throw new PaymentHandlingFailedException();
     }
@@ -281,15 +283,19 @@ class ProductManager
         return $this->mailManager->send($subject, $body, array($user), null, array('attachment' => $path));
     }
 
-    public function sendMailError(SharedWorkspace $sws, $serverOutput = null)
+    public function sendMailError(SharedWorkspace $sws, $serverOutput = null, $targetUrl = null)
     {
         $subject = 'Erreur lors de la gestion des espaces commerciaux.';
-        $body = '<div> Un espace d\'activit� a �t� pay� par ' . $sws->getOwner()->getUsername() . ' </div>';
+        $body = '<div> Un espace d\'activité a été payé par ' . $sws->getOwner()->getUsername() . ' </div>';
         $body = '<div> Son email est ' . $sws->getOwner()->getMail() . ' </div>';
-        $body .= '<div> Une erreur est survenue apr�s son payment </div>';
+        $body .= '<div> Une erreur est survenue après son payment </div>';
         $body .= '<div> La commande consiste en un espace dont la date d\'expiration est ' . $sws->getExpDate()->format(\DateTime::RFC2822) . '</div>';
         $body .= "<div> Nombre d'utilisateur: {$sws->getMaxUser()} - Nombre de ressource: {$sws->getMaxRes()} - Taille maximale: {$sws->getMaxStorage()} </div>";
         $to = $this->ch->getParameter('formalibre_commercial_email_support');
+
+        if ($targetUrl) {
+            $body .= "<div>target: {$targetUrl}</div>";
+        }
 
         if ($serverOutput) {
             $body .= "<div>{$serverOutput}</div>";
@@ -304,13 +310,13 @@ class ProductManager
         );
     }
 
-    public function executeWorkspaceOrder(Order $order, $swsId)
+    public function executeWorkspaceOrder(Order $order, $duration, $swsId = 0, $addOrderVat = false)
     {
-        $this->endOrder($order);
+        $this->endOrder($order, $addOrderVat);
         $sws = $this->om->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
 
-        if ($swsId == 0) {
-            $sws = $this->addRemoteWorkspace($order);
+        if ($sws === null) {
+            $sws = $this->addRemoteWorkspace($order, $duration);
         } else {
             $this->addRemoteWorkspaceExpDate($order, $sws);
         }
@@ -318,12 +324,35 @@ class ProductManager
         $this->sendSuccessMail($sws, $order);
     }
 
-    private function addRemoteWorkspace(Order $order)
+    private function addRemoteWorkspace(Order $order, $duration)
     {
         $user = $order->getOwner();
-        $sws = $this->addSharedWorkspace($user, $order);
+        $sws = $this->addSharedWorkspace($user, $order, $duration);
         $this->createRemoteSharedWorkspace($sws, $user);
 
         return $sws;
+    }
+
+    public function hasFreeTestMonth($user)
+    {
+        if ($user === 'anon.') return true;
+
+        $repo = $this->om->getRepository('FormaLibreInvoiceBundle:FreeTestMonthUsage');
+        $users = $repo->findByUser($user);
+
+        return count($users) > 1 ? false: true;
+    }
+
+    public function useFreeTestMonth(User $user)
+    {
+        $fmu = new FreeTestMonthUsage();
+        $fmu->setUser($user);
+        $this->om->persist($fmu);
+        $this->om->flush();
+    }
+
+    public function getByCode($code)
+    {
+        return $this->productRepository->findOneByCode($code);
     }
 }

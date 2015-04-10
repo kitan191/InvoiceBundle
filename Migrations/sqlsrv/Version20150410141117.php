@@ -1,6 +1,6 @@
 <?php
 
-namespace FormaLibre\InvoiceBundle\Migrations\pdo_sqlsrv;
+namespace FormaLibre\InvoiceBundle\Migrations\sqlsrv;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/04/09 06:15:53
+ * Generation date: 2015/04/10 02:11:17
  */
-class Version20150409181552 extends AbstractMigration
+class Version20150410141117 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -58,6 +58,16 @@ class Version20150409181552 extends AbstractMigration
         ");
         $this->addSql("
             CREATE INDEX IDX_62CE339E7E3C61F9 ON formalibre__order (owner_id)
+        ");
+        $this->addSql("
+            CREATE TABLE formalibre__free_test_month_usage (
+                id INT IDENTITY NOT NULL, 
+                user_id INT, 
+                PRIMARY KEY (id)
+            )
+        ");
+        $this->addSql("
+            CREATE INDEX IDX_110D0DB6A76ED395 ON formalibre__free_test_month_usage (user_id)
         ");
         $this->addSql("
             CREATE TABLE formalibre__price_solution (
@@ -115,6 +125,12 @@ class Version20150409181552 extends AbstractMigration
             ON DELETE CASCADE
         ");
         $this->addSql("
+            ALTER TABLE formalibre__free_test_month_usage 
+            ADD CONSTRAINT FK_110D0DB6A76ED395 FOREIGN KEY (user_id) 
+            REFERENCES claro_user (id) 
+            ON DELETE CASCADE
+        ");
+        $this->addSql("
             ALTER TABLE formalibre__price_solution 
             ADD CONSTRAINT FK_E2B632A84584665A FOREIGN KEY (product_id) 
             REFERENCES formalibre__product (id) 
@@ -157,6 +173,9 @@ class Version20150409181552 extends AbstractMigration
         ");
         $this->addSql("
             DROP TABLE formalibre__order
+        ");
+        $this->addSql("
+            DROP TABLE formalibre__free_test_month_usage
         ");
         $this->addSql("
             DROP TABLE formalibre__price_solution

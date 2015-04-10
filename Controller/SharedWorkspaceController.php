@@ -217,7 +217,11 @@ class SharedWorkspaceController extends Controller
         }
 
         try {
-            $this->productManager->executeWorkspaceOrder($order, $swsId);
+            $this->productManager->executeWorkspaceOrder(
+                $order,
+                $swsId,
+                $order->getPriceSolution()->getMonthDuration()
+            );
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
@@ -314,5 +318,35 @@ class SharedWorkspaceController extends Controller
         $route = $this->router->generate('admin_invoice_open');
 
         return new RedirectResponse($route);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/free_test",
+     *      name="formalibre_free_test_workspace"
+     * )
+     * @return Response
+     */
+    public function createFreeTestWorkspace()
+    {
+        if (!$this->sc->isGranted('ROLE_USER')) {
+            $redirectRoute =  $this->router->generate('formalibre_free_test_workspace', array());
+            $this->session->set('redirect_route', $redirectRoute);
+            $route = $this->router->generate('claro_security_login', array());
+
+            return new RedirectResponse($route);
+        }
+
+        $user = $this->sc->getToken()->getUser();
+
+        if (!$this->productManager->hasFreeTestMonth($user)) {
+            throw new \Exception('free test month used');
+        }
+
+        $order = new Order();
+        $order->setOwner($user);
+        $product = $this->productManager->getByCode('SHARED_WS_D');
+        $order->setProduct($product);
+        $this->productManager->executeWorkspaceOrder($order, 0, false);
     }
 }

@@ -34,7 +34,7 @@ class LoadParametersData extends AbstractFixture implements ContainerAwareInterf
     public function load(ObjectManager $manager)
     {
         $configHandler = $this->container->get('claroline.config.platform_config_handler');
-        $configHandler->setParameter('formalibre_free_month_duration', 1);
+        $configHandler->setParameter('formalibre_test_month_duration', 1);
         $configHandler->setParameter('auto_logging_after_registration', true);
         $configHandler->setParameter('commercial_email_support', 'changeme@email.com');
         $configHandler->setParameter('formalibre_target_platform_url', 'localhost/nico/Claroline/web/app_dev.php');

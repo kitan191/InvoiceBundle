@@ -80,7 +80,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td> {{ order.getProduct().getCode|trans({}, 'invoice') }} </td>
+                        <td> {{ order.getProduct().getCode()|trans({}, 'invoice') }} </td>
                         <td> descr </td>
                         <td> 1 </td>
                         <td> {{ order.getVatRate() }} </td>
@@ -90,14 +90,6 @@
                         <td> {{ order.getAmount() }} </td>
                 </tbody>
             </table>
-        </div>
-        <div class="payment-total default-block top-margin">
-            <ul style="list-style-type: none; list-style: none;">
-                <li> Réduction: </li>
-                <li> Total net: </li>
-                <li> Total TVA: </li>
-                <li> Total (EUR): </li>
-            </ul>
         </div>
         <div id="footer" class="footer top-margin">
             <small>

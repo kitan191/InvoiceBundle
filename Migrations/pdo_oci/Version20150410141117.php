@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/04/09 06:15:53
+ * Generation date: 2015/04/10 02:11:17
  */
-class Version20150409181552 extends AbstractMigration
+class Version20150410141117 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -118,6 +118,44 @@ class Version20150409181552 extends AbstractMigration
         ");
         $this->addSql("
             COMMENT ON COLUMN formalibre__order.extendedData IS '(DC2Type:json_array)'
+        ");
+        $this->addSql("
+            CREATE TABLE formalibre__free_test_month_usage (
+                id NUMBER(10) NOT NULL, 
+                user_id NUMBER(10) DEFAULT NULL, 
+                PRIMARY KEY(id)
+            )
+        ");
+        $this->addSql("
+            DECLARE constraints_Count NUMBER; BEGIN 
+            SELECT COUNT(CONSTRAINT_NAME) INTO constraints_Count 
+            FROM USER_CONSTRAINTS 
+            WHERE TABLE_NAME = 'FORMALIBRE__FREE_TEST_MONTH_USAGE' 
+            AND CONSTRAINT_TYPE = 'P'; IF constraints_Count = 0 
+            OR constraints_Count = '' THEN EXECUTE IMMEDIATE 'ALTER TABLE FORMALIBRE__FREE_TEST_MONTH_USAGE ADD CONSTRAINT FORMALIBRE__FREE_TEST_MONTH_USAGE_AI_PK PRIMARY KEY (ID)'; END IF; END;
+        ");
+        $this->addSql("
+            CREATE SEQUENCE FORMALIBRE__FREE_TEST_MONTH_USAGE_ID_SEQ START WITH 1 MINVALUE 1 INCREMENT BY 1
+        ");
+        $this->addSql("
+            CREATE TRIGGER FORMALIBRE__FREE_TEST_MONTH_USAGE_AI_PK BEFORE INSERT ON FORMALIBRE__FREE_TEST_MONTH_USAGE FOR EACH ROW DECLARE last_Sequence NUMBER; last_InsertID NUMBER; BEGIN 
+            SELECT FORMALIBRE__FREE_TEST_MONTH_USAGE_ID_SEQ.NEXTVAL INTO :NEW.ID 
+            FROM DUAL; IF (
+                :NEW.ID IS NULL 
+                OR :NEW.ID = 0
+            ) THEN 
+            SELECT FORMALIBRE__FREE_TEST_MONTH_USAGE_ID_SEQ.NEXTVAL INTO :NEW.ID 
+            FROM DUAL; ELSE 
+            SELECT NVL(Last_Number, 0) INTO last_Sequence 
+            FROM User_Sequences 
+            WHERE Sequence_Name = 'FORMALIBRE__FREE_TEST_MONTH_USAGE_ID_SEQ'; 
+            SELECT :NEW.ID INTO last_InsertID 
+            FROM DUAL; WHILE (last_InsertID > last_Sequence) LOOP 
+            SELECT FORMALIBRE__FREE_TEST_MONTH_USAGE_ID_SEQ.NEXTVAL INTO last_Sequence 
+            FROM DUAL; END LOOP; END IF; END;
+        ");
+        $this->addSql("
+            CREATE INDEX IDX_110D0DB6A76ED395 ON formalibre__free_test_month_usage (user_id)
         ");
         $this->addSql("
             CREATE TABLE formalibre__price_solution (
@@ -231,6 +269,12 @@ class Version20150409181552 extends AbstractMigration
             ON DELETE CASCADE
         ");
         $this->addSql("
+            ALTER TABLE formalibre__free_test_month_usage 
+            ADD CONSTRAINT FK_110D0DB6A76ED395 FOREIGN KEY (user_id) 
+            REFERENCES claro_user (id) 
+            ON DELETE CASCADE
+        ");
+        $this->addSql("
             ALTER TABLE formalibre__price_solution 
             ADD CONSTRAINT FK_E2B632A84584665A FOREIGN KEY (product_id) 
             REFERENCES formalibre__product (id) 
@@ -273,6 +317,9 @@ class Version20150409181552 extends AbstractMigration
         ");
         $this->addSql("
             DROP TABLE formalibre__order
+        ");
+        $this->addSql("
+            DROP TABLE formalibre__free_test_month_usage
         ");
         $this->addSql("
             DROP TABLE formalibre__price_solution

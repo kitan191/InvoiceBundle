@@ -90,7 +90,7 @@ class SharedWorkspaceForm extends AbstractType
                 array(
                     'label' => ' ', //fuck you label
                     'amount'   => 0,
-                    'currency' => 'EUR',
+                    'currency' => 'USD',
                     'allowed_methods' => array('bank_transfer', 'paypal_express_checkout'),
                     'default_method' => 'payment_paypal',
                     'predefined_data' => array(
