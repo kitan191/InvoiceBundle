@@ -87,7 +87,7 @@
                 <tbody>
                     {% for transfer in pager.currentPageResults %}
                     <tr>
-                        <td> {{ transfer.getPaymentInstruction().getExtendedData().get('communication')}} </td>
+                        <td> {{ transfer.getPaymentInstruction().getExtendedData().get('communication')|format_structured_communication()}} </td>
                         <td> {{ transfer.getApprovingAmount() }}</td>
                         <td> <a href="{{ path('formalibre_validate_bank_transfer', {'payment': transfer.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
                         <td> {{ transfer.getCreatedAt()|intl_date_format() }} </td>

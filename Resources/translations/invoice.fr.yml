@@ -31,7 +31,7 @@ max_users: Nombre d'utilisateur max.
 expiration_date: Date d'expiration
 my_workspaces: Mes espaces d'activités
 subscription: Abonnements
-bank_tranfer: Virement bancaire
+bank_transfer: Virement bancaire
 payment_handling_exception_message: Une erreur est survenue. Un email a été envoyé a l'équipe de support.
 order_already_submitted_exception : Cette commande a déjà été soumise.
 payment_pending_exception_message: Une erreur est survenue et le payment n'a pas été effectué.
@@ -39,3 +39,8 @@ SHARED_WS_A: Groupe
 SHARED_WS_B: Classe
 SHARED_WS_C: Amphi
 SHARED_WS_D: Promotion
+invoice_footer: |
+    Forma­Libre S.A. ­ Siège Social: Chemin du Cyclotron 6, 1348 Louvain­la­Neuve – TVA BE0599.995.379 - RPM Nivelles</br>
+    site : www.claroline.com – E­mail: info@claroline.com
+paypal_express_checkout: Paypal
+formalibre_invoice: Commande Forma-Libre.

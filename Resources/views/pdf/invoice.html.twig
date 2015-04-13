@@ -43,7 +43,7 @@
             <img src="{{ asset('bundles/formalibreinvoice/images/invoice_logo.jpg', absolute=true) }}" class="logo" alt="logo"/>
             <span class="top-span">
                 <ul>
-                    <li> Facture n° {{ order.getId() }} </li>
+                    <li> Facture n° {{ order.getId({{ sws.code }}) }} </li>
                     <li> Date d'émission: {{ order.getValidationDate().getTimeStamp()|date('d/m/Y')}} </li>
                 </ul>
 
@@ -61,11 +61,13 @@
         <div class="payment-type default-block top-margin">
             <ul style="list-style-type: none;">
                 <li> Date d'achat: {{ order.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
-                <li> Mode de paiment: {{ order.getPaymentInstruction().getPaymentSystemName() }} </li>
+                <li> Mode de paiment: {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }} </li>
+                <li> Durée de souscription: {{ duration }} mois </li>
+                <li> Date d'expiration: {{ sws.getExpDate()|date('d/m/Y') }} </li>
             </ul>
         </div>
         <div class="item-description default-block top-margin">
-            <table>
+            <table table-striped>
                 <thead>
                     <tr>
                         <th> Item </th>
@@ -86,15 +88,14 @@
                         <td> {{ order.getVatRate() }} </td>
                         <td> {{ order.getPriceSolution().getPrice() }} </td>
                         <td> {{ order.getVatAmount() }}</td>
-                        <td> net value </td>
+                        <td> {{ order.getAmount() }} </td>
                         <td> {{ order.getAmount() }} </td>
                 </tbody>
             </table>
         </div>
         <div id="footer" class="footer top-margin">
             <small>
-                Forma­Libre S.A. ­ Siège Social: Chemin du Cyclotron 6, 1348 Louvain­la­Neuve – TVA BE0599.995.379 </br>
-                site : www.claroline.com – E­mail: info@claroline.com
+                {{ 'invoice_footer'|trans({}, 'invoice')|raw }}
             </small>
         </div>
     </body>

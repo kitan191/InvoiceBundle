@@ -22,31 +22,35 @@
 <div class="section-content">
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="col-md-3">
-                <div class="well">
-                    {{
-                        'SHARE_WS_DESCRIPTION'|trans(
-                            {
-                                '%users%': product.details.max_users,
-                                '%storage%': product.details.max_storage,
-                                '%resources%': product.details.max_resources
-                            },
-                            'invoice'
-                        )|raw
-                    }}
-                </div>
-                {% set action = path('workspace_product_payment_submit', {'product': product.getId(), 'order': order.getId(), 'swsId': sws.getId() }) %}
-                <form action="{{ action }}" method="post">
-                    {% form_theme form 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
-                    {{ form_widget (form) }}
-                    <input type="submit" class="btn btn-primary" value="{{ 'add'|trans({}, 'platform') }}"/>
-                </form>
-            </div>
-            <div class="col-md-9">
+            <div class="well">
                 <div class="well">
                     {{ 'expiration_date'|trans({}, 'invoice')}}: {{ workspace.expiration_date|date('d/m/Y') }} </br>
                     Under construction...
                 </div>
+            </div>
+            <div class="row">
+                {% for form in forms %}
+                <div class="col-md-3">
+                    <div class="well">
+                        {{
+                            'SHARE_WS_DESCRIPTION'|trans(
+                                {
+                                    '%code%': form['product'].getCode()|trans({}, 'invoice'),
+                                    '%users%': form['product'].details.max_users,
+                                    '%storage%': form['product'].details.max_storage,
+                                    '%resources%': form['product'].details.max_resources
+                                },
+                                'invoice'
+                            )|raw
+                        }}
+                    </div>
+                    <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId(), 'order': form['order'].getId() }) }}" method="post">
+                        {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
+                        {{ form_widget(form['form']) }}
+                        <input type="submit" class="btn btn-primary" value="{{'add'|trans({}, 'platform')}}"/>
+                    </form>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>

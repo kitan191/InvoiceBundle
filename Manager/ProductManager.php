@@ -137,7 +137,7 @@ class ProductManager
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $id = $sws->getRemoteId();
-        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesub=ription/workspace/' . $id;
+        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $id;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $targetUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -147,19 +147,16 @@ class ProductManager
         return json_decode($serverOutput);
     }
 
-    public function addRemoteWorkspaceExpDate($order, SharedWorkspace $sws)
+    public function addRemoteWorkspaceExpDate($order, SharedWorkspace $sws, $monthDuration)
     {
         $product = $order->getProduct();
-        $priceSolution = $order->getPriceSolution();
-        //get the duration right
         $details = $product->getDetails();
-        $monthDuration = $priceSolution->getMonthDuration();
         $expDate = $sws->getExpDate();
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
         $payload = json_encode(array('expiration_date' => $expDate->getTimeStamp()));
         $payload = $this->encrypt($payload);
-        $targetUrl = $targetUrl = $this->targetPlatformUrl . '/workspacesubscription/workspace/' . $sws->getRemoteId() . '/exp_date/increase';
+        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $sws->getRemoteId() . '/exp_date/increase';
         $serverOutput = $this->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
 
@@ -244,14 +241,13 @@ class ProductManager
         throw new PaymentHandlingFailedException();
     }
 
-    public function sendSuccessMail(SharedWorkspace $sws, Order $order)
+    public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null)
     {
-        $user = $this->sc->getToken()->getUser();
+        $workspace = $this->getWorkspaceData($sws);
         $snappy = $this->container->get('knp_snappy.pdf');
         $owner = $order->getOwner();
         $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
         $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
-
         $streetField = $fieldRepo->findOneByName('formalibre_street');
         $cpField = $fieldRepo->findOneByName('formalibre_cp');
         $townField = $fieldRepo->findOneByName('formalibre_town');
@@ -264,10 +260,12 @@ class ProductManager
             'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
             array(
                 'order' => $order,
-                'street' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $streetField))->getValue(),
-                'cp' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $cpField))->getValue(),
-                'town' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $townField))->getValue(),
-                'country' => $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $countryField))->getValue()
+                'street' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $streetField))->getValue(),
+                'cp' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $cpField))->getValue(),
+                'town' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $townField))->getValue(),
+                'country' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $countryField))->getValue(),
+                'duration' => $duration,
+                'sws' => $sws
             )
         );
         //@todo: the path should include the invoice numbe
@@ -276,11 +274,45 @@ class ProductManager
         @mkdir($this->container->getParameter('claroline.param.pdf_directory')) . '/invoice';
         $snappy->generateFromHtml($view, $path);
         $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'platform');
+        $companyField = $countryField = $fieldRepo->findOneByName('formalibre_company_name');
+        $company = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $companyField))->getValue();
+        $targetAdress = $this->ch->getParameter('formalibre_target_platform_url') . "/workspaces/{$sws->getRemoteId()}/open/tool/home";
+
         $body = $this->container->get('templating')->render(
-            'FormaLibreInvoiceBundle:Mail:workspace_subscription.html.twig'
+            'FormaLibreInvoiceBundle:email:confirm_invoice.html.twig',
+            array(
+                'order' => $order,
+                'company' => $company,
+                'target_adress' => $targetAdress,
+                'month_duration' => $duration,
+                'sws' => $sws,
+                'workspace' => $workspace
+            )
         );
 
-        return $this->mailManager->send($subject, $body, array($user), null, array('attachment' => $path));
+        return $this->mailManager->send($subject, $body, array($owner), null, array('attachment' => $path));
+    }
+
+    public function sendBankTransferPendingMail(Order $order)
+    {
+        $user = $order->getOwner();
+        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'platform');
+        $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
+        $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
+        $companyField = $fieldRepo->findOneByName('formalibre_company_name');
+        $company = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $companyField))->getValue();
+        $instruction = $order->getPaymentInstruction();
+        $extra = $instruction->getExtendedData();
+        $body = $this->container->get('templating')->render(
+            'FormaLibreInvoiceBundle:email:confirm_bank_transfer.html.twig',
+            array(
+                'order' => $order,
+                'company' => $company,
+                'communication' => $extra->get('communication')
+            )
+        );
+
+        return $this->mailManager->send($subject, $body, array($user));
     }
 
     public function sendMailError(SharedWorkspace $sws, $serverOutput = null, $targetUrl = null)
@@ -310,18 +342,18 @@ class ProductManager
         );
     }
 
-    public function executeWorkspaceOrder(Order $order, $duration, $swsId = 0, $addOrderVat = false)
+    public function executeWorkspaceOrder(Order $order, $duration, $swsId = 0, $isTestOrder = false)
     {
-        $this->endOrder($order, $addOrderVat);
+        $this->endOrder($order, $isTestOrder);
         $sws = $this->om->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
 
         if ($sws === null) {
             $sws = $this->addRemoteWorkspace($order, $duration);
         } else {
-            $this->addRemoteWorkspaceExpDate($order, $sws);
+            $this->addRemoteWorkspaceExpDate($order, $sws, $duration);
         }
 
-        $this->sendSuccessMail($sws, $order);
+        if (!$isTestOrder) $this->sendSuccessMail($sws, $order, $duration);
     }
 
     private function addRemoteWorkspace(Order $order, $duration)
@@ -340,7 +372,7 @@ class ProductManager
         $repo = $this->om->getRepository('FormaLibreInvoiceBundle:FreeTestMonthUsage');
         $users = $repo->findByUser($user);
 
-        return count($users) > 1 ? false: true;
+        return count($users) >= 1 ? false: true;
     }
 
     public function useFreeTestMonth(User $user)
@@ -354,5 +386,10 @@ class ProductManager
     public function getByCode($code)
     {
         return $this->productRepository->findOneByCode($code);
+    }
+
+    public function isProductAvailableFor(SharedWorkspace $sws, Product $product)
+    {
+        return false;
     }
 }

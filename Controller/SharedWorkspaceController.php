@@ -20,6 +20,7 @@ use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use JMS\Payment\CoreBundle\Model\PaymentInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class SharedWorkspaceController extends Controller
 {
@@ -125,7 +126,15 @@ class SharedWorkspaceController extends Controller
             $this->session->remove('form_price_data');
         }
 
-        $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator, $order, $this->vatManager, $swsId));
+        $form = $this->createForm(new SharedWorkspaceForm(
+            $product,
+            $this->router,
+            $this->em,
+            $this->translator,
+            $order,
+            $this->vatManager,
+            $swsId
+        ));
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
@@ -219,8 +228,8 @@ class SharedWorkspaceController extends Controller
         try {
             $this->productManager->executeWorkspaceOrder(
                 $order,
-                $swsId,
-                $order->getPriceSolution()->getMonthDuration()
+                $order->getPriceSolution()->getMonthDuration(),
+                $swsId
             );
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
@@ -245,13 +254,22 @@ class SharedWorkspaceController extends Controller
      */
     public function pendingPaymentAction(Order $order)
     {
+        if ($order->getOwner() !== $this->sc->getToken()->getUser()) {
+            throw new AccessDeniedException();
+        }
+
+
         $instruction = $order->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
         $order->setExtendedData(array('communication' => $extra->get('communication')));
         $this->em->persist($order);
         $this->em->flush();
+        $this->productManager->sendBankTransferPendingMail($order);
 
-        return array('communication' => $extra->get('communication'));
+        return array(
+            'communication' => $extra->get('communication'),
+            'order' => $order,
+        );
     }
 
     /**
@@ -260,30 +278,43 @@ class SharedWorkspaceController extends Controller
      *      name="shared_workspace_expiration_increase_form"
      * )
      * @EXT\Template
-     * @Security("has_role('ROLE_ADMIN')")
      *
      * @return Response
      */
     public function increaseExpirationDateFormAction(SharedWorkspace $sws)
     {
+        if ($sws->getOwner() !== $this->sc->getToken()->getUser()) {
+            throw new AccessDeniedException();
+        }
+
         $order = new Order();
         $this->em->persist($order);
         $this->em->flush();
-        $product = $sws->getProduct();
-        $formType = new SharedWorkspaceForm(
-            $product,
-            $this->router,
-            $this->em,
-            $this->translator,
-            $order,
-            $this->vatManager,
-            $sws->getId()
-        );
-
-        $form = $this->createForm($formType)->createView();
+        $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
+        $forms = array();
         $workspace = $this->productManager->getWorkspaceData($sws);
 
-        return array('form' => $form, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
+        foreach ($products as $product) {
+            //now we generate the forms !
+            $formType = new SharedWorkspaceForm(
+                $product,
+                $this->router,
+                $this->em,
+                $this->translator,
+                $order,
+                $this->vatManager,
+                $sws->getId()
+            );
+
+            $form = $this->createForm($formType);
+            $forms[] = array(
+                'form' => $form->createView(),
+                'product' => $product,
+                'order' => $order
+            );
+        }
+
+        return array('forms' => $forms, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
     }
 
     /**
@@ -347,6 +378,16 @@ class SharedWorkspaceController extends Controller
         $order->setOwner($user);
         $product = $this->productManager->getByCode('SHARED_WS_D');
         $order->setProduct($product);
-        $this->productManager->executeWorkspaceOrder($order, 0, false);
+
+        $this->productManager->executeWorkspaceOrder(
+            $order,
+            $this->container->get('claroline.config.platform_config_handler')
+            ->getParameter('formalibre_test_month_duration'),
+            false
+        );
+
+        $this->productManager->useFreeTestMonth($user);
+
+        return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
 }

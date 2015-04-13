@@ -4,6 +4,7 @@ namespace FormaLibre\InvoiceBundle\Form;
 
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\Order;
+use FormaLibre\InvoiceBundle\Manager\VatManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -28,7 +29,7 @@ class SharedWorkspaceForm extends AbstractType
         $em,
         $translator,
         Order $order,
-        $vatManager,
+        VatManager $vatManager,
         $swsId = 0
     )
     {
@@ -168,9 +169,14 @@ class SharedWorkspaceForm extends AbstractType
 
     private function getCommunication()
     {
-         $base = rand(1000000000, 9999999999);
-         $ctrl = $base % 97;
+        $x = 10; // Amount of digits
+        $x--;
+        $min = pow(10, $x);
+        $max = pow(10, $x + 1) - 1;
+        $value = rand($min, $max);
 
-         return "$base" + "$ctrl";
+        $ctrl = $value % 97;
+
+        return "$value" . "$ctrl";
     }
 }
