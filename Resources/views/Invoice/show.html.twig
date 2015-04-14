@@ -38,9 +38,15 @@
                         <th> {{ workspace['shared_workspace'].getMaxUser() }} </th>
                         <th> {{ workspace['shared_workspace'].getMaxRes() }} </th>
                         <th> {{ workspace['shared_workspace'].getMaxStorage() }} </th>
-                        <th> <a href="{{ path('shared_workspace_expiration_increase_form', {sws: workspace['shared_workspace'].getId()})}}" class="btn btn-primary">
-                            {{ 'increase_expiration_date'|trans({}, 'invoice') }}
-                        </a> </th>
+                        <th>
+
+                        {% if workspace['shared_workspace'].isTest() %}
+                            <a href="{{ path('renew_test_workspace', {sws: workspace['shared_workspace'].getId()})}}" class="btn btn-primary">
+                                {{ 'upgrade'|trans({}, 'invoice') }}
+                            </a>
+                        {% else %}
+                        {% endif %}
+                        </th>
                     </tr>
                 {% endfor %}
             </tbody>

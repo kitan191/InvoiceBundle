@@ -1,6 +1,6 @@
 <?php
 
-namespace FormaLibre\InvoiceBundle\Migrations\pdo_mysql;
+namespace FormaLibre\InvoiceBundle\Migrations\mysqli;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/04/10 02:11:17
+ * Generation date: 2015/04/14 01:44:03
  */
-class Version20150410141117 extends AbstractMigration
+class Version20150414134402 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -76,6 +76,7 @@ class Version20150410141117 extends AbstractMigration
                 maxUser INT NOT NULL, 
                 maxRes INT NOT NULL, 
                 autoSubscribe TINYINT(1) NOT NULL, 
+                isTest INT NOT NULL, 
                 INDEX IDX_1559C4C27E3C61F9 (owner_id), 
                 INDEX IDX_1559C4C24584665A (product_id), 
                 PRIMARY KEY(id)

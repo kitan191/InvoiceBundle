@@ -344,16 +344,29 @@ class ProductManager
 
     public function executeWorkspaceOrder(Order $order, $duration, $swsId = 0, $isTestOrder = false)
     {
-        $this->endOrder($order, $isTestOrder);
+        $this->endOrder($order, !$isTestOrder);
         $sws = $this->om->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
 
         if ($sws === null) {
             $sws = $this->addRemoteWorkspace($order, $duration);
         } else {
             $this->addRemoteWorkspaceExpDate($order, $sws, $duration);
+
+            if ($this->isTestOrder) {
+                $this->updateTestOrder($order, $sws);
+            }
         }
 
+        $sws->setIsTest($isTestOrder);
+        $this->om->persist($sws);
+        $this->om->flush();
+
         if (!$isTestOrder) $this->sendSuccessMail($sws, $order, $duration);
+    }
+
+    private function updateTestOrder(Order $order, SharedWorkspace $sws)
+    {
+
     }
 
     private function addRemoteWorkspace(Order $order, $duration)
@@ -390,6 +403,14 @@ class ProductManager
 
     public function isProductAvailableFor(SharedWorkspace $sws, Product $product)
     {
-        return false;
+        $workspace = $this->getWorkspaceData($sws);
+        $ut = $this->container->get('claroline.utilities.misc');
+        $productData = $product->getDetails();
+
+        if ($workspace->user_amount > $productData['max_users']) return false;
+        if ($ut->getRealFileSize($workspace->storage_used) > $ut->getRealFileSize($productData['max_storage'])) return false;
+        if ($workspace->count_resources > $productData['max_resources']) return false;
+
+        return true;
     }
 }

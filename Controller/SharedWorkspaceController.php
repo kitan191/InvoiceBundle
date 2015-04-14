@@ -261,7 +261,12 @@ class SharedWorkspaceController extends Controller
 
         $instruction = $order->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
-        $order->setExtendedData(array('communication' => $extra->get('communication')));
+        $order->setExtendedData(
+            array(
+                'communication' => $extra->get('communication'),
+                'shared_workspace_id' => $extra->get('shared_workspace_id')
+            )
+        );
         $this->em->persist($order);
         $this->em->flush();
         $this->productManager->sendBankTransferPendingMail($order);
@@ -274,16 +279,19 @@ class SharedWorkspaceController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/shared/workspace/{sws}",
-     *      name="shared_workspace_expiration_increase_form"
+     *      "/renew/test/workspace/{sws}",
+     *      name="renew_test_workspace"
      * )
      * @EXT\Template
      *
      * @return Response
      */
-    public function increaseExpirationDateFormAction(SharedWorkspace $sws)
+    public function renewTestWorkspaceAction(SharedWorkspace $sws)
     {
-        if ($sws->getOwner() !== $this->sc->getToken()->getUser()) {
+        if (
+            $sws->getOwner() !== $this->sc->getToken()->getUser() ||
+            !$sws->isTest()
+        ) {
             throw new AccessDeniedException();
         }
 
@@ -306,15 +314,31 @@ class SharedWorkspaceController extends Controller
                 $sws->getId()
             );
 
+            $available = $this->productManager->isProductAvailableFor($sws, $product) ? 1: 0;
             $form = $this->createForm($formType);
             $forms[] = array(
                 'form' => $form->createView(),
                 'product' => $product,
-                'order' => $order
+                'order' => $order,
+                'is_available' => $available
             );
         }
 
         return array('forms' => $forms, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/renew/test/workspace/{sws}",
+     *      name="renew_test_workspace"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function renewWorkspace(SharedWorkspace $sws)
+    {
+
     }
 
     /**
@@ -334,7 +358,8 @@ class SharedWorkspaceController extends Controller
     /**
      * @EXT\Route(
      *      "/bank_transfer_validate/{payment}",
-     *      name="formalibre_validate_bank_transfer"
+     *      name="formalibre_validate_bank_transfer",
+     *      defaults={"swsId" = 0}
      * )
      * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
@@ -343,9 +368,15 @@ class SharedWorkspaceController extends Controller
      */
     public function validateBankTransferAction(Payment $payment)
     {
+
         $order = $this->paymentManager->getOrderFromPayment($payment);
+        $extra = $order->getExtendedData();
         $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
-        $this->productManager->executeWorkspaceOrder($order, 0);
+        $this->productManager->executeWorkspaceOrder(
+            $order,
+            $order->getPriceSolution()->getMonthDuration(),
+            $extra['shared_workspace_id']
+        );
         $route = $this->router->generate('admin_invoice_open');
 
         return new RedirectResponse($route);
@@ -371,7 +402,11 @@ class SharedWorkspaceController extends Controller
         $user = $this->sc->getToken()->getUser();
 
         if (!$this->productManager->hasFreeTestMonth($user)) {
-            throw new \Exception('free test month used');
+            $content = $this->renderView(
+                'FormaLibreInvoiceBundle:errors:freeTestMonthUsedException.html.twig'
+            );
+
+            return new Response($content);;
         }
 
         $order = new Order();
@@ -381,9 +416,9 @@ class SharedWorkspaceController extends Controller
 
         $this->productManager->executeWorkspaceOrder(
             $order,
-            $this->container->get('claroline.config.platform_config_handler')
-            ->getParameter('formalibre_test_month_duration'),
-            false
+            $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'),
+            0,
+            true
         );
 
         $this->productManager->useFreeTestMonth($user);

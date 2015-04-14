@@ -46,7 +46,7 @@
             Merci de votre achat Forma-Libre
         </div>
         <div class="top-margin credit">
-            Monsieur / Madame {{ order.getOwner().getLastName() }}, nous avons bien reçu votre virement. Votre espace d'activité () est a présent disponible.
+            Monsieur / Madame {{ order.getOwner().getLastName() }}, nous avons bien reçu votre virement. Votre espace d'activité ({{ workspace.code }}) est a présent disponible.
         </div>
         <div class="payment-type default-block top-margin">
             Numéro de commande: {{ order.getId() }}

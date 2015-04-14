@@ -57,6 +57,11 @@ class SharedWorkspace
     private $autoSubscribe = false;
 
     /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    private $isTest = false;
+
+    /**
      * @ORM\ManyToOne(
      *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product",
      *     inversedBy="sharedWorkspaces"
@@ -148,5 +153,15 @@ class SharedWorkspace
     public function getProduct()
     {
         return $this->product;
+    }
+
+    public function setIsTest($test)
+    {
+        $this->isTest = $test;
+    }
+
+    public function isTest()
+    {
+        return $this->isTest;
     }
 }

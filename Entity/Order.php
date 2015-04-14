@@ -201,7 +201,7 @@ class Order
 
     public function getExtendedData()
     {
-        return $this->data;
+        return $this->extendedData;
     }
 
     public function getCreationDate()

@@ -106,7 +106,8 @@ class SharedWorkspaceForm extends AbstractType
                                 //'L_PAYMENTREQUEST_0_AMT0' => 0,
                                 'L_PAYMENTREQUEST_0_DESC0' => $detailsInfo,
                                 'L_PAYMENTREQUEST_0_QTY0' => '1'
-                            )
+                            ),
+                            'shared_workspace_id' => $this->swsId
                         ),
                         'bank_transfer' => array(
                             'return_url' => $returnSuccessUrl,
@@ -114,7 +115,8 @@ class SharedWorkspaceForm extends AbstractType
                             'cancel_url' => $this->router->generate('workspace_product_payment_cancel', array(
                                 'order' => $this->product->getCode(),
                             ), true),
-                            'communication' => $this->communication
+                            'communication' => $this->communication,
+                            'shared_workspace_id' => $this->swsId
                         )
                     )
                 )
