@@ -187,10 +187,22 @@ class RegistrationExtension extends AbstractTypeExtension
         return 'form';
     }
 
-    //todo integrate this into claroline one way or an other
     public function getCountries()
     {
-         return array (
+        $codes = $this->getCountryCodes();
+        $translated = array();
+
+        foreach ($codes as $code) {
+            $translated[$code] = $this->translator->trans($code, array(), 'country_code');
+        }
+
+        return $translated;
+    }
+
+    //todo integrate this into claroline one way or an other
+    private function getCountryCodes()
+    {
+         $countries = array (
             'AF' => 'Afghanistan',
             'AX' => 'Åland Islands',
             'AL' => 'Albania',
@@ -450,6 +462,8 @@ class RegistrationExtension extends AbstractTypeExtension
             'YE' => 'Yemen',
             'ZM' => 'Zambia',
             'ZW' => 'Zimbabwe',
-            );
+        );
+
+        return array_keys($countries);
     }
 }

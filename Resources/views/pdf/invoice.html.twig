@@ -55,7 +55,7 @@
                 <li> {{ order.getVatNumber() }} </li>
                 <li> {{ street }} </li>
                 <li> {{ cp }} </li>
-                <li> {{ country }} </li>
+                <li> {{ country|trans({}, 'country_code') }} </li>
             </ul>
         </div>
         <div class="payment-type default-block top-margin">
