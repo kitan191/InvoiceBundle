@@ -111,6 +111,17 @@ class SharedWorkspaceController extends Controller
      */
     public function submitWorkspaceAction(Product $product, Order $order, $swsId)
     {
+        $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
+            ->findOneByRemoteId($swsId);
+
+        if (
+            $sws
+            && $sws->getOwner() !== $this->sc->getToken()->getUser()
+            && !$this->sc->isGranted('ROLE_ADMIN')
+        ) {
+            throw new AccessDeniedException();
+        }
+
         if ($order->getPaymentInstruction()) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:orderAlreadySubmitedException.html.twig'
@@ -191,6 +202,16 @@ class SharedWorkspaceController extends Controller
      */
     public function completePaymentAction(Order $order, $swsId)
     {
+        $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
+            ->findOneByRemoteId($swsId);
+
+        if (
+            $order->getOwner() !== $this->sc->getToken()->getUser()
+            && $this->sc->isGranted('ROLE_ADMIN') === false
+        ) {
+            throw new AccessDeniedException();
+        }
+
         $instruction = $order->getPaymentInstruction();
 
         if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
@@ -229,7 +250,7 @@ class SharedWorkspaceController extends Controller
             $this->productManager->executeWorkspaceOrder(
                 $order,
                 $order->getPriceSolution()->getMonthDuration(),
-                $swsId
+                $sws
             );
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
@@ -258,7 +279,6 @@ class SharedWorkspaceController extends Controller
             throw new AccessDeniedException();
         }
 
-
         $instruction = $order->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
         $order->setExtendedData(
@@ -279,66 +299,44 @@ class SharedWorkspaceController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/renew/test/workspace/{sws}",
+     *      "/renew/test/workspace/{remoteId}",
      *      name="renew_test_workspace"
      * )
      * @EXT\Template
      *
      * @return Response
      */
-    public function renewTestWorkspaceAction(SharedWorkspace $sws)
+    public function renewWorkspaceAction($remoteId)
     {
-        if (
-            $sws->getOwner() !== $this->sc->getToken()->getUser() ||
-            !$sws->isTest()
-        ) {
-            throw new AccessDeniedException();
+        $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
+            ->findOneByRemoteId($remoteId);
+
+        if (!$sws) {
+            throw new \Exception('unknown remote id');
+        }
+
+        if ($this->sc->getToken()->getUser() !== $sws->getOwner()) {
+            throw new \AccessDeniedException();
         }
 
         $order = new Order();
+        $order->setOwner($this->sc->getToken()->getUser());
         $this->em->persist($order);
         $this->em->flush();
-        $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
-        $forms = array();
+        $product = $sws->getProduct();
+        $formType = new SharedWorkspaceForm(
+            $product,
+            $this->router,
+            $this->em,
+            $this->translator,
+            $order,
+            $this->vatManager,
+            $sws->getId()
+        );
+        $form = $this->createForm($formType)->createView();
         $workspace = $this->productManager->getWorkspaceData($sws);
 
-        foreach ($products as $product) {
-            //now we generate the forms !
-            $formType = new SharedWorkspaceForm(
-                $product,
-                $this->router,
-                $this->em,
-                $this->translator,
-                $order,
-                $this->vatManager,
-                $sws->getId()
-            );
-
-            $available = $this->productManager->isProductAvailableFor($sws, $product) ? 1: 0;
-            $form = $this->createForm($formType);
-            $forms[] = array(
-                'form' => $form->createView(),
-                'product' => $product,
-                'order' => $order,
-                'is_available' => $available
-            );
-        }
-
-        return array('forms' => $forms, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/renew/test/workspace/{sws}",
-     *      name="renew_test_workspace"
-     * )
-     * @EXT\Template
-     *
-     * @return Response
-     */
-    public function renewWorkspace(SharedWorkspace $sws)
-    {
-
+        return array('form' => $form, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
     }
 
     /**
@@ -368,14 +366,20 @@ class SharedWorkspaceController extends Controller
      */
     public function validateBankTransferAction(Payment $payment)
     {
+        //the admin is the only one able to do this.
+        if (!$this->sc->isGranted('ROLE_ADMIN')) {
+            throw new \AccessDeniedException();
+        }
 
         $order = $this->paymentManager->getOrderFromPayment($payment);
         $extra = $order->getExtendedData();
+        $sws = $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
+            ->find($extra['shared_workspace_id']);
         $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
         $this->productManager->executeWorkspaceOrder(
             $order,
             $order->getPriceSolution()->getMonthDuration(),
-            $extra['shared_workspace_id']
+            $sws
         );
         $route = $this->router->generate('admin_invoice_open');
 
@@ -384,15 +388,18 @@ class SharedWorkspaceController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/free_test",
+     *      "/free_test/{product}",
      *      name="formalibre_free_test_workspace"
      * )
      * @return Response
      */
-    public function createFreeTestWorkspace()
+    public function createFreeTestWorkspace(Product $product)
     {
         if (!$this->sc->isGranted('ROLE_USER')) {
-            $redirectRoute =  $this->router->generate('formalibre_free_test_workspace', array());
+            $redirectRoute =  $this->router->generate(
+                'formalibre_free_test_workspace',
+                array('product' => $product->getId())
+            );
             $this->session->set('redirect_route', $redirectRoute);
             $route = $this->router->generate('claro_security_login', array());
 
@@ -411,7 +418,6 @@ class SharedWorkspaceController extends Controller
 
         $order = new Order();
         $order->setOwner($user);
-        $product = $this->productManager->getByCode('SHARED_WS_D');
         $order->setProduct($product);
 
         $this->productManager->executeWorkspaceOrder(

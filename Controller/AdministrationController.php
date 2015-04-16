@@ -7,7 +7,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
 use JMS\Payment\CoreBundle\Entity\Payment;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use JMS\SecurityExtraBundle\Annotation as SEC;
 
+/**
+* @SEC\PreAuthorize("canOpenAdminTool('formalibre_admin_invoice')")
+*/
 class AdministrationController extends Controller
 {
     /** @DI\Inject("formalibre.manager.payment_manager") */

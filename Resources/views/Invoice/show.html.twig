@@ -38,15 +38,7 @@
                         <th> {{ workspace['shared_workspace'].getMaxUser() }} </th>
                         <th> {{ workspace['shared_workspace'].getMaxRes() }} </th>
                         <th> {{ workspace['shared_workspace'].getMaxStorage() }} </th>
-                        <th>
-
-                        {% if workspace['shared_workspace'].isTest() %}
-                            <a href="{{ path('renew_test_workspace', {sws: workspace['shared_workspace'].getId()})}}" class="btn btn-primary">
-                                {{ 'upgrade'|trans({}, 'invoice') }}
-                            </a>
-                        {% else %}
-                        {% endif %}
-                        </th>
+                        <th> <a href="{{ path('renew_test_workspace', {'remoteId': workspace['shared_workspace'].getRemoteId()}) }}"> {{ 'renew'|trans({}, 'invoice')}} </a> </th>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -152,6 +152,12 @@ class ProductManager
         $product = $order->getProduct();
         $details = $product->getDetails();
         $expDate = $sws->getExpDate();
+        $now = new \DateTime();
+
+        if ($now->getTimeStamp() > $expDate->getTimeStamp()) {
+            $expDate = $now;
+        }
+
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
         $payload = json_encode(array('expiration_date' => $expDate->getTimeStamp()));
@@ -342,19 +348,14 @@ class ProductManager
         );
     }
 
-    public function executeWorkspaceOrder(Order $order, $duration, $swsId = 0, $isTestOrder = false)
+    public function executeWorkspaceOrder(Order $order, $duration, $sws = null, $isTestOrder = false)
     {
         $this->endOrder($order, !$isTestOrder);
-        $sws = $this->om->getRepository("FormaLibreInvoiceBundle:Product\SharedWorkspace")->find($swsId);
 
         if ($sws === null) {
             $sws = $this->addRemoteWorkspace($order, $duration);
         } else {
             $this->addRemoteWorkspaceExpDate($order, $sws, $duration);
-
-            if ($this->isTestOrder) {
-                $this->updateTestOrder($order, $sws);
-            }
         }
 
         $sws->setIsTest($isTestOrder);
@@ -362,11 +363,6 @@ class ProductManager
         $this->om->flush();
 
         if (!$isTestOrder) $this->sendSuccessMail($sws, $order, $duration);
-    }
-
-    private function updateTestOrder(Order $order, SharedWorkspace $sws)
-    {
-
     }
 
     private function addRemoteWorkspace(Order $order, $duration)
