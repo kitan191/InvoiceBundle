@@ -279,7 +279,7 @@ class ProductManager
         @mkdir($this->container->getParameter('claroline.param.pdf_directory'));
         @mkdir($this->container->getParameter('claroline.param.pdf_directory')) . '/invoice';
         $snappy->generateFromHtml($view, $path);
-        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'platform');
+        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'invoice');
         $companyField = $countryField = $fieldRepo->findOneByName('formalibre_company_name');
         $company = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $companyField))->getValue();
         $targetAdress = $this->ch->getParameter('formalibre_target_platform_url') . "/workspaces/{$sws->getRemoteId()}/open/tool/home";
@@ -302,7 +302,7 @@ class ProductManager
     public function sendBankTransferPendingMail(Order $order)
     {
         $user = $order->getOwner();
-        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'platform');
+        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'invoice');
         $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
         $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
         $companyField = $fieldRepo->findOneByName('formalibre_company_name');
