@@ -423,7 +423,7 @@ class SharedWorkspaceController extends Controller
         $this->productManager->executeWorkspaceOrder(
             $order,
             $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'),
-            0,
+            null,
             true
         );
 
