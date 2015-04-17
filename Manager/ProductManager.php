@@ -306,7 +306,8 @@ class ProductManager
         $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
         $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
         $companyField = $fieldRepo->findOneByName('formalibre_company_name');
-        $company = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $companyField))->getValue();
+        $field = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $companyField));
+        $company = $field ? $field->getValue(): null;
         $instruction = $order->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
         $body = $this->container->get('templating')->render(
