@@ -19,23 +19,47 @@ use JMS\DiExtraBundle\Annotation as DI;
  */
 class InvoiceExtension extends \Twig_Extension
 {
+    private $container;
+
+    /**
+     * @DI\InjectParams({
+     *     "container" = @DI\Inject("service_container")
+     * })
+     */
+    public function __construct($container)
+    {
+        $this->container = $container;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function getFilters()
     {
         return array(
-            new \Twig_SimpleFilter('format_structured_communication', array($this, 'format'))
+            new \Twig_SimpleFilter('format_structured_communication', array($this, 'formatCommunication')),
+            new \Twig_SimpleFilter('format_price', array($this, 'formatPrice'))
         );
     }
 
-    public function format($number)
+    public function formatCommunication($number)
     {
         $str = (string) $number;
 
         if (strlen($str) < 12) return $number;
 
         return '++' . substr($str, 0, 3) . '/' . substr($str, 3, 4) . '/' . substr($str, 7) . '++';
+    }
+
+    public function formatPrice($number)
+    {
+        $locale = $this->container->get('request')->getLocale();
+
+        if (strtolower($locale) === 'en') {
+            return number_format($number, 2, '.', ',');
+        }
+
+        return number_format($number, 2, ',', '.');
     }
 
     /**

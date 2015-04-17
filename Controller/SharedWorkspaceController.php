@@ -71,6 +71,12 @@ class SharedWorkspaceController extends Controller
         $this->em->flush();
         $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
         $forms = array();
+        $hasFreeTest = true;
+        $user = $this->sc->getToken()->getUser();
+
+        if ($user !== 'anon.' && !$this->productManager->hasFreeTestMonth($user)) {
+            $hasFreeTest = false;
+        }
 
         foreach ($products as $product) {
             //now we generate the forms !
@@ -82,7 +88,7 @@ class SharedWorkspaceController extends Controller
             );
         }
 
-        return array('forms' => $forms);
+        return array('forms' => $forms, 'hasFreeTest' => $hasFreeTest);
     }
 
     /**

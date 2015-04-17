@@ -40,7 +40,7 @@
                 <form action="{{ action }}" method="post">
                     {% form_theme form 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
                     {{ form_widget (form) }}
-                    <input type="submit" class="btn btn-primary" value="{{ 'add'|trans({}, 'platform') }}"/>
+                    <input type="submit" class="btn btn-primary" value="{{ 'buy'|trans({}, 'invoice') }}"/>
                 </form>
             </div>
             <div class="col-md-9">
