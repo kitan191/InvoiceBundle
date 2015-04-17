@@ -290,7 +290,8 @@ class ProductManager
         $snappy->generateFromHtml($view, $path);
         $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'invoice');
         $companyField = $countryField = $fieldRepo->findOneByName('formalibre_company_name');
-        $company = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $companyField))->getValue();
+        $companyFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $companyField));
+        $company = $companyFieldValue ? $companyFieldValue->getValue(): null;
         $targetAdress = $this->ch->getParameter('formalibre_target_platform_url') . "/workspaces/{$sws->getRemoteId()}/open/tool/home";
 
         $body = $this->container->get('templating')->render(
