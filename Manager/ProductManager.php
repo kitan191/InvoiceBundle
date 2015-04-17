@@ -262,14 +262,23 @@ class ProductManager
         $this->om->persist($order);
         $this->om->flush();
 
+        $streeFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $streetField));
+        $street = $streeFieldValue ? $streetFieldValue->getValue(): 'N/A';
+        $cpFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $cpField));
+        $cp = $cpFieldValue ? $cpFieldValue->getValue(): 'N/A';
+        $townFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $townField));
+        $town = $townFieldValue ? $townFieldValue->getValue(): 'N/A';
+        $countryFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $countryField));
+        $country = $countryFieldValue ? $countryFieldValue->getValue(): 'N/A';
+
         $view = $this->container->get('templating')->render(
             'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
             array(
                 'order' => $order,
-                'street' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $streetField))->getValue(),
-                'cp' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $cpField))->getValue(),
-                'town' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $townField))->getValue(),
-                'country' => $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $countryField))->getValue(),
+                'street' => $street,
+                'cp' => $cp,
+                'town' => $town,
+                'country' => $country,
                 'duration' => $duration,
                 'sws' => $sws
             )
