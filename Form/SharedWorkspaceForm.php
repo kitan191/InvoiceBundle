@@ -178,6 +178,7 @@ class SharedWorkspaceForm extends AbstractType
         $value = rand($min, $max);
 
         $ctrl = $value % 97;
+        if ($ctrl < 10) $ctrl = '0' . $ctrl;
 
         return "$value" . "$ctrl";
     }
