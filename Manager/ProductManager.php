@@ -71,6 +71,7 @@ class ProductManager
         //get the duration right
         $details = $product->getDetails();
         $expDate = new \DateTime();
+        if ($this->hasFreeTestMonth($user)) $monthDuration += 1;
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
         $sws = new SharedWorkspace();
@@ -225,16 +226,19 @@ class ProductManager
         return $ciphertextencoded;
     }
 
-    public function endOrder(Order $order, $addVat = true)
+    public function endOrder(Order $order, $isPayed = true)
     {
         $order->setCountryCode($this->vatManager->getClientLocation());
         $order->setIpAddress($_SERVER['REMOTE_ADDR']);
         $order->setOwner($order->getOwner());
 
-        if ($addVat) {
-            $order->setAmount($order->getPriceSolution()->getPrice());
+        if ($isPayed) {
+            //if it's a company, don't add the vat
+
+            //otherwise feel free to do it
             $order->setVatRate($this->vatManager->getVATRate($this->vatManager->getClientLocation()));
             $order->setVatAmount($this->vatManager->getVAT($order->getAmount()));
+            $order->setAmount($order->getPriceSolution()->getPrice());
         }
         //add the vat number here ()
         $order->setIsExecuted(true);
@@ -247,7 +251,7 @@ class ProductManager
         throw new PaymentHandlingFailedException();
     }
 
-    public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null)
+    public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null, $hasFreeMonth = false)
     {
         $workspace = $this->getWorkspaceData($sws);
         $snappy = $this->container->get('knp_snappy.pdf');
@@ -263,7 +267,7 @@ class ProductManager
         $this->om->flush();
 
         $streeFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $streetField));
-        $street = $streeFieldValue ? $streetFieldValue->getValue(): 'N/A';
+        $street = $streeFieldValue ? $streeFieldValue->getValue(): 'N/A';
         $cpFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $cpField));
         $cp = $cpFieldValue ? $cpFieldValue->getValue(): 'N/A';
         $townFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $townField));
@@ -280,7 +284,8 @@ class ProductManager
                 'town' => $town,
                 'country' => $country,
                 'duration' => $duration,
-                'sws' => $sws
+                'sws' => $sws,
+                'hasFreeMonth' => $hasFreeMonth
             )
         );
         //@todo: the path should include the invoice numbe
@@ -302,7 +307,8 @@ class ProductManager
                 'target_adress' => $targetAdress,
                 'month_duration' => $duration,
                 'sws' => $sws,
-                'workspace' => $workspace
+                'workspace' => $workspace,
+                'hasFreeMonth' => $hasFreeMonth
             )
         );
 
@@ -372,8 +378,9 @@ class ProductManager
         $sws->setIsTest($isTestOrder);
         $this->om->persist($sws);
         $this->om->flush();
-
-        if (!$isTestOrder) $this->sendSuccessMail($sws, $order, $duration);
+        $hasFreeMonth = $this->hasFreeTestMonth($order->getOwner());
+        if (!$isTestOrder) $this->sendSuccessMail($sws, $order, $duration, $hasFreeMonth);
+        if ($this->hasFreeTestMonth($order->getOwner())) $this->useFreeTestMonth($order->getOwner());
     }
 
     private function addRemoteWorkspace(Order $order, $duration)

@@ -71,6 +71,7 @@
         <div class="url-container default-block top-margin">
             Entrez dans votre espace d'activité à l'adresse suivante: {{ target_adress }}
         </div>
+        {% if hasFreeMonth %} 1 mois gratuit dans le tas {% endif %}
         <div id="footer" class="footer top-margin">
             <small>
                 {{ 'invoice_footer'|trans({}, 'invoice')|raw }}

@@ -91,7 +91,7 @@ class SharedWorkspaceForm extends AbstractType
                 array(
                     'label' => ' ', //fuck you label
                     'amount'   => 0,
-                    'currency' => 'EUR',
+                    'currency' => 'USD',
                     'allowed_methods' => array('bank_transfer', 'paypal_express_checkout'),
                     'default_method' => 'payment_paypal',
                     'predefined_data' => array(
@@ -132,7 +132,8 @@ class SharedWorkspaceForm extends AbstractType
         $data = $event->getData();
         $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($data['price']);
         $amount = $priceSolution->getPrice();
-        $vat = $this->vatManager->getVat($amount);
+        $vatNumber = $this->vatManager->getVatFromOwner($this->order->getOwner());
+        $vat = !$this->vatManager->isValid($vatNumber) ? $this->vatManager->getVat($amount): 0;
         $totalAmount = $amount + $vat;
         $options = $form->get('payment')->getConfig()->getOptions();
         $options['amount'] = $totalAmount;

@@ -66,13 +66,14 @@ class SharedWorkspaceController extends Controller
     public function formsAction()
     {
         //it would be better if I was able to avoid creating a new order everytime...
+        $user = $this->sc->getToken()->getUser();
         $order = new Order();
+        $order->setOwner($user);
         $this->em->persist($order);
         $this->em->flush();
         $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
         $forms = array();
         $hasFreeTest = true;
-        $user = $this->sc->getToken()->getUser();
 
         if ($user !== 'anon.' && !$this->productManager->hasFreeTestMonth($user)) {
             $hasFreeTest = false;
@@ -432,8 +433,6 @@ class SharedWorkspaceController extends Controller
             null,
             true
         );
-
-        $this->productManager->useFreeTestMonth($user);
 
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }

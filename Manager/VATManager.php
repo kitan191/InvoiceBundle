@@ -3,12 +3,48 @@
 namespace FormaLibre\InvoiceBundle\Manager;
 
 use JMS\DiExtraBundle\Annotation as DI;
+use Claroline\CoreBundle\Entity\User;
 
 /**
 * @DI\Service("formalibre.manager.vat_manager")
 */
 class VATManager
 {
+    /**
+     * @DI\InjectParams({
+     *     "om" = @DI\Inject("claroline.persistence.object_manager")
+     * })
+     */
+    public function __construct($om)
+    {
+        $this->om = $om;
+    }
+
+    public function getVatFromOwner(User $user)
+    {
+        $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
+        $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
+        $vatField = $fieldRepo->findOneByName('formalibre_vat');
+        $vatFieldValue = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $vatField));
+
+        return $vatFieldValue ? $vatFieldValue->getValue(): null;
+    }
+
+    /**
+     * is a vat number valid ?
+     */
+    public function isValid($value)
+    {
+        $vat = str_replace(' ', '', $value);
+        $countryCode = substr($vat, 0, 2);
+        $vat = substr($value, 2);
+        $vat = str_replace('.', '', $vat);
+        $vat = str_replace(' ', '', $vat);
+        $data = file_get_contents("http://isvat.appspot.com/{$countryCode}/{$vat}");
+
+        return $data === 'true' ? true: false;
+    }
+
     public function getVAT($amt)
     {
         return $amt * $this->getVATRate($this->getClientLocation());

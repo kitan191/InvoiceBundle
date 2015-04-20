@@ -37,7 +37,7 @@ class LoadParametersData extends AbstractFixture implements ContainerAwareInterf
         $configHandler->setParameter('formalibre_test_month_duration', 1);
         $configHandler->setParameter('knp_pdf_binary_path', '/usr/local/bin/wkhtmltopdf');
         $configHandler->setParameter('auto_logging_after_registration', true);
-        $configHandler->setParameter('commercial_email_support', 'changeme@email.com');
+        $configHandler->setParameter('formalibre_commercial_email_support', 'changeme@email.com');
         $configHandler->setParameter('formalibre_target_platform_url', 'localhost/nico/Claroline/web/app_dev.php');
         $configHandler->setParameter('formalibre_encrypt', true);
         $configHandler->setParameter('formalibre_encryption_secret_encrypt', 'bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3'); //change me bro
