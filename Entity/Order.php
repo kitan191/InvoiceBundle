@@ -94,6 +94,11 @@ class Order
      */
     protected $validationDate;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $hasDiscout = false;
+
     public function getId()
     {
         return $this->id;
@@ -217,5 +222,15 @@ class Order
     public function getValidationDate()
     {
         return $this->validationDate;
+    }
+
+    public function setHasDiscount($bool)
+    {
+        $this->hasDiscout = $bool;
+    }
+
+    public function hasDiscount()
+    {
+        return $this->hasDiscout;
     }
 }

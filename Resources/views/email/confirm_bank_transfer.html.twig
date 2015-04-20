@@ -64,7 +64,7 @@
                 <li>Nombre d'utilisateur: {{ order.product.details.max_users }}</li>
                 <li>Nombre de ressource: {{ order.product.details.max_resources }}</li>
                 <li>Espace de stockage: {{ order.product.details.max_storage }} </li>
-                <li>Durée: {{ order.getPriceSolution().getMonthDuration()  }} mois </li>
+                <li>Durée: {{ order.getPriceSolution().getMonthDuration() + freeMonthAmount }} mois </li>
             </ul>
         </div>
         <div class="url-container default-block top-margin">
@@ -80,6 +80,7 @@
                 <li> Votre espace d'activité vous sera ouvert dans un délai de 5 jours ouvrables maximum, après réception de votre virement. Vous serez averti via mail de l'ouverture de celui-ci </li>
             </ul>
         </div>
+        {% if hasFreeMonth %} Mois gratuit {% endif %}
         <small>
             {{ 'invoice_footer'|trans({}, 'invoice')|raw }}
         </small>

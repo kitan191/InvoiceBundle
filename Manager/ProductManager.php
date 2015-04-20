@@ -71,7 +71,6 @@ class ProductManager
         //get the duration right
         $details = $product->getDetails();
         $expDate = new \DateTime();
-        if ($this->hasFreeTestMonth($user)) $monthDuration += 1;
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
         $sws = new SharedWorkspace();
@@ -251,7 +250,7 @@ class ProductManager
         throw new PaymentHandlingFailedException();
     }
 
-    public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null, $hasFreeMonth = false)
+    public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null)
     {
         $workspace = $this->getWorkspaceData($sws);
         $snappy = $this->container->get('knp_snappy.pdf');
@@ -274,6 +273,8 @@ class ProductManager
         $town = $townFieldValue ? $townFieldValue->getValue(): 'N/A';
         $countryFieldValue = $valueRepo->findOneBy(array('user' => $owner, 'fieldFacet' => $countryField));
         $country = $countryFieldValue ? $countryFieldValue->getValue(): 'N/A';
+        $hasFreeMonth = $order->hasDiscount();
+        $freeMonthAmount = $hasFreeMonth ? $this->ch->getParameter('formalibre_test_month_duration'): 0;
 
         $view = $this->container->get('templating')->render(
             'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
@@ -285,7 +286,8 @@ class ProductManager
                 'country' => $country,
                 'duration' => $duration,
                 'sws' => $sws,
-                'hasFreeMonth' => $hasFreeMonth
+                'hasFreeMonth' => $hasFreeMonth,
+                'freeMonthAmount' => $freeMonthAmount
             )
         );
         //@todo: the path should include the invoice numbe
@@ -308,7 +310,8 @@ class ProductManager
                 'month_duration' => $duration,
                 'sws' => $sws,
                 'workspace' => $workspace,
-                'hasFreeMonth' => $hasFreeMonth
+                'hasFreeMonth' => $hasFreeMonth,
+                'freeMonthAmount' => $freeMonthAmount
             )
         );
 
@@ -326,12 +329,17 @@ class ProductManager
         $company = $field ? $field->getValue(): null;
         $instruction = $order->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
+        $hasFreeMonth = $order->hasDiscount();
+        $freeMonthAmount = $hasFreeMonth ? $this->ch->getParameter('formalibre_test_month_duration'): 0;
+
         $body = $this->container->get('templating')->render(
             'FormaLibreInvoiceBundle:email:confirm_bank_transfer.html.twig',
             array(
                 'order' => $order,
                 'company' => $company,
-                'communication' => $extra->get('communication')
+                'communication' => $extra->get('communication'),
+                'freeMonthAmount' => $freeMonthAmount,
+                'hasFreeMonth' => $hasFreeMonth
             )
         );
 

@@ -65,19 +65,20 @@ class SharedWorkspaceController extends Controller
      */
     public function formsAction()
     {
-        //it would be better if I was able to avoid creating a new order everytime...
         $user = $this->sc->getToken()->getUser();
+        $hasFreeTest = true;
+
+        //it would be better if I was able to avoid creating a new order everytime...
+        if ($user !== 'anon.' && !$this->productManager->hasFreeTestMonth($user)) {
+            $hasFreeTest = false;
+        }
+
         $order = new Order();
         $order->setOwner($user);
         $this->em->persist($order);
         $this->em->flush();
         $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
         $forms = array();
-        $hasFreeTest = true;
-
-        if ($user !== 'anon.' && !$this->productManager->hasFreeTestMonth($user)) {
-            $hasFreeTest = false;
-        }
 
         foreach ($products as $product) {
             //now we generate the forms !
@@ -179,6 +180,7 @@ class SharedWorkspaceController extends Controller
             //refresh
             $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
             $order->setProduct($product);
+            if ($this->productManager->hasFreeTestMonth($order->getOwner())) $order->setHasDiscount(true);
             $order->setOwner($this->sc->getToken()->getUser());
             $this->ppc->createPaymentInstruction($instruction);
             $order->setPaymentInstruction($instruction);
@@ -254,9 +256,13 @@ class SharedWorkspaceController extends Controller
         }
 
         try {
+            $duration = $order->hasDiscount() ?
+                $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
+                $order->getPriceSolution()->getMonthDuration();
+
             $this->productManager->executeWorkspaceOrder(
                 $order,
-                $order->getPriceSolution()->getMonthDuration(),
+                $duration,
                 $sws
             );
         } catch (PaymentHandlingFailedException $e) {
@@ -297,10 +303,14 @@ class SharedWorkspaceController extends Controller
         $this->em->persist($order);
         $this->em->flush();
         $this->productManager->sendBankTransferPendingMail($order);
+        $freeMonthAmount = $order->hasDiscount() ? $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'): 0;
+        if ($order->hasDiscount()) $this->productManager->useFreeTestMonth($order->getOwner());
 
         return array(
             'communication' => $extra->get('communication'),
             'order' => $order,
+            'freeMonthAmount' => $freeMonthAmount,
+            'hasFreeMonth' => $order->hasDiscount()
         );
     }
 
@@ -383,9 +393,12 @@ class SharedWorkspaceController extends Controller
         $sws = $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
             ->find($extra['shared_workspace_id']);
         $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
+        $duration = $order->hasDiscount() ?
+            $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
+            $order->getPriceSolution()->getMonthDuration();
         $this->productManager->executeWorkspaceOrder(
             $order,
-            $order->getPriceSolution()->getMonthDuration(),
+            $duration,
             $sws
         );
         $route = $this->router->generate('admin_invoice_open');
