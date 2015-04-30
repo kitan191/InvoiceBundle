@@ -41,7 +41,6 @@ class ProductManager
         ObjectManager $om,
         VATManager $vatManager,
         $logger,
-        $sc,
         $ch,
         $mailManager,
         $container
