@@ -23,7 +23,6 @@ class ProductManager
     private $targetPlatformUrl;
     private $logger;
     private $vatManager;
-    private $sc;
     private $ch;
     private $mailManager;
     private $container;
@@ -33,7 +32,6 @@ class ProductManager
      *     "om" = @DI\Inject("claroline.persistence.object_manager"),
      *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
      *     "logger" = @DI\Inject("logger"),
-     *     "sc" = @DI\Inject("security.context"),
      *     "ch" = @DI\Inject("claroline.config.platform_config_handler"),
      *     "mailManager" = @DI\Inject("claroline.manager.mail_manager"),
      *     "container" = @DI\Inject("service_container")
@@ -54,7 +52,6 @@ class ProductManager
         $this->sharedWorkspaceRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
         $this->logger                    = $logger;
         $this->vatManager                = $vatManager;
-        $this->sc                        = $sc;
         $this->ch                        = $ch;
         $this->mailManager               = $mailManager;
         $this->container                 = $container;

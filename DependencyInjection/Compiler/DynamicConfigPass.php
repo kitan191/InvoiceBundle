@@ -31,23 +31,29 @@ class DynamicConfigPass implements CompilerPassInterface
     {
         //paypal auth
         $paypal = new Definition();
-        $paypal->setFactoryService('formalibre.payal_payment_factory');
-        $paypal->setFactoryMethod('getAuthenticationStrategyToken');
+        $paypal->setFactory(array(
+            new Reference('formalibre.payal_payment_factory'),
+            'getAuthenticationStrategyToken')
+        );
         $paypal->setClass('JMS\Payment\PaypalBundle\Client\Authentication\TokenAuthenticationStrategy');
         $container->removeDefinition('payment.paypal.authentication_strategy.token');
         $container->setDefinition('payment.paypal.authentication_strategy.token', $paypal);
 
         //paypal client
         $client = new Definition();
-        $client->setFactoryService('formalibre.payal_payment_factory');
-        $client->setFactoryMethod('getClient');
+        $client->setFactory(array(
+            new Reference('formalibre.payal_payment_factory'),
+            'getClient')
+        );
         $client->setClass('JMS\Payment\PaypalBundle\Client\Client');
         $container->removeDefinition('payment.paypal.client');
         $container->setDefinition('payment.paypal.client', $client);
 
         $mcrypt = new Definition();
-        $mcrypt->setFactoryService('formalibre.payal_payment_factory');
-        $mcrypt->setFactoryMethod('getEncryptionService');
+        $mcrypt->setFactory(array(
+            new Reference('formalibre.payal_payment_factory'),
+            'getEncryptionService')
+        );
         $mcrypt->setClass('JMS\Payment\CoreBundle\Cryptography\MCryptEncryptionService');
         $container->removeDefinition('payment.encryption_service');
         $container->setDefinition('payment.encryption_service', $mcrypt);

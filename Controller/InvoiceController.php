@@ -8,8 +8,8 @@ use JMS\DiExtraBundle\Annotation as DI;
 
 class InvoiceController extends Controller
 {
-    /** @DI\Inject("security.context") */
-    private $sc;
+    /** @DI\Inject("security.token_storage") */
+    private $tokenStorage;
 
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
@@ -25,7 +25,7 @@ class InvoiceController extends Controller
      */
     public function showAction()
     {
-        $user = $this->sc->getToken()->getUser();
+        $user = $this->tokenStorage->getToken()->getUser();
         $sharedWorkspaces = $this->productManager->getSharedWorkspaceByUser($user);
         $data = array();
 

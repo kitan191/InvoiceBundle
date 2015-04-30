@@ -39,8 +39,11 @@ class SharedWorkspaceController extends Controller
     /** @DI\Inject("translator") */
     private $translator;
 
-    /** @DI\Inject("security.context") */
-    private $sc;
+    /** @DI\Inject("security.token_storage") */
+    private $tokenStorage;
+
+    /** @DI\Inject("security.authorization_checker") */
+    private $authorization;
 
     /** @DI\Inject("session") */
     private $session;
@@ -65,7 +68,7 @@ class SharedWorkspaceController extends Controller
      */
     public function formsAction()
     {
-        $user = $this->sc->getToken()->getUser();
+        $user = $this->tokenStorage->getToken()->getUser();
         $hasFreeTest = true;
 
         //it would be better if I was able to avoid creating a new order everytime...
@@ -124,8 +127,8 @@ class SharedWorkspaceController extends Controller
 
         if (
             $sws
-            && $sws->getOwner() !== $this->sc->getToken()->getUser()
-            && !$this->sc->isGranted('ROLE_ADMIN')
+            && $sws->getOwner() !== $this->tokenStorage->getToken()->getUser()
+            && !$this->authorization->isGranted('ROLE_ADMIN')
         ) {
             throw new AccessDeniedException();
         }
@@ -158,7 +161,7 @@ class SharedWorkspaceController extends Controller
 
         if ($form->isValid()) {
                 //do that stuff here
-            if (!$this->sc->isGranted('ROLE_USER')) {
+            if (!$this->authorization->isGranted('ROLE_USER')) {
                 $this->session->set('form_payment_data', $form->get('payment')->getData());
                 $this->session->set('form_price_data', $form->get('price')->getData());
                 $redirectRoute =  $this->router->generate('workspace_product_payment_submit', array(
@@ -181,7 +184,7 @@ class SharedWorkspaceController extends Controller
             $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
             $order->setProduct($product);
             if ($this->productManager->hasFreeTestMonth($order->getOwner())) $order->setHasDiscount(true);
-            $order->setOwner($this->sc->getToken()->getUser());
+            $order->setOwner($this->tokenStorage->getToken()->getUser());
             $this->ppc->createPaymentInstruction($instruction);
             $order->setPaymentInstruction($instruction);
             $order->setPriceSolution($priceSolution);
@@ -215,8 +218,8 @@ class SharedWorkspaceController extends Controller
             ->findOneByRemoteId($swsId);
 
         if (
-            $order->getOwner() !== $this->sc->getToken()->getUser()
-            && $this->sc->isGranted('ROLE_ADMIN') === false
+            $order->getOwner() !== $this->tokenStorage->getToken()->getUser()
+            && $this->authorization->isGranted('ROLE_ADMIN') === false
         ) {
             throw new AccessDeniedException();
         }
@@ -288,7 +291,7 @@ class SharedWorkspaceController extends Controller
      */
     public function pendingPaymentAction(Order $order)
     {
-        if ($order->getOwner() !== $this->sc->getToken()->getUser()) {
+        if ($order->getOwner() !== $this->tokenStorage->getToken()->getUser()) {
             throw new AccessDeniedException();
         }
 
@@ -332,12 +335,12 @@ class SharedWorkspaceController extends Controller
             throw new \Exception('unknown remote id');
         }
 
-        if ($this->sc->getToken()->getUser() !== $sws->getOwner()) {
+        if ($this->tokenStorage->getToken()->getUser() !== $sws->getOwner()) {
             throw new \AccessDeniedException();
         }
 
         $order = new Order();
-        $order->setOwner($this->sc->getToken()->getUser());
+        $order->setOwner($this->tokenStorage->getToken()->getUser());
         $this->em->persist($order);
         $this->em->flush();
         $product = $sws->getProduct();
@@ -384,7 +387,7 @@ class SharedWorkspaceController extends Controller
     public function validateBankTransferAction(Payment $payment)
     {
         //the admin is the only one able to do this.
-        if (!$this->sc->isGranted('ROLE_ADMIN')) {
+        if (!$this->authorization->isGranted('ROLE_ADMIN')) {
             throw new \AccessDeniedException();
         }
 
@@ -415,7 +418,7 @@ class SharedWorkspaceController extends Controller
      */
     public function createFreeTestWorkspace(Product $product)
     {
-        if (!$this->sc->isGranted('ROLE_USER')) {
+        if (!$this->authorization->isGranted('ROLE_USER')) {
             $redirectRoute =  $this->router->generate(
                 'formalibre_free_test_workspace',
                 array('product' => $product->getId())
@@ -426,7 +429,7 @@ class SharedWorkspaceController extends Controller
             return new RedirectResponse($route);
         }
 
-        $user = $this->sc->getToken()->getUser();
+        $user = $this->tokenStorage->getToken()->getUser();
 
         if (!$this->productManager->hasFreeTestMonth($user)) {
             $content = $this->renderView(
