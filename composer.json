@@ -7,7 +7,7 @@
     "require": {
         "php": ">=5.4.1",
         "claroline/core-bundle": "~4.1",
-        "claroline/pdf-generator-bundle": "dev-master#c51772d446172e9f9a7b5a1e9a2863eeb44ca3c9",
+        "claroline/pdf-generator-bundle": "dev-4.x-dev",
         "jms/payment-core-bundle": "master-dev",
         "jms/payment-paypal-bundle": "dev-master"
     },
