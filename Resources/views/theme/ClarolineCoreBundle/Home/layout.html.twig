@@ -13,22 +13,25 @@
     {% endif %}
 
     {% if father is empty %}
-        <div class="contents">
-            {{ content | raw }}
-            <div class="content-12">
-                <div class="content-element 12">
-                    <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"> {{ 'products'|trans({}, 'platform') }} </h3>
+        {% set params = app.request.attributes.get('_route_params') %}
+        {% if params.type is defined %}
+            {% if params.type == "Votre espace d'activité" %}
+                <div class="contents">
+                    {{ content | raw }}
+                    <div class="content-12">
+                        <div class="content-element 12">
+                            <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title"> {{ 'products'|trans({}, 'platform') }} </h3>
+                                    </div>
+                                <div class="panel-body">
+                                    {{ render(controller("FormaLibreInvoiceBundle:SharedWorkspace:iframeForms")) }}
+                                </div>
                             </div>
-                        <div class="panel-body">
-                            {{ render(controller("FormaLibreInvoiceBundle:SharedWorkspace:iframeForms")) }}
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    {% else %}
-        {{ content | raw }}
+            {% endif %}
+        {% endif %}
     {% endif %}
 {% endif %}
