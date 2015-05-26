@@ -132,7 +132,7 @@ class SharedWorkspaceForm extends AbstractType
         $data = $event->getData();
         $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($data['price']);
         $amount = $priceSolution->getPrice();
-        $vatNumber = $this->vatManager->getVatFromOwner($this->order->getOwner());
+        $vatNumber = $this->order->getOwner() ? $this->vatManager->getVatFromOwner($this->order->getOwner()): null;
         $vat = !$this->vatManager->isValid($vatNumber) ? $this->vatManager->getVat($amount): 0;
         $totalAmount = $amount + $vat;
         $options = $form->get('payment')->getConfig()->getOptions();

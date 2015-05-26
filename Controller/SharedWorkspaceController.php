@@ -77,7 +77,11 @@ class SharedWorkspaceController extends Controller
         }
 
         $order = new Order();
-        $order->setOwner($user);
+
+        if ($user !== 'anon.') {
+            $order->setOwner($user);
+        }
+
         $this->em->persist($order);
         $this->em->flush();
         $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
@@ -97,13 +101,7 @@ class SharedWorkspaceController extends Controller
     }
 
     /**
-     * @EXT\Route(
-     *      "/products/form/iframe",
-     *      name="workspace_products_form_iframe"
-     * )
      * @EXT\Template
-     *
-     * @return Response
      */
     public function iframeFormsAction()
     {
@@ -124,14 +122,6 @@ class SharedWorkspaceController extends Controller
     {
         $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
             ->findOneByRemoteId($swsId);
-
-        if (
-            $sws
-            && $sws->getOwner() !== $this->tokenStorage->getToken()->getUser()
-            && !$this->authorization->isGranted('ROLE_ADMIN')
-        ) {
-            throw new AccessDeniedException();
-        }
 
         if ($order->getPaymentInstruction()) {
             $content = $this->renderView(

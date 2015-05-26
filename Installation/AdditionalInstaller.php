@@ -18,6 +18,10 @@ class AdditionalInsaller extends BaseInstaller
 
     public function preUpdate($currentVersion, $targetVersion)
     {
+        case version_compare($currentVersion, '5.0.1', '<')  && version_compare($targetVersion, '5.0.1', '>='):
+            $updater = new Updater\Updater050001($this->container);
+            $updater->setLogger($this->logger);
+            $updater->postUpdate();
     }
 
     public function postUpdate($currentVersion, $targetVersion)
