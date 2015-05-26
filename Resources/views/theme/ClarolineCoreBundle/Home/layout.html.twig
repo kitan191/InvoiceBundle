@@ -15,7 +15,7 @@
     {% if father is empty %}
         {% set params = app.request.attributes.get('_route_params') %}
         {% if params.type is defined %}
-            {% if params.type == "Votre espace d'activité" %}
+            {% if params.type == "your_workspace" %}
                 <div class="contents">
                     {{ content | raw }}
                     <div class="content-12">
