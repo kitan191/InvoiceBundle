@@ -51,10 +51,15 @@
         <div class="payment-type default-block top-margin">
             Numéro de commande: {{ order.getId() }}
             <ul style="list-style-type: none;">
+                {% if order.getPaymentInstruction() != null %}
+                    {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }}
+                {% else %}
+                    {% set paymentSystemName = 'aucun' %}
+                {% endif %}
                 <li> {{ order.getOwner().getLastName() }} {{ order.getOwner().getFirstName() }} </li>
                 {% if company is defined %} <li> {{ company}} </li> {% endif %}
                 <li> Date de commande: {{ order.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
-                <li> Mode de paiment: {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }} </li>
+                <li> Mode de paiment: {{ paymentSystemName }} </li>
             </ul>
         </div>
         <div class="item-description default-block top-margin">

@@ -59,9 +59,14 @@
             </ul>
         </div>
         <div class="payment-type default-block top-margin">
+            {% if order.getPaymentInstruction() != null %}
+                {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }}
+            {% else %}
+                {% set paymentSystemName = 'aucun' %}
+            {% endif %}
             <ul style="list-style-type: none;">
                 <li> Date d'achat: {{ order.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
-                <li> Mode de paiment: {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }} </li>
+                <li> Mode de paiment: {{ paymentSystemName }} </li>
                 <li> Durée de souscription: {{ duration }} mois </li>
                 <li> Date d'expiration: {{ sws.getExpDate()|date('d/m/Y') }} </li>
             </ul>
@@ -82,11 +87,16 @@
                 </thead>
                 <tbody>
                     <tr>
+                        {% if order.getPriceSolution() != null %}
+                            {% set price =  order.getPriceSolution().getPrice() %}
+                        {% else %}
+                            {% set price = 0 %}
+                        {% endif %}
                         <td> {{ order.getProduct().getCode()|trans({}, 'invoice') }} </td>
                         <td> descr </td>
                         <td> 1 </td>
                         <td> {{ order.getVatRate() }} </td>
-                        <td> {{ order.getPriceSolution().getPrice() }} </td>
+                        <td> {{ price }} </td>
                         <td> {{ order.getVatAmount() }}</td>
                         <td> {{ order.getAmount() }} </td>
                         <td> {{ order.getAmount() }} </td>

@@ -383,7 +383,7 @@ class ProductManager
         $this->om->persist($sws);
         $this->om->flush();
         $hasFreeMonth = $this->hasFreeTestMonth($order->getOwner());
-        if (!$isTestOrder) $this->sendSuccessMail($sws, $order, $duration, $hasFreeMonth);
+        $this->sendSuccessMail($sws, $order, $duration, $hasFreeMonth);
         if ($this->hasFreeTestMonth($order->getOwner())) $this->useFreeTestMonth($order->getOwner());
     }
 
