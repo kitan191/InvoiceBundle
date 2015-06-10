@@ -16,8 +16,12 @@ use Doctrine\ORM\EntityRepository;
 class OrderRepository extends EntityRepository
 {
     public function getPayedOrders($getQuery = true)
-    {/*
+    {
         $dql = "SELECT o from FormaLibre\InvoiceBundle\Entity\Order o
-            WHERE "*/
+            WHERE o.product is not NULL";
+
+        $query = $this->_em->createQuery($dql);
+
+        return $getQuery ? $query: $query->getResult();
     }
 }

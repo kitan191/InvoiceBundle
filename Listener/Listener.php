@@ -69,7 +69,7 @@ class Listener
 
     private function openAdminPendingOperations()
     {
-        $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:openPending');
+        $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:index');
         $params['page'] = 1;
         $params['search'] = '';
         $subRequest = $this->container->get('request')->duplicate(array(), null, $params);

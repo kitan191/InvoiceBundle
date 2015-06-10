@@ -6,7 +6,7 @@
             'twitter_bootstrap_translated',
             {
                 'proximity' : 1,
-                'routeName': 'admin_invoice_open_pending'
+                'routeName': 'admin_invoice_open_invoice'
             }
         )
     }}
@@ -17,7 +17,7 @@
                 'twitter_bootstrap_translated',
                 {
                     'proximity' : 1,
-                    'routeName': 'admin_invoice_open_pending_search',
+                    'routeName': 'admin_invoice_open_invoice_search',
                     'routeParams': {'search': search }
                 }
             )
@@ -42,7 +42,7 @@
                 'href': path('admin_invoice_index')
             },
             {
-                'name': 'pending'|trans({}, 'invoice'),
+                'name': 'show'|trans({}, 'invoice'),
                 'href': ''
             }
         ])
@@ -71,26 +71,32 @@
                 <thead>
                     <tr>
                         <th>
-                            {{ 'communication'|trans({}, 'platform') }}
-                        </th>
-                        <th>
                             {{ 'amount'|trans({}, 'invoice') }}
-                        </th>
-                        <th>
-                            {{ 'execute'|trans({}, 'platform') }}
                         </th>
                         <th>
                             {{ 'date'|trans({}, 'platform') }}
                         </th>
+                        <th>
+                            {{ 'username'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'invoice'|trans({}, 'invoice') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for transfer in pager.currentPageResults %}
+                    {% for order in pager.currentPageResults %}
                     <tr>
-                        <td> {{ transfer.getPaymentInstruction().getExtendedData().get('communication')|format_structured_communication()}} </td>
-                        <td> {{ transfer.getApprovingAmount() }}</td>
-                        <td> <a href="{{ path('formalibre_validate_bank_transfer', {'payment': transfer.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
-                        <td> {{ transfer.getCreatedAt()|intl_date_format() }} </td>
+                        {% set instruction = order.getPaymentInstruction() %}
+                        {% if instruction is not null %}
+                            {% set payment = instruction.getPayments()|first() %}
+                        {% else %}
+                            {% set payment = null %}
+                        {% endif %}
+                        <td> {% if payment is not null %} {{ payment.getApprovedAmount() }} {% else %} {{ 'free'|trans({}, 'invoice')}} {% endif %} </td>
+                        <td> {{ order.getCreationDate()|intl_date_format() }} </td>
+                        <th> {{ order.getOwner().getUsername() }} </th>
+                        <th> <a href="#"> {{ 'invoice'|trans({}, 'platform') }} </a>
                     </tr>
                     {% endfor %}
                 </tbody>

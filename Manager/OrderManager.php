@@ -18,14 +18,15 @@ class OrderManager
      * })
      */
     public function __construct(
+        ObjectManager $om
     )
     {
         $this->om = $om;
         $this->orderRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Order');
     }
 
-    public function getPayedOrders($search, $getQuery = false)
+    public function getPayedOrders($getQuery = false)
     {
-        //$this->orderRepository
+        return $this->orderRepository->getPayedOrders($getQuery);
     }
 }
