@@ -96,7 +96,7 @@
                         <td> {% if payment is not null %} {{ payment.getApprovedAmount() }} {% else %} {{ 'free'|trans({}, 'invoice')}} {% endif %} </td>
                         <td> {{ order.getCreationDate()|intl_date_format() }} </td>
                         <th> {{ order.getOwner().getUsername() }} </th>
-                        <th> <a href="#"> {{ 'invoice'|trans({}, 'platform') }} </a>
+                        <th> <a href="{{ path('admin_invoice_show', {'order': order.getId() })}}"> {{ 'invoice'|trans({}, 'platform') }} </a>
                     </tr>
                     {% endfor %}
                 </tbody>
