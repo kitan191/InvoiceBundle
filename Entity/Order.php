@@ -8,7 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Table(name="formalibre__order")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="FormaLibre\InvoiceBundle\Repository\OrderRepository")
  */
 class Order
 {

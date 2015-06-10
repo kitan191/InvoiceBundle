@@ -60,7 +60,8 @@
         </div>
         <div class="payment-type default-block top-margin">
             {% if order.getPaymentInstruction() != null %}
-                {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }}
+                {% set paymentSystemName = order.getPaymentInstruction().getPaymentSystemName() %}
+                {{ paymentSystemName }}
             {% else %}
                 {% set paymentSystemName = 'aucun' %}
             {% endif %}

@@ -394,7 +394,7 @@ class SharedWorkspaceController extends Controller
             $duration,
             $sws
         );
-        $route = $this->router->generate('admin_invoice_open');
+        $route = $this->router->generate('admin_invoice_open_pending');
 
         return new RedirectResponse($route);
     }

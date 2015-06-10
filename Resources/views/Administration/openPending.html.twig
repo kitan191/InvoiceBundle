@@ -6,7 +6,7 @@
             'twitter_bootstrap_translated',
             {
                 'proximity' : 1,
-                'routeName': 'admin_invoice_open'
+                'routeName': 'admin_invoice_open_pending'
             }
         )
     }}
@@ -17,7 +17,7 @@
                 'twitter_bootstrap_translated',
                 {
                     'proximity' : 1,
-                    'routeName': 'admin_invoice_open_search',
+                    'routeName': 'admin_invoice_open_pending_search',
                     'routeParams': {'search': search }
                 }
             )
@@ -112,8 +112,8 @@
         parameters = {};
         parameters.route = {};
         parameters.route.action = {};
-        parameters.route.normal = {"route": "admin_invoice_open", "parameters": {} };
-        parameters.route.search = {"route": "admin_invoice_open_search", "parameters": {} };
+        parameters.route.normal = {"route": "admin_invoice_open_pending", "parameters": {} };
+        parameters.route.search = {"route": "admin_invoice_open_pending_search", "parameters": {} };
         Claroline.Table.initialize(parameters);
     </script>
 {% endblock %}

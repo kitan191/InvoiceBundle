@@ -22,15 +22,15 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/open/{page}",
-     *      name="admin_invoice_open",
+     *      "/admin/open/pending/{page}",
+     *      name="admin_invoice_open_pending",
      *      defaults={"page"=1, "search"=""},
      *      options = {"expose"=true}
      * )
      *
      * @EXT\Route(
-     *      "/admin/open/{page}/search/{search}",
-     *      name="admin_invoice_open_search",
+     *      "/admin/open/pending/{page}/search/{search}",
+     *      name="admin_invoice_open_pending_search",
      *      defaults={"page"=1},
      *      options = {"expose"=true}
      * )
@@ -39,7 +39,7 @@ class AdministrationController extends Controller
      *
      * @return Response
      */
-    public function openAction($page, $search)
+    public function openPendingAction($page, $search)
     {
         $query = $search === '' ?
             $this->paymentManager->getPendingBankTransfer(true) :
@@ -47,5 +47,18 @@ class AdministrationController extends Controller
         $pager = $this->pagerFactory->createPager($query, $page, 25);
 
         return array('pager' => $pager, 'search' => $search);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/admin/open/pending/{page}",
+     *      name="admin_invoice_open_pending",
+     *      defaults={"page"=1, "search"=""},
+     *      options = {"expose"=true}
+     * )
+     */
+    public function showInvoicesAction($page, $search)
+    {
+        return array();
     }
 }

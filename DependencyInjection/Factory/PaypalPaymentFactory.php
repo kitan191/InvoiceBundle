@@ -56,7 +56,7 @@ class PaypalPaymentFactory
     public function getEncryptionService()
     {
         $secret = $this->configHandler->getParameter('formalibre_encryption_secret_encrypt') ;
-        if ($secret === null) $secret = '123'; 
+        if ($secret === null) $secret = '1234'; 
 
         return new MCryptEncryptionService(
             $secret,
