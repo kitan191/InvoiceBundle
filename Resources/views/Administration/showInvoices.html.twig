@@ -71,13 +71,25 @@
                 <thead>
                     <tr>
                         <th>
-                            {{ 'amount'|trans({}, 'invoice') }}
-                        </th>
-                        <th>
                             {{ 'date'|trans({}, 'platform') }}
                         </th>
                         <th>
-                            {{ 'username'|trans({}, 'platform') }}
+                            {{ 'amount'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'vat'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'first_name'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'last_name'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'company'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'email'|trans({}, 'platform') }}
                         </th>
                         <th>
                             {{ 'invoice'|trans({}, 'invoice') }}
@@ -87,15 +99,13 @@
                 <tbody>
                     {% for order in pager.currentPageResults %}
                     <tr>
-                        {% set instruction = order.getPaymentInstruction() %}
-                        {% if instruction is not null %}
-                            {% set payment = instruction.getPayments()|first() %}
-                        {% else %}
-                            {% set payment = null %}
-                        {% endif %}
-                        <td> {% if payment is not null %} {{ payment.getApprovedAmount() }} {% else %} {{ 'free'|trans({}, 'invoice')}} {% endif %} </td>
                         <td> {{ order.getCreationDate()|intl_date_format() }} </td>
-                        <th> {{ order.getOwner().getUsername() }} </th>
+                        <td> {{ order.getAmount() }}
+                        <td> {{ order.getVatAmount() }}
+                        <th> {{ order.getOwner().getFirstName() }} </th>
+                        <th> {{ order.getOwner().getLastName() }} </th>
+                        <th> {{ order.getOwner|get_user_company() }}</th>
+                        <th> {{ order.getOwner().getMail() }} </th>
                         <th> <a href="{{ path('admin_invoice_show', {'order': order.getId() })}}"> {{ 'invoice'|trans({}, 'platform') }} </a>
                     </tr>
                     {% endfor %}

@@ -18,7 +18,7 @@ class OrderRepository extends EntityRepository
     public function getPayedOrders($getQuery = true)
     {
         $dql = "SELECT o from FormaLibre\InvoiceBundle\Entity\Order o
-            WHERE o.product is not NULL";
+            WHERE o.validationDate is not NULL";
 
         $query = $this->_em->createQuery($dql);
 

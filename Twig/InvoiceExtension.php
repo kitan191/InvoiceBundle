@@ -12,6 +12,7 @@
 namespace FormaLibre\InvoiceBundle\Twig;
 
 use JMS\DiExtraBundle\Annotation as DI;
+use Claroline\CoreBundle\Entity\User;
 
 /**
  * @DI\Service
@@ -39,7 +40,7 @@ class InvoiceExtension extends \Twig_Extension
         return array(
             new \Twig_SimpleFilter('format_structured_communication', array($this, 'formatCommunication')),
             new \Twig_SimpleFilter('format_price', array($this, 'formatPrice')),
-            new \Twig_SimpleFilter('get_payement_order', array($this, 'getPaymentOrder'))
+            new \Twig_SimpleFilter('get_user_company', array($this, 'getUserCompany'))
         );
     }
 
@@ -62,10 +63,19 @@ class InvoiceExtension extends \Twig_Extension
 
         return number_format($number, 2, ',', '.');
     }
-    
-    public function getPaymentOrder($payment)
+
+    public function getUserCompany(User $user)
     {
-        return $this->container->get('formalibre.manager.payment_manager')->getOrderFromPayment($payment);
+        $facetManager = $this->container->get('claroline.manager.facet_manager');
+        $ffvs = $facetManager->getFieldValuesByUser($user);
+
+        foreach ($ffvs as $ffv) {
+            if ($ffv->getFieldFacet()->getName() === 'formalibre_company_name') {
+                return $facetManager->getDisplayedValue($ffv);
+            }
+        }
+
+        return '';
     }
 
     /**

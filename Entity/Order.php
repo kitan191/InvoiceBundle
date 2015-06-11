@@ -19,9 +19,6 @@ class Order
      */
     private $id;
 
-    /** @ORM\OneToOne(targetEntity="JMS\Payment\CoreBundle\Entity\PaymentInstruction") */
-    private $paymentInstruction;
-
     /**
      * @ORM\ManyToOne(
      *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product"
@@ -29,6 +26,14 @@ class Order
      * @ORM\JoinColumn(name="product_id", onDelete="SET NULL")
      */
     private $product;
+
+    /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Chart"
+     * )
+     * @ORM\JoinColumn(name="chart_id", onDelete="SET NULL")
+     */
+    private $chart;
 
     /**
      * @ORM\ManyToOne(
@@ -51,18 +56,7 @@ class Order
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    private $ipAddress;
-
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $countryCode;
-
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
     private $vatNumber;
-
 
     /**
      * @ORM\Column(type="float", nullable=true)
@@ -75,53 +69,13 @@ class Order
     protected $extendedData;
 
     /**
-     * @ORM\ManyToOne(
-     *     targetEntity="Claroline\CoreBundle\Entity\User",
-     *     cascade={"persist"}
-     * )
-     * @ORM\JoinColumn(onDelete="CASCADE", nullable=true)
-     */
-    private $owner;
-
-    /**
-     * @ORM\Column(name="creation_date", type="datetime")
-     * @Gedmo\Timestampable(on="create")
-     */
-    protected $creationDate;
-
-    /**
-     * @ORM\Column(name="validation_date", type="datetime", nullable=true)
-     */
-    protected $validationDate;
-
-    /**
      * @ORM\Column(type="boolean", nullable=false)
      */
-    private $hasDiscout = false;
+    private $hasDiscount = false;
 
     public function getId()
     {
         return $this->id;
-    }
-
-    public function getPaymentInstruction()
-    {
-        return $this->paymentInstruction;
-    }
-
-    public function setPaymentInstruction(PaymentInstruction $instruction)
-    {
-        $this->paymentInstruction = $instruction;
-    }
-
-    public function setProduct(Product $product)
-    {
-        $this->product = $product;
-    }
-
-    public function setPriceSolution(PriceSolution $priceSolution)
-    {
-        $this->priceSolution = $priceSolution;
     }
 
     public function getProduct()
@@ -159,11 +113,6 @@ class Order
         return $this->vatRate;
     }
 
-    public function setIpAddress($ip)
-    {
-        $this->ipAddress = $ip;
-    }
-
     public function setVatNumber($number)
     {
         $this->vatNumber = $number;
@@ -189,16 +138,6 @@ class Order
         return $this->amount;
     }
 
-    public function setOwner($user)
-    {
-        $this->owner = $user;
-    }
-
-    public function getOwner()
-    {
-        return $this->owner;
-    }
-
     public function setExtendedData(array $data)
     {
         $this->extendedData = $data;
@@ -209,28 +148,23 @@ class Order
         return $this->extendedData;
     }
 
-    public function getCreationDate()
-    {
-        return $this->creationDate;
-    }
-
-    public function setValidationDate($date)
-    {
-        $this->validationDate = $date;
-    }
-
-    public function getValidationDate()
-    {
-        return $this->validationDate;
-    }
-
     public function setHasDiscount($bool)
     {
-        $this->hasDiscout = $bool;
+        $this->hasDiscount = $bool;
     }
 
     public function hasDiscount()
     {
-        return $this->hasDiscout;
+        return $this->hasDiscount;
+    }
+
+    public function setChart(Chart $chart)
+    {
+        $this->chart = $chart;
+    }
+
+    public function getChart()
+    {
+        return $this->chart;
     }
 }
