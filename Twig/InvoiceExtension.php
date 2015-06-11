@@ -38,7 +38,8 @@ class InvoiceExtension extends \Twig_Extension
     {
         return array(
             new \Twig_SimpleFilter('format_structured_communication', array($this, 'formatCommunication')),
-            new \Twig_SimpleFilter('format_price', array($this, 'formatPrice'))
+            new \Twig_SimpleFilter('format_price', array($this, 'formatPrice')),
+            new \Twig_SimpleFilter('get_payement_order', array($this, 'getPaymentOrder'))
         );
     }
 
@@ -61,6 +62,11 @@ class InvoiceExtension extends \Twig_Extension
 
         return number_format($number, 2, ',', '.');
     }
+    
+    public function getPaymentOrder($payment)
+    {
+        return $this->container->get('formalibre.manager.payment_manager')->getOrderFromPayment($payment);
+    }
 
     /**
      * Get the name of the twig extention.
@@ -69,6 +75,6 @@ class InvoiceExtension extends \Twig_Extension
      */
     public function getName()
     {
-        return 'structured_communication_extension';
+        return 'invoice_extension';
     }
 }

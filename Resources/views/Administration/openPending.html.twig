@@ -82,6 +82,9 @@
                         <th>
                             {{ 'date'|trans({}, 'platform') }}
                         </th>
+                        <th>
+                            {{ 'username'|trans({}, 'platform') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,6 +94,7 @@
                         <td> {{ transfer.getApprovingAmount() }}</td>
                         <td> <a href="{{ path('formalibre_validate_bank_transfer', {'payment': transfer.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
                         <td> {{ transfer.getCreatedAt()|intl_date_format() }} </td>
+                        <td> {% set order = transfer|get_payement_order() %} {{ order.getOwner().getUsername() }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
