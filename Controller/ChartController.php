@@ -5,33 +5,127 @@ namespace FormaLibre\InvoiceBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 
 class ChartController extends Controller
 {
-    /** @DI\Inject("formalibre.manager.chart_manager") */
-    private $chartManager;
+    /** @DI\Inject("doctrine.orm.entity_manager") */
+    private $em;
+
+    /** @DI\Inject("payment.plugin_controller") */
+    private $ppc;
 
     /** @DI\Inject("security.token_storage") */
     private $tokenStorage;
 
+    /** @DI\Inject("claroline.manager.chart_manager") */
+    private $chartManager;
+
     /**
      * @EXT\Route(
-     *      "/payment/chart/submit/{chart}",
-     *      name="formalibre_invoice_chart_submit"
+     *      "/payment_complete/chart/{chart}",
+     *      name="chart_payment_complete",
+     *      defaults={"swsId" = 0}
      * )
-     *
-     * @param $swsId the sharedWorkspaceId if it already exists (otherwise, if it's 0, we'll create a new one)
      * @return Response
      */
-    public function submitChartAction(Chart $chart)
+    public function completePaymentAction(Chart $chart)
     {
-        $currentUser = $this->tokenStorage->getToken()->getUser();
-
-        if ($chart->getOwner() !== $currentUser()) {
-            throw new \AccessDeniedException();
+        if (
+            $chart->getOwner() !== $this->tokenStorage->getToken()->getUser()
+            && $this->authorization->isGranted('ROLE_ADMIN') === false
+        ) {
+            throw new AccessDeniedException();
         }
 
-        $this->chartManager->submitChart($chart); 
+        $instruction = $chart->getPaymentInstruction();
+
+        if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
+            $payment = $this->ppc->createPayment(
+                $instruction->getId(),
+                $instruction->getAmount() - $instruction->getDepositedAmount()
+            );
+        } else {
+            $payment = $pendingTransaction->getPayment();
+        }
+
+        $result = $this->ppc->approveAndDeposit($payment->getId(), $payment->getTargetAmount());
+
+        if (Result::STATUS_PENDING === $result->getStatus()) {
+            $ex = $result->getPluginException();
+
+            if ($ex instanceof ActionRequiredException) {
+                $action = $ex->getAction();
+                if ($action instanceof VisitUrl) {
+                    return new RedirectResponse($action->getUrl());
+                }
+                throw $ex;
+            }
+
+            $content = $this->renderView(
+                'FormaLibreInvoiceBundle:errors:paymentPendingException.html.twig'
+            );
+
+            return new Response($content);
+
+        } else if (Result::STATUS_SUCCESS !== $result->getStatus()) {
+            throw new \RuntimeException('Transaction was not successful: '. $result->getReasonCode());
+        }
+
+        try {
+            $this->chartManager->validate($chart);
+        } catch (PaymentHandlingFailedException $e) {
+            $content = $this->renderView(
+                'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
+            );
+
+            return new Response($content);
+        }
+
+        return new RedirectResponse($this->router->generate('invoice_show_all', array()));
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/payment_pending/chart/{chart}",
+     *      name="chart_payment_pending"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function pendingPaymentAction(Chart $chart)
+    {
+        if ($chart->getOwner() !== $this->tokenStorage->getToken()->getUser()) {
+            throw new AccessDeniedException();
+        }
+
+        $instruction = $chart->getPaymentInstruction();
+        $extra = $instruction->getExtendedData();
+        $chart->setExtendedData(array('communication' => $extra->get('communication')));
+        $this->em->persist($chart);
+        $this->em->flush();
+        $this->chartManager->sendBankTransferPendingMail($chart);
+        //$freeMonthAmount = $order->hasDiscount() ? $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'): 0;
+        //if ($order->hasDiscount()) $this->productManager->useFreeTestMonth($order->getOwner());
+
+        return array(
+            'communication' => $extra->get('communication'),
+            'chart' => $chart
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/payment_cancel",
+     *      name="chart_payment_cancel"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function cancelAction(Chart $chart)
+    {
+        return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
 }

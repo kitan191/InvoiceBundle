@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/06/11 04:30:40
+ * Generation date: 2015/06/12 03:12:39
  */
-class Version20150611163039 extends AbstractMigration
+class Version20150612151239 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -32,12 +32,7 @@ class Version20150611163039 extends AbstractMigration
                 id INT AUTO_INCREMENT NOT NULL, 
                 chart_id INT DEFAULT NULL, 
                 isPayed TINYINT(1) NOT NULL, 
-                vatAmount DOUBLE PRECISION DEFAULT NULL, 
-                vatRate DOUBLE PRECISION DEFAULT NULL, 
-                vatNumber VARCHAR(255) DEFAULT NULL, 
-                amount DOUBLE PRECISION DEFAULT NULL, 
-                total DOUBLE PRECISION DEFAULT NULL, 
-                countryCode VARCHAR(255) DEFAULT NULL, 
+                invoiceNumber TINYINT(1) NOT NULL, 
                 UNIQUE INDEX UNIQ_10E984CDBEF83E0A (chart_id), 
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
@@ -75,6 +70,7 @@ class Version20150611163039 extends AbstractMigration
         $this->addSql("
             ALTER TABLE formalibre__order 
             ADD chart_id INT DEFAULT NULL, 
+            ADD shared_workspace_id INT DEFAULT NULL, 
             DROP owner_id, 
             DROP ipAddress, 
             DROP countryCode, 
@@ -90,7 +86,27 @@ class Version20150611163039 extends AbstractMigration
             ON DELETE SET NULL
         ");
         $this->addSql("
+            ALTER TABLE formalibre__order 
+            ADD CONSTRAINT FK_62CE339E6EBC57F5 FOREIGN KEY (shared_workspace_id) 
+            REFERENCES formalibre__shared_workspace (id) 
+            ON DELETE SET NULL
+        ");
+        $this->addSql("
             CREATE INDEX IDX_62CE339EBEF83E0A ON formalibre__order (chart_id)
+        ");
+        $this->addSql("
+            CREATE INDEX IDX_62CE339E6EBC57F5 ON formalibre__order (shared_workspace_id)
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre__shared_workspace 
+            DROP FOREIGN KEY FK_1559C4C24584665A
+        ");
+        $this->addSql("
+            DROP INDEX IDX_1559C4C24584665A ON formalibre__shared_workspace
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre__shared_workspace 
+            DROP product_id
         ");
     }
 
@@ -114,13 +130,18 @@ class Version20150611163039 extends AbstractMigration
             DROP INDEX IDX_62CE339EBEF83E0A ON formalibre__order
         ");
         $this->addSql("
+            DROP INDEX IDX_62CE339E6EBC57F5 ON formalibre__order
+        ");
+        $this->addSql("
             ALTER TABLE formalibre__order 
+            ADD owner_id INT DEFAULT NULL, 
             ADD ipAddress VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
             ADD countryCode VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
             ADD creation_date DATETIME NOT NULL, 
             ADD validation_date DATETIME DEFAULT NULL, 
             ADD paymentInstruction_id INT DEFAULT NULL, 
-            CHANGE chart_id owner_id INT DEFAULT NULL, 
+            DROP chart_id, 
+            DROP shared_workspace_id, 
             CHANGE hasdiscount hasDiscout TINYINT(1) NOT NULL
         ");
         $this->addSql("
@@ -139,6 +160,19 @@ class Version20150611163039 extends AbstractMigration
         ");
         $this->addSql("
             CREATE INDEX IDX_62CE339E7E3C61F9 ON formalibre__order (owner_id)
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre__shared_workspace 
+            ADD product_id INT DEFAULT NULL
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre__shared_workspace 
+            ADD CONSTRAINT FK_1559C4C24584665A FOREIGN KEY (product_id) 
+            REFERENCES formalibre__product (id) 
+            ON DELETE SET NULL
+        ");
+        $this->addSql("
+            CREATE INDEX IDX_1559C4C24584665A ON formalibre__shared_workspace (product_id)
         ");
     }
 }

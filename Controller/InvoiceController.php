@@ -25,6 +25,8 @@ class InvoiceController extends Controller
      */
     public function showAction()
     {
+        return array('data' => array());
+
         $user = $this->tokenStorage->getToken()->getUser();
         $sharedWorkspaces = $this->productManager->getSharedWorkspaceByUser($user);
         $data = array();

@@ -73,6 +73,15 @@ class Order
      */
     private $hasDiscount = false;
 
+    /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace",
+     *     inversedBy="order"
+     * )
+     * @ORM\JoinColumn(name="shared_workspace_id", onDelete="SET NULL")
+     */
+    private $sharedWorkspace;
+
     public function getId()
     {
         return $this->id;
@@ -166,5 +175,15 @@ class Order
     public function getChart()
     {
         return $this->chart;
+    }
+
+    public function setSharedWorkspace(SharedWorkspace $sws)
+    {
+        $this->setSharedWorkspace = $sws;
+    }
+
+    public function getSharedWorkspace()
+    {
+        return $this->sharedWorkspace;
     }
 }

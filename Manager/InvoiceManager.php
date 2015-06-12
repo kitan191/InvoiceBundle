@@ -25,18 +25,14 @@ class InvoiceManager
     public function create(Chart $chart)
     {
         $invoice = new Invoice();
-
-        foreach ($chart->getOrders() as $order) {
-
-        }
-
+        $invoice->setChart($chart);
         $this->om->persist($invoice);
         $this->om->flush();
     }
 
     public function send(Invoice $invoice)
     {
-
+        throw new \Exception('send invoice yolo !');
     }
 /*
     public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null)
@@ -104,6 +100,6 @@ class InvoiceManager
             )
         );
 
-        return $this->mailManager->send($subject, $body, array($owner), null, array('attachment' => $path));*/
-    }
+        return $this->mailManager->send($subject, $body, array($owner), null, array('attachment' => $path));
+    }*/
 }

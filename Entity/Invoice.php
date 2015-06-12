@@ -25,38 +25,35 @@ class Invoice
     private $isPayed = false;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="boolean", nullable=false)
      */
-    private $vatAmount;
+    private $invoiceNumber;
 
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $vatRate;
-
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $vatNumber;
-
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $amount;
-
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $total;
-
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $countryCode;
+    private $paymentMethod;
 
     /**
      * @ORM\OneToOne(targetEntity="FormaLibre\InvoiceBundle\Entity\Chart", inversedBy="invoice")
      * @ORM\JoinColumn(name="chart_id", referencedColumnName="id")
      **/
     private $chart;
+
+    public function setChart(Chart $chart)
+    {
+        $this->chart = $chart;
+    }
+
+    public function setPaymentMethod($paymentMethod)
+    {
+        $this->paymentMethod = $paymentMethod;
+    }
+
+    public function getPaymentMethod()
+    {
+        return $this->paymentMethod;
+    }
+
+    public function getChart()
+    {
+        return $this->chart;
+    }
 }

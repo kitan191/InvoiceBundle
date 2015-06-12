@@ -9,6 +9,7 @@ use Claroline\CoreBundle\Entity\User;
 use FormaLibre\InvoiceBundle\Form\SharedWorkspaceForm;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\Order;
+use FormaLibre\InvoiceBundle\Entity\Chart;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -17,7 +18,6 @@ use JMS\Payment\CoreBundle\PluginController\Result;
 use JMS\Payment\CoreBundle\Entity\Payment;
 use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
-use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use JMS\Payment\CoreBundle\Model\PaymentInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -51,6 +51,9 @@ class SharedWorkspaceController extends Controller
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
 
+    /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
+    private $sharedWorkspaceManager;
+
     /** @DI\Inject("formalibre.manager.payment_manager") */
     private $paymentManager;
 
@@ -72,16 +75,14 @@ class SharedWorkspaceController extends Controller
         $hasFreeTest = true;
 
         //it would be better if I was able to avoid creating a new order everytime...
-        if ($user !== 'anon.' && !$this->productManager->hasFreeTestMonth($user)) {
+        if ($user !== 'anon.' && !$this->sharedWorkspaceManager->hasFreeTestMonth($user)) {
             $hasFreeTest = false;
         }
 
         $order = new Order();
-
-        if ($user !== 'anon.') {
-            $order->setOwner($user);
-        }
-
+        $chart = new Chart();
+        $order->setChart($chart);
+        $this->em->persist($chart);
         $this->em->persist($order);
         $this->em->flush();
         $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
@@ -89,7 +90,16 @@ class SharedWorkspaceController extends Controller
 
         foreach ($products as $product) {
             //now we generate the forms !
-            $form = $this->createForm(new SharedWorkspaceForm($product, $this->router, $this->em, $this->translator, $order, $this->vatManager));
+            $form = $this->createForm(
+                new SharedWorkspaceForm(
+                    $product,
+                    $this->router,
+                    $this->em,
+                    $this->translator,
+                    $order,
+                    $this->vatManager
+                )
+            );
             $forms[] = array(
                 'form' => $form->createView(),
                 'product' => $product,
@@ -110,19 +120,17 @@ class SharedWorkspaceController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/payment/workspace/submit/{product}/Order/{order}/{swsId}",
+     *      "/payment/workspace/submit/{product}/Order/{order}/chart/{chart}",
      *      name="workspace_product_payment_submit",
      *      defaults={"swsId" = 0}
      * )
      *
      * @param $swsId the sharedWorkspaceId if it already exists (otherwise, if it's 0, we'll create a new one)
+     * @param $chartId the chartId if it already exists (otherwise, if it's 0, we'll create a new one)
      * @return Response
      */
-    public function submitWorkspaceAction(Product $product, Order $order, $swsId)
+    public function addOrderToChartAction(Product $product, Order $order, Chart $chart)
     {
-        $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
-            ->findOneByRemoteId($swsId);
-
         if ($order->getPaymentInstruction()) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:orderAlreadySubmitedException.html.twig'
@@ -144,8 +152,7 @@ class SharedWorkspaceController extends Controller
             $this->em,
             $this->translator,
             $order,
-            $this->vatManager,
-            $swsId
+            $this->vatManager
         ));
         $form->handleRequest($this->request);
 
@@ -170,15 +177,15 @@ class SharedWorkspaceController extends Controller
         }
 
         if ($instruction && $priceSolution) {
-            //refresh
             $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
             $order->setProduct($product);
-            if ($this->productManager->hasFreeTestMonth($order->getOwner())) $order->setHasDiscount(true);
             $order->setOwner($this->tokenStorage->getToken()->getUser());
             $this->ppc->createPaymentInstruction($instruction);
-            $order->setPaymentInstruction($instruction);
+            $chart->setPaymentInstruction($instruction);
             $order->setPriceSolution($priceSolution);
             $order->setAmount($instruction->getAmount());
+            $order->setChart($chart);
+            $this->em->persist($chart);
             $this->em->persist($order);
             $this->em->flush($order);
             $extData = $instruction->getExtendedData();
@@ -190,121 +197,6 @@ class SharedWorkspaceController extends Controller
         }
 
         throw new \Exception('Errors were found: ' . $form->getErrorsAsString());
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/payment_complete/workspace/{order}/{swsId}",
-     *      name="workspace_product_payment_complete",
-     *      defaults={"swsId" = 0}
-     * )
-
-     * @param $swsId the sharedWorkspaceId if it already exists (otherwise, if it's 0, we'll create a new one)
-     * @return Response
-     */
-    public function completePaymentAction(Order $order, $swsId)
-    {
-        $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
-            ->findOneByRemoteId($swsId);
-
-        if (
-            $order->getOwner() !== $this->tokenStorage->getToken()->getUser()
-            && $this->authorization->isGranted('ROLE_ADMIN') === false
-        ) {
-            throw new AccessDeniedException();
-        }
-
-        $instruction = $order->getPaymentInstruction();
-
-        if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
-            $payment = $this->ppc->createPayment(
-                $instruction->getId(),
-                $instruction->getAmount() - $instruction->getDepositedAmount()
-            );
-        } else {
-            $payment = $pendingTransaction->getPayment();
-        }
-
-        $result = $this->ppc->approveAndDeposit($payment->getId(), $payment->getTargetAmount());
-
-        if (Result::STATUS_PENDING === $result->getStatus()) {
-            $ex = $result->getPluginException();
-
-            if ($ex instanceof ActionRequiredException) {
-                $action = $ex->getAction();
-                if ($action instanceof VisitUrl) {
-                    return new RedirectResponse($action->getUrl());
-                }
-                throw $ex;
-            }
-
-            $content = $this->renderView(
-                'FormaLibreInvoiceBundle:errors:paymentPendingException.html.twig'
-            );
-
-            return new Response($content);
-
-        } else if (Result::STATUS_SUCCESS !== $result->getStatus()) {
-            throw new \RuntimeException('Transaction was not successful: '. $result->getReasonCode());
-        }
-
-        try {
-            $duration = $order->hasDiscount() ?
-                $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
-                $order->getPriceSolution()->getMonthDuration();
-
-            $this->productManager->executeWorkspaceOrder(
-                $order,
-                $duration,
-                $sws
-            );
-        } catch (PaymentHandlingFailedException $e) {
-            $content = $this->renderView(
-                'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
-            );
-
-            return new Response($content);
-        }
-
-        return new RedirectResponse($this->router->generate('invoice_show_all', array()));
-    }
-
-
-    /**
-     * @EXT\Route(
-     *      "/payment_pending/workspace/{order}",
-     *      name="workspace_product_payment_pending"
-     * )
-     * @EXT\Template
-     *
-     * @return Response
-     */
-    public function pendingPaymentAction(Order $order)
-    {
-        if ($order->getOwner() !== $this->tokenStorage->getToken()->getUser()) {
-            throw new AccessDeniedException();
-        }
-
-        $instruction = $order->getPaymentInstruction();
-        $extra = $instruction->getExtendedData();
-        $order->setExtendedData(
-            array(
-                'communication' => $extra->get('communication'),
-                'shared_workspace_id' => $extra->get('shared_workspace_id')
-            )
-        );
-        $this->em->persist($order);
-        $this->em->flush();
-        $this->productManager->sendBankTransferPendingMail($order);
-        $freeMonthAmount = $order->hasDiscount() ? $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'): 0;
-        if ($order->hasDiscount()) $this->productManager->useFreeTestMonth($order->getOwner());
-
-        return array(
-            'communication' => $extra->get('communication'),
-            'order' => $order,
-            'freeMonthAmount' => $freeMonthAmount,
-            'hasFreeMonth' => $order->hasDiscount()
-        );
     }
 
     /**
@@ -340,63 +232,12 @@ class SharedWorkspaceController extends Controller
             $this->em,
             $this->translator,
             $order,
-            $this->vatManager,
-            $sws->getId()
+            $this->vatManager
         );
         $form = $this->createForm($formType)->createView();
         $workspace = $this->productManager->getWorkspaceData($sws);
 
         return array('form' => $form, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/payment_cancel",
-     *      name="workspace_product_payment_cancel"
-     * )
-     * @EXT\Template
-     *
-     * @return Response
-     */
-    public function cancelAction(Order $order)
-    {
-        return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/bank_transfer_validate/{payment}",
-     *      name="formalibre_validate_bank_transfer",
-     *      defaults={"swsId" = 0}
-     * )
-     * @EXT\Template
-     * @Security("has_role('ROLE_ADMIN')")
-     *
-     * @return Response
-     */
-    public function validateBankTransferAction(Payment $payment)
-    {
-        //the admin is the only one able to do this.
-        if (!$this->authorization->isGranted('ROLE_ADMIN')) {
-            throw new \AccessDeniedException();
-        }
-
-        $order = $this->paymentManager->getOrderFromPayment($payment);
-        $extra = $order->getExtendedData();
-        $sws = $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
-            ->find($extra['shared_workspace_id']);
-        $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
-        $duration = $order->hasDiscount() ?
-            $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
-            $order->getPriceSolution()->getMonthDuration();
-        $this->productManager->executeWorkspaceOrder(
-            $order,
-            $duration,
-            $sws
-        );
-        $route = $this->router->generate('admin_invoice_open_pending');
-
-        return new RedirectResponse($route);
     }
 
     /**

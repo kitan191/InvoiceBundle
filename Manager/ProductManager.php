@@ -86,34 +86,6 @@ class ProductManager
         throw new PaymentHandlingFailedException();
     }
 
-    public function sendBankTransferPendingMail(Order $order)
-    {
-        $user = $order->getOwner();
-        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'invoice');
-        $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
-        $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
-        $companyField = $fieldRepo->findOneByName('formalibre_company_name');
-        $field = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $companyField));
-        $company = $field ? $field->getValue(): null;
-        $instruction = $order->getPaymentInstruction();
-        $extra = $instruction->getExtendedData();
-        $hasFreeMonth = $order->hasDiscount();
-        $freeMonthAmount = $hasFreeMonth ? $this->ch->getParameter('formalibre_test_month_duration'): 0;
-
-        $body = $this->container->get('templating')->render(
-            'FormaLibreInvoiceBundle:email:confirm_bank_transfer.html.twig',
-            array(
-                'order' => $order,
-                'company' => $company,
-                'communication' => $extra->get('communication'),
-                'freeMonthAmount' => $freeMonthAmount,
-                'hasFreeMonth' => $hasFreeMonth
-            )
-        );
-
-        return $this->mailManager->send($subject, $body, array($user));
-    }
-
     public function sendMailError(SharedWorkspace $sws, $serverOutput = null, $targetUrl = null)
     {
         $subject = 'Erreur lors de la gestion des espaces commerciaux.';

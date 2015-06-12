@@ -61,15 +61,6 @@ class SharedWorkspace
      */
     private $isTest = false;
 
-    /**
-     * @ORM\ManyToOne(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product",
-     *     inversedBy="sharedWorkspaces"
-     * )
-     * @ORM\JoinColumn(name="product_id", onDelete="SET NULL")
-     */
-    private $product;
-
     public function getId()
     {
         return $this->id;

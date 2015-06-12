@@ -37,15 +37,6 @@ class Product
     /**
      * @ORM\OneToMany(
      *     mappedBy="product",
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace",
-     *     cascade={"persist"}
-     * )
-     */
-    private $sharedWorkspaces;
-
-    /**
-     * @ORM\OneToMany(
-     *     mappedBy="product",
      *     targetEntity="FormaLibre\InvoiceBundle\Entity\PriceSolution",
      *     cascade={"persist"}
      * )
@@ -54,7 +45,6 @@ class Product
 
     public function __construct()
     {
-        $this->sharedWorkspace = new ArrayCollection();
         $this->priceSolutions = new ArrayCollection();
     }
 

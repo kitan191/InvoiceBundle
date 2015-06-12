@@ -12,3 +12,8 @@ admin_invoice_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/AdministrationController.php"
     type: annotation
     prefix: /
+
+chart_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/ChartController.php"
+    type: annotation
+    prefix: /

@@ -29,8 +29,7 @@ class SharedWorkspaceForm extends AbstractType
         $em,
         $translator,
         Order $order,
-        VatManager $vatManager,
-        $swsId = 0
+        VatManager $vatManager
     )
     {
         $this->product = $product;
@@ -38,7 +37,6 @@ class SharedWorkspaceForm extends AbstractType
         $this->em = $em;
         $this->translator = $translator;
         $this->order = $order;
-        $this->swsId = $swsId;
         $this->vatManager = $vatManager;
         $this->communication = $this->getCommunication();
     }
@@ -59,13 +57,13 @@ class SharedWorkspaceForm extends AbstractType
         );
 
         $returnSuccessUrl = $this->router->generate(
-            'workspace_product_payment_complete',
-            array('order' => $this->order->getId(), 'swsId' => $this->swsId), true
+            'chart_payment_complete',
+            array('chart' => $this->order->getChart()->getId()), true
         );
 
         $pendingUrl = $this->router->generate(
-            'workspace_product_payment_pending',
-            array('order' => $this->order->getId()), true
+            'chart_payment_pending',
+            array('chart' => $this->order->getChart()->getId()), true
         );
 
         $builder->add(
@@ -99,24 +97,22 @@ class SharedWorkspaceForm extends AbstractType
                         'paypal_express_checkout' => array(
                             'label' => '',
                             'return_url' => $returnSuccessUrl,
-                            'cancel_url' => $this->router->generate('workspace_product_payment_cancel', array(
-                                'order' => $this->product->getCode(),
+                            'cancel_url' => $this->router->generate('chart_payment_cancel', array(
+                                'chart' => $this->order->getChart(),
                             ), true),
                             'checkout_params' => array(
                                 //'L_PAYMENTREQUEST_0_AMT0' => 0,
                                 'L_PAYMENTREQUEST_0_DESC0' => $detailsInfo,
                                 'L_PAYMENTREQUEST_0_QTY0' => '1'
-                            ),
-                            'shared_workspace_id' => $this->swsId
+                            )
                         ),
                         'bank_transfer' => array(
                             'return_url' => $returnSuccessUrl,
                             'pending_url' => $pendingUrl,
-                            'cancel_url' => $this->router->generate('workspace_product_payment_cancel', array(
-                                'order' => $this->product->getCode(),
+                            'cancel_url' => $this->router->generate('chart_payment_cancel', array(
+                                'chart' => $this->order->getChart(),
                             ), true),
-                            'communication' => $this->communication,
-                            'shared_workspace_id' => $this->swsId
+                            'communication' => $this->communication
                         )
                     )
                 )

@@ -132,6 +132,42 @@ class AdministrationController extends Controller
         $response->headers->set('Connection', 'close');
 
         return $response;
+    }
 
+    /**
+     * @EXT\Route(
+     *      "/bank_transfer_validate/{payment}",
+     *      name="formalibre_validate_bank_transfer",
+     *      defaults={"swsId" = 0}
+     * )
+     * @EXT\Template
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function validateBankTransferAction(Payment $payment)
+    {
+        //the admin is the only one able to do this.
+        if (!$this->authorization->isGranted('ROLE_ADMIN')) {
+            throw new \AccessDeniedException();
+        }
+
+/*
+        $order = $this->paymentManager->getOrderFromPayment($payment);
+        $extra = $order->getExtendedData();
+        $sws = $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
+            ->find($extra['shared_workspace_id']);
+        $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
+        $duration = $order->hasDiscount() ?
+            $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
+            $order->getPriceSolution()->getMonthDuration();
+        $this->productManager->executeWorkspaceOrder(
+            $order,
+            $duration,
+            $sws
+        );
+        $route = $this->router->generate('admin_invoice_open_pending');
+
+        return new RedirectResponse($route);*/
     }
 }
