@@ -6,6 +6,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
+use FormaLibre\InvoiceBundle\Entity\Chart;
+use JMS\Payment\CoreBundle\PluginController\Result;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
+use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 
 class ChartController extends Controller
 {
@@ -18,7 +25,7 @@ class ChartController extends Controller
     /** @DI\Inject("security.token_storage") */
     private $tokenStorage;
 
-    /** @DI\Inject("claroline.manager.chart_manager") */
+    /** @DI\Inject("formalibre.manager.chart_manager") */
     private $chartManager;
 
     /**

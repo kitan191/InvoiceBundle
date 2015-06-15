@@ -14,10 +14,7 @@ use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use JMS\Payment\CoreBundle\PluginController\Result;
 use JMS\Payment\CoreBundle\Entity\Payment;
-use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
-use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 use JMS\Payment\CoreBundle\Model\PaymentInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -131,7 +128,7 @@ class SharedWorkspaceController extends Controller
      */
     public function addOrderToChartAction(Product $product, Order $order, Chart $chart)
     {
-        if ($order->getPaymentInstruction()) {
+        if ($chart->getPaymentInstruction()) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:orderAlreadySubmitedException.html.twig'
             );
@@ -179,7 +176,7 @@ class SharedWorkspaceController extends Controller
         if ($instruction && $priceSolution) {
             $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
             $order->setProduct($product);
-            $order->setOwner($this->tokenStorage->getToken()->getUser());
+            $chart->setOwner($this->tokenStorage->getToken()->getUser());
             $this->ppc->createPaymentInstruction($instruction);
             $chart->setPaymentInstruction($instruction);
             $order->setPriceSolution($priceSolution);
@@ -187,7 +184,7 @@ class SharedWorkspaceController extends Controller
             $order->setChart($chart);
             $this->em->persist($chart);
             $this->em->persist($order);
-            $this->em->flush($order);
+            $this->em->flush();
             $extData = $instruction->getExtendedData();
 
             return new RedirectResponse($extData->get('return_url'));

@@ -87,6 +87,11 @@ class Order
         return $this->id;
     }
 
+    public function setProduct(Product $product)
+    {
+        $this->product = $product;
+    }
+
     public function getProduct()
     {
         return $this->product;
@@ -95,6 +100,11 @@ class Order
     public function getPriceSolution()
     {
         return $this->priceSolution;
+    }
+
+    public function setPriceSolution($priceSolution)
+    {
+        $this->priceSolution = $priceSolution;
     }
 
     public function setCountryCode($code)
