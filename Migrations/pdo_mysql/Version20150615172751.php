@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/06/12 03:12:39
+ * Generation date: 2015/06/15 05:27:52
  */
-class Version20150612151239 extends AbstractMigration
+class Version20150615172751 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -21,6 +21,7 @@ class Version20150612151239 extends AbstractMigration
                 creation_date DATETIME NOT NULL, 
                 validation_date DATETIME DEFAULT NULL, 
                 ipAddress VARCHAR(255) DEFAULT NULL, 
+                extendedData LONGTEXT DEFAULT NULL COMMENT '(DC2Type:json_array)', 
                 paymentInstruction_id INT DEFAULT NULL, 
                 UNIQUE INDEX UNIQ_72B18A2CFD913E4D (paymentInstruction_id), 
                 INDEX IDX_72B18A2C7E3C61F9 (owner_id), 
@@ -74,6 +75,7 @@ class Version20150612151239 extends AbstractMigration
             DROP owner_id, 
             DROP ipAddress, 
             DROP countryCode, 
+            DROP extendedData, 
             DROP creation_date, 
             DROP validation_date, 
             DROP paymentInstruction_id, 
@@ -137,6 +139,7 @@ class Version20150612151239 extends AbstractMigration
             ADD owner_id INT DEFAULT NULL, 
             ADD ipAddress VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
             ADD countryCode VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
+            ADD extendedData LONGTEXT DEFAULT NULL COLLATE utf8_unicode_ci COMMENT '(DC2Type:json_array)', 
             ADD creation_date DATETIME NOT NULL, 
             ADD validation_date DATETIME DEFAULT NULL, 
             ADD paymentInstruction_id INT DEFAULT NULL, 

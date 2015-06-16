@@ -62,6 +62,11 @@ class Chart
      **/
     private $orders;
 
+    /**
+     * @ORM\Column(type="json_array", nullable=true)
+     */
+    protected $extendedData;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -125,5 +130,15 @@ class Chart
     public function getOrders()
     {
         return $this->orders;
+    }
+
+    public function setExtendedData(array $data)
+    {
+        $this->extendedData = $data;
+    }
+
+    public function getExtendedData()
+    {
+        return $this->extendedData;
     }
 }

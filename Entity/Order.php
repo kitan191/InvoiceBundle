@@ -64,11 +64,6 @@ class Order
     private $amount;
 
     /**
-     * @ORM\Column(type="json_array", nullable=true)
-     */
-    protected $extendedData;
-
-    /**
      * @ORM\Column(type="boolean", nullable=false)
      */
     private $hasDiscount = false;
@@ -155,16 +150,6 @@ class Order
     public function getAmount()
     {
         return $this->amount;
-    }
-
-    public function setExtendedData(array $data)
-    {
-        $this->extendedData = $data;
-    }
-
-    public function getExtendedData()
-    {
-        return $this->extendedData;
     }
 
     public function setHasDiscount($bool)

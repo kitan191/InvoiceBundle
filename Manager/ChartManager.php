@@ -74,7 +74,7 @@ class ChartManager
 
     public function sendBankTransferPendingMail(Chart $chart)
     {
-        throw new \Exception('send validation mail');
+        //throw new \Exception('send validation mail');
         /*
         $user = $order->getOwner();
         $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'invoice');
