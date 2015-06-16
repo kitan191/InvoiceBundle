@@ -112,6 +112,11 @@ class Chart
         $this->ipAddress = $ip;
     }
 
+    public function getIpadress()
+    {
+        return $this->ipAdress;
+    }
+
     public function getCreationDate()
     {
         return $this->creationDate;
@@ -140,5 +145,15 @@ class Chart
     public function getExtendedData()
     {
         return $this->extendedData;
+    }
+
+    public function setIpAdress($ipAdress)
+    {
+        $this->ipAdress = $ipAdress;
+    }
+
+    public function getIpAdress()
+    {
+        return $this->ipAdress;
     }
 }

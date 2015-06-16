@@ -39,29 +39,31 @@
                 Nous vous confirmons la réservation de votre espace d'activité. Vous trouverez une copie des informations relatives à votre achat ci-dessous.
             </div>
             <div class="payment-type">
-                Numéro de commande: {{ order.getId() }}
+                Numéro de commande: {{ chart.getInvoice().getId() }}
                 <ul style="list-style-type: none;">
-                    <li> {{ order.getOwner().getLastName() }} {{ order.getOwner().getFirstName() }} </li>
+                    <li> {{ chart.getOwner().getLastName() }} {{ chart.getOwner().getFirstName() }} </li>
                     {% if company is defined %} <li> {{ company}} </li> {% endif %}
-                    <li> Date de commande: {{ order.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
-                    <li> Mode de paiment: {{ order.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }} </li>
+                    <li> Date de commande: {{ chart.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
+                    <li> Mode de paiment: {{ chart.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }} </li>
                 </ul>
             </div>
             <div class="item-description">
                 Description du produit:
                 <ul style="list-style-type: none;">
-                    <li>Nom: {{ order.getProduct().getCode()|trans({}, 'invoice') }}</li>
-                    <li>Nombre d'utilisateur: {{ order.product.details.max_users }}</li>
-                    <li>Nombre de ressource: {{ order.product.details.max_resources }}</li>
-                    <li>Espace de stockage: {{ order.product.details.max_storage }} </li>
-                    <li>Durée: {{ order.getPriceSolution().getMonthDuration() + freeMonthAmount }} mois </li>
+                    {% for order in chart.getOrders() %}
+                        <li>Nom: {{ order.getProduct().getCode()|trans({}, 'invoice') }}</li>
+                        <li>Nombre d'utilisateur: {{ order.product.details.max_users }}</li>
+                        <li>Nombre de ressource: {{ order.product.details.max_resources }}</li>
+                        <li>Espace de stockage: {{ order.product.details.max_storage }} </li>
+                        <li>Durée: {{ order.getPriceSolution().getMonthDuration() + freeMonthAmount }} mois </li>
+                    {% endfor %}
                 </ul>
             </div>
             <div class="url-container">
                 Informations concernant le paiement par virement:
                 <ul style="list-style-type: none;">
                     <li> Forma-Libre S.A., Chemin du cyclotron, 6, 1345, Louvain-la-Neuve, Belgique </li>
-                    <li> Montant: {{ order.getAmount()|format_price() }} EUR </li>
+                    <li> Montant: {{ chart.getAmount()|format_price() }} EUR </li>
                     <li> Communication structurée: {{ communication|format_structured_communication() }} </li>
                     <li> Numéro de compte: BE36 7320 3521 4081 </li>
                     <li> BIC: CREGBEBB </li>

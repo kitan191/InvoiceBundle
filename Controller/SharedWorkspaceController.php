@@ -118,8 +118,7 @@ class SharedWorkspaceController extends Controller
     /**
      * @EXT\Route(
      *      "/payment/workspace/submit/{product}/Order/{order}/chart/{chart}",
-     *      name="workspace_product_payment_submit",
-     *      defaults={"swsId" = 0}
+     *      name="workspace_product_payment_submit"
      * )
      *
      * @param $swsId the sharedWorkspaceId if it already exists (otherwise, if it's 0, we'll create a new one)
@@ -161,7 +160,7 @@ class SharedWorkspaceController extends Controller
                 $redirectRoute =  $this->router->generate('workspace_product_payment_submit', array(
                     'order' => $order->getId(),
                     'product' => $product->getId(),
-                    'swsId' => $swsId
+                    'chart' => $chart->getId()
                 ));
                 $this->session->set('redirect_route', $redirectRoute);
                 $route = $this->router->generate('claro_security_login', array());
@@ -179,8 +178,8 @@ class SharedWorkspaceController extends Controller
             $chart->setOwner($this->tokenStorage->getToken()->getUser());
             $this->ppc->createPaymentInstruction($instruction);
             $chart->setPaymentInstruction($instruction);
+            $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
             $order->setPriceSolution($priceSolution);
-            $order->setAmount($instruction->getAmount());
             $order->setChart($chart);
             $this->em->persist($chart);
             $this->em->persist($order);

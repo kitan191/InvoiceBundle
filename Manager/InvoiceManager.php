@@ -3,8 +3,8 @@
 namespace FormaLibre\InvoiceBundle\Manager;
 
 use JMS\DiExtraBundle\Annotation as DI;
-use Claroline\FormaLibre\InvoiceBundle\Entity\Chart;
-use Claroline\FormaLibre\InvoiceBundle\Entity\Invoice;
+use FormaLibre\InvoiceBundle\Entity\Chart;
+use FormaLibre\InvoiceBundle\Entity\Invoice;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 
 /**
@@ -14,18 +14,29 @@ class InvoiceManager
 {
     /**
      * @DI\InjectParams({
-     *     "om" = @DI\Inject("claroline.persistence.object_manager")
+     *     "om"         = @DI\Inject("claroline.persistence.object_manager"),
+     *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager")
      * })
      */
-    public function __construct(ObjectManager $om)
+    public function __construct(ObjectManager $om, VATManager $vatManager)
     {
         $this->om = $om;
+        $this->vatManager = $vatManager;
     }
 
     public function create(Chart $chart)
     {
         $invoice = new Invoice();
         $invoice->setChart($chart);
+        $user = $chart->getOwner();
+        $vatRate = $this->vatManager->getVatFromOwner($user) ?
+            0: $this->vatManager->getVATRate($this->vatManager->getCountryCodeFromOwner($user));
+        $invoice->setVatRate($vatRate);
+
+        foreach ($chart->getOrders() as $order) {
+
+        }
+
         $this->om->persist($invoice);
         $this->om->flush();
     }

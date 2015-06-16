@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/06/15 05:27:52
+ * Generation date: 2015/06/16 05:25:50
  */
-class Version20150615172751 extends AbstractMigration
+class Version20150616172549 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -34,6 +34,11 @@ class Version20150615172751 extends AbstractMigration
                 chart_id INT DEFAULT NULL, 
                 isPayed TINYINT(1) NOT NULL, 
                 invoiceNumber TINYINT(1) NOT NULL, 
+                vatAmount DOUBLE PRECISION DEFAULT NULL, 
+                vatRate DOUBLE PRECISION DEFAULT NULL, 
+                amount DOUBLE PRECISION DEFAULT NULL, 
+                totalAmount DOUBLE PRECISION DEFAULT NULL, 
+                vatNumber VARCHAR(255) DEFAULT NULL, 
                 UNIQUE INDEX UNIQ_10E984CDBEF83E0A (chart_id), 
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
@@ -73,8 +78,12 @@ class Version20150615172751 extends AbstractMigration
             ADD chart_id INT DEFAULT NULL, 
             ADD shared_workspace_id INT DEFAULT NULL, 
             DROP owner_id, 
+            DROP vatAmount, 
+            DROP vatRate, 
             DROP ipAddress, 
             DROP countryCode, 
+            DROP vatNumber, 
+            DROP amount, 
             DROP extendedData, 
             DROP creation_date, 
             DROP validation_date, 
@@ -137,8 +146,12 @@ class Version20150615172751 extends AbstractMigration
         $this->addSql("
             ALTER TABLE formalibre__order 
             ADD owner_id INT DEFAULT NULL, 
+            ADD vatAmount DOUBLE PRECISION DEFAULT NULL, 
+            ADD vatRate DOUBLE PRECISION DEFAULT NULL, 
             ADD ipAddress VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
             ADD countryCode VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
+            ADD vatNumber VARCHAR(255) DEFAULT NULL COLLATE utf8_unicode_ci, 
+            ADD amount DOUBLE PRECISION DEFAULT NULL, 
             ADD extendedData LONGTEXT DEFAULT NULL COLLATE utf8_unicode_ci COMMENT '(DC2Type:json_array)', 
             ADD creation_date DATETIME NOT NULL, 
             ADD validation_date DATETIME DEFAULT NULL, 

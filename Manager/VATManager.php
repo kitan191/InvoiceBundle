@@ -30,6 +30,16 @@ class VATManager
         return $vatFieldValue ? $vatFieldValue->getValue(): null;
     }
 
+    public function getCountryCodeFromOwner(User $user)
+    {
+        $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
+        $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
+        $vatField = $fieldRepo->findOneByName('formalibre_country');
+        $vatFieldValue = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $vatField));
+
+        return $vatFieldValue ? $vatFieldValue->getValue(): null;
+    }
+
     /**
      * is a vat number valid ?
      */

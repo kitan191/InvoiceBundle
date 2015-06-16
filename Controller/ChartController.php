@@ -7,6 +7,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use FormaLibre\InvoiceBundle\Entity\Chart;
+use FormaLibre\InvoiceBundle\Entity\Invoice;
 use JMS\Payment\CoreBundle\PluginController\Result;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -28,11 +29,13 @@ class ChartController extends Controller
     /** @DI\Inject("formalibre.manager.chart_manager") */
     private $chartManager;
 
+    /** @DI\Inject("formalibre.manager.invoice_manager") */
+    private $invoiceManager;
+
     /**
      * @EXT\Route(
      *      "/payment_complete/chart/{chart}",
-     *      name="chart_payment_complete",
-     *      defaults={"swsId" = 0}
+     *      name="chart_payment_complete"
      * )
      * @return Response
      */
@@ -46,6 +49,7 @@ class ChartController extends Controller
         }
 
         $instruction = $chart->getPaymentInstruction();
+        $this->invoiceManager->create($chart);
 
         if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
             $payment = $this->ppc->createPayment(

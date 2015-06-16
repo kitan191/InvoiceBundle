@@ -44,26 +44,6 @@ class Order
     private $priceSolution;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $vatAmount;
-
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $vatRate;
-
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $vatNumber;
-
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $amount;
-
-    /**
      * @ORM\Column(type="boolean", nullable=false)
      */
     private $hasDiscount = false;
@@ -100,56 +80,6 @@ class Order
     public function setPriceSolution($priceSolution)
     {
         $this->priceSolution = $priceSolution;
-    }
-
-    public function setCountryCode($code)
-    {
-        $this->countryCode = $code;
-    }
-
-    public function setVatAmount($amount)
-    {
-        $this->vatAmount = $amount;
-    }
-
-    public function getVatAmount()
-    {
-        return $this->vatAmount;
-    }
-
-    public function setVatRate($vatRate)
-    {
-        $this->vatRate = $vatRate;
-    }
-
-    public function getVatRate()
-    {
-        return $this->vatRate;
-    }
-
-    public function setVatNumber($number)
-    {
-        $this->vatNumber = $number;
-    }
-
-    public function getVatNumber()
-    {
-        return $this->vatNumber;
-    }
-
-    public function setAmount($amount)
-    {
-        $this->amount = $amount;
-    }
-
-    public function setIsExecuted($boolean)
-    {
-        $this->isExecuted = true;
-    }
-
-    public function getAmount()
-    {
-        return $this->amount;
     }
 
     public function setHasDiscount($bool)

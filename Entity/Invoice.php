@@ -27,9 +27,7 @@ class Invoice
     /**
      * @ORM\Column(type="boolean", nullable=false)
      */
-    private $invoiceNumber;
-
-    private $paymentMethod;
+    private $invoiceNumber = 0;
 
     /**
      * @ORM\OneToOne(targetEntity="FormaLibre\InvoiceBundle\Entity\Chart", inversedBy="invoice")
@@ -37,23 +35,58 @@ class Invoice
      **/
     private $chart;
 
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $vatAmount;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $vatRate;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $amount;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalAmount;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $vatNumber;
+
+    public function setVatNumber($number)
+    {
+        $this->vatNumber = $number;
+    }
+
+    public function getVatNumber()
+    {
+        return $this->vatNumber;
+    }
+
     public function setChart(Chart $chart)
     {
         $this->chart = $chart;
     }
 
-    public function setPaymentMethod($paymentMethod)
-    {
-        $this->paymentMethod = $paymentMethod;
-    }
-
-    public function getPaymentMethod()
-    {
-        return $this->paymentMethod;
-    }
-
     public function getChart()
     {
         return $this->chart;
+    }
+
+    public function setVatRate($vatRate)
+    {
+        $this->vatRate = $vatRate;
+    }
+
+    public function getVatRate()
+    {
+        return $this->vatRate;
     }
 }
