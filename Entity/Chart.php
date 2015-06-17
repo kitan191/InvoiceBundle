@@ -151,9 +151,4 @@ class Chart
     {
         $this->ipAdress = $ipAdress;
     }
-
-    public function getIpAdress()
-    {
-        return $this->ipAdress;
-    }
 }

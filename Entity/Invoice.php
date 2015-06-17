@@ -25,7 +25,7 @@ class Invoice
     private $isPayed = false;
 
     /**
-     * @ORM\Column(type="boolean", nullable=false)
+     * @ORM\Column(type="integer", nullable=false)
      */
     private $invoiceNumber = 0;
 
@@ -60,6 +60,11 @@ class Invoice
      */
     private $vatNumber;
 
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $paymentSystemName;
+
     public function setVatNumber($number)
     {
         $this->vatNumber = $number;
@@ -88,5 +93,50 @@ class Invoice
     public function getVatRate()
     {
         return $this->vatRate;
+    }
+
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+    }
+
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    public function setTotalAmount($amount)
+    {
+        $this->totalAmount = $amount;
+    }
+
+    public function getTotalAmount()
+    {
+        return $this->totalAmount;
+    }
+
+    public function setVatAmount($vatAmount)
+    {
+        $this->vatAmount = $vatAmount;
+    }
+
+    public function getVatAmount()
+    {
+        return $this->vatAmount;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setPaymentSystemName($paymentSystemName)
+    {
+        $this->paymentSystemName = $paymentSystemName;
+    }
+
+    public function getPaymentSystemName()
+    {
+        return $this->paymentSystemName;
     }
 }

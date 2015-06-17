@@ -217,8 +217,6 @@ class SharedWorkspaceManager
 
     public function executeWorkspaceOrder(Order $order, $duration, $sws = null, $isTestOrder = false)
     {
-        $this->endOrder($order, !$isTestOrder);
-
         if ($sws === null) {
             $sws = $this->addRemoteWorkspace($order, $duration);
         } else {

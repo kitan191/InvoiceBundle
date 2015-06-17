@@ -40,7 +40,7 @@ class InvoiceExtension extends \Twig_Extension
         return array(
             new \Twig_SimpleFilter('format_structured_communication', array($this, 'formatCommunication')),
             new \Twig_SimpleFilter('format_price', array($this, 'formatPrice')),
-            new \Twig_SimpleFilter('get_user_company', array($this, 'getUserCompany'))
+            new \Twig_SimpleFunction('get_facet_value', array($this, 'getFieldValue'))
         );
     }
 
@@ -64,13 +64,13 @@ class InvoiceExtension extends \Twig_Extension
         return number_format($number, 2, ',', '.');
     }
 
-    public function getUserCompany(User $user)
+    private function getFieldValue(User $user, $fieldName)
     {
         $facetManager = $this->container->get('claroline.manager.facet_manager');
         $ffvs = $facetManager->getFieldValuesByUser($user);
 
         foreach ($ffvs as $ffv) {
-            if ($ffv->getFieldFacet()->getName() === 'formalibre_company_name') {
+            if ($ffv->getFieldFacet()->getName() === $fieldName) {
                 return $facetManager->getDisplayedValue($ffv);
             }
         }

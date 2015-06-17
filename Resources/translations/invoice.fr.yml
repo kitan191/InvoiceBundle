@@ -49,3 +49,14 @@ renew: Renouveller
 buy: Acheter
 free_test: Essayer gratuitement
 my_invoices: Mes factures
+code: Code
+quantity: Quantité
+unit_price: Prix unitaire
+total: Total
+net_total: Total HT
+vat_rate: Taux TVA
+vat_total: Total TVA
+vati_total: Total TVAC
+invoice_number: Facture n°
+invoice_date: Date de facture
+payment_method: Méthode de paiement

@@ -1,0 +1,9 @@
+<div class="payment-type">
+    {{ 'invoice_number'|trans({}, 'invoice') }}: {{ chart.getInvoice().getId() }}
+    <ul style="list-style-type: none;">
+        <li> {{ chart.getOwner().getLastName() }} {{ chart.getOwner().getFirstName() }} </li>
+        {% if company is defined %} <li> {{ company }} </li> {% endif %}
+        <li> {{ 'invoice_date'|trans({}, 'invoice' ) }}: {{ chart.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
+        <li> {{ 'payment_method'|trans({}, 'invoice') }}: {{ chart.getInvoice().getPaymentSystemName()|trans({}, 'invoice') }} </li>
+    </ul>
+</div>

@@ -28,56 +28,9 @@
 <div class="section-content">
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="top default-block top-margin">
-                <img style="max-width:10%; height: auto; margin-bottom: 2%"src="{{ asset('bundles/formalibreinvoice/images/invoice_logo.jpg', absolute=true) }}" class="logo" alt="logo_formalibre"/>
-                <a href="{{ path('invoice_show_all') }}" class="btn btn-primary pull-right"> {{ 'my_invoices'|trans({}, 'invoice') }} </a>
-            </div>
-            <div class="title">
-                Merci de votre Réservation.
-            </div>
-            <div class="credit">
-                Nous vous confirmons la réservation de votre espace d'activité. Vous trouverez une copie des informations relatives à votre achat ci-dessous.
-            </div>
-            <div class="payment-type">
-                Numéro de commande: {{ chart.getInvoice().getId() }}
-                <ul style="list-style-type: none;">
-                    <li> {{ chart.getOwner().getLastName() }} {{ chart.getOwner().getFirstName() }} </li>
-                    {% if company is defined %} <li> {{ company}} </li> {% endif %}
-                    <li> Date de commande: {{ chart.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
-                    <li> Mode de paiment: {{ chart.getPaymentInstruction().getPaymentSystemName()|trans({}, 'invoice') }} </li>
-                </ul>
-            </div>
-            <div class="item-description">
-                Description du produit:
-                <ul style="list-style-type: none;">
-                    {% for order in chart.getOrders() %}
-                        <li>Nom: {{ order.getProduct().getCode()|trans({}, 'invoice') }}</li>
-                        <li>Nombre d'utilisateur: {{ order.product.details.max_users }}</li>
-                        <li>Nombre de ressource: {{ order.product.details.max_resources }}</li>
-                        <li>Espace de stockage: {{ order.product.details.max_storage }} </li>
-                        <li>Durée: {{ order.getPriceSolution().getMonthDuration() + freeMonthAmount }} mois </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="url-container">
-                Informations concernant le paiement par virement:
-                <ul style="list-style-type: none;">
-                    <li> Forma-Libre S.A., Chemin du cyclotron, 6, 1345, Louvain-la-Neuve, Belgique </li>
-                    <li> Montant: {{ chart.getAmount()|format_price() }} EUR </li>
-                    <li> Communication structurée: {{ communication|format_structured_communication() }} </li>
-                    <li> Numéro de compte: BE36 7320 3521 4081 </li>
-                    <li> BIC: CREGBEBB </li>
-                    <li> CBC banque-assurance </li>
-                    <li> Avenue Paul Delvaux, n°1, 1340, Ottiginies, Belgique </li>
-                </ul>
-                Votre espace d'activité vous sera ouvert dans un délai de 5 jours ouvrables maximum. Après réception de votre virement, vous serez averti via mail de l'ouverture de celui-ci
-            </div>
-            {% if hasFreeMonth %} 1 mois gratuit supplémentaire. {% endif %}
-            <div class="footer" style="text-align:center;">
-                <small>
-                    {{ 'invoice_footer'|trans({}, 'invoice')|raw }}
-                </small>
-            </div>
+            {% include 'FormaLibreInvoiceBundle:Invoice:invoice.html.twig'
+                with {'communication': communication, 'chart': chart}
+            %}
         </div>
     </div>
 </div>

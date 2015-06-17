@@ -61,24 +61,6 @@ class ProductManager
         return $this->productRepository->findByType($type);
     }
 
-    public function endOrder(Order $order, $isPayed = true)
-    {
-        $order->setCountryCode($this->vatManager->getClientLocation());
-        $order->setIpAddress($_SERVER['REMOTE_ADDR']);
-        $order->setOwner($order->getOwner());
-
-        if ($isPayed) {
-            //if it's a company, don't add the vat
-
-            //otherwise feel free to do it
-            $order->setVatRate($this->vatManager->getVATRate($this->vatManager->getClientLocation()));
-            $order->setVatAmount($this->vatManager->getVAT($order->getAmount()));
-            $order->setAmount($order->getPriceSolution()->getPrice());
-        }
-        //add the vat number here ()
-        $order->setIsExecuted(true);
-    }
-
     public function handleError(SharedWorkspace $sws, $serverOutput = null, $target = null)
     {
         $this->sendMailError($sws, $serverOutput, $target);

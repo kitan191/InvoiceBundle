@@ -57,6 +57,11 @@ class Order
      */
     private $sharedWorkspace;
 
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    private $quantity = 1;
+
     public function getId()
     {
         return $this->id;
@@ -110,5 +115,10 @@ class Order
     public function getSharedWorkspace()
     {
         return $this->sharedWorkspace;
+    }
+
+    public function getQuantity()
+    {
+        return $this->quantity;
     }
 }

@@ -42,12 +42,6 @@ class ChartManager
         $order->setChart($chart);
     }
 
-    public function submit(Chart $chart)
-    {
-        $invoice = $this->invoiceManager->create($chart);
-        $this->invoiceManager->send($invoice);
-    }
-
     public function validate(Chart $chart)
     {
         $orders = $chart->getOrders();
@@ -70,36 +64,5 @@ class ChartManager
             $duration,
             $order->getSharedWorkspace()
         );
-    }
-
-    public function sendBankTransferPendingMail(Chart $chart)
-    {
-        //throw new \Exception('send validation mail');
-        /*
-        $user = $order->getOwner();
-        $subject = $this->container->get('translator')->trans('formalibre_invoice', array(), 'invoice');
-        $valueRepo =  $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacetValue');
-        $fieldRepo = $this->om->getRepository('ClarolineCoreBundle:Facet\FieldFacet');
-        $companyField = $fieldRepo->findOneByName('formalibre_company_name');
-        $field = $valueRepo->findOneBy(array('user' => $user, 'fieldFacet' => $companyField));
-        $company = $field ? $field->getValue(): null;
-        $instruction = $order->getPaymentInstruction();
-        $extra = $instruction->getExtendedData();
-        $hasFreeMonth = $order->hasDiscount();
-        $freeMonthAmount = $hasFreeMonth ? $this->ch->getParameter('formalibre_test_month_duration'): 0;
-
-        $body = $this->container->get('templating')->render(
-            'FormaLibreInvoiceBundle:email:confirm_bank_transfer.html.twig',
-            array(
-                'order' => $order,
-                'company' => $company,
-                'communication' => $extra->get('communication'),
-                'freeMonthAmount' => $freeMonthAmount,
-                'hasFreeMonth' => $hasFreeMonth
-            )
-        );
-
-        return $this->mailManager->send($subject, $body, array($user));
-        */
     }
 }

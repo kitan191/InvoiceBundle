@@ -116,9 +116,6 @@ class ChartController extends Controller
         $chart->setExtendedData(array('communication' => $extra->get('communication')));
         $this->em->persist($chart);
         $this->em->flush();
-        $this->chartManager->sendBankTransferPendingMail($chart);
-        //$freeMonthAmount = $order->hasDiscount() ? $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'): 0;
-        //if ($order->hasDiscount()) $this->productManager->useFreeTestMonth($order->getOwner());
 
         return array(
             'communication' => $extra->get('communication'),

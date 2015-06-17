@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/06/16 05:25:50
+ * Generation date: 2015/06/17 02:39:25
  */
-class Version20150616172549 extends AbstractMigration
+class Version20150617143925 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -33,12 +33,13 @@ class Version20150616172549 extends AbstractMigration
                 id INT AUTO_INCREMENT NOT NULL, 
                 chart_id INT DEFAULT NULL, 
                 isPayed TINYINT(1) NOT NULL, 
-                invoiceNumber TINYINT(1) NOT NULL, 
+                invoiceNumber INT NOT NULL, 
                 vatAmount DOUBLE PRECISION DEFAULT NULL, 
                 vatRate DOUBLE PRECISION DEFAULT NULL, 
                 amount DOUBLE PRECISION DEFAULT NULL, 
                 totalAmount DOUBLE PRECISION DEFAULT NULL, 
                 vatNumber VARCHAR(255) DEFAULT NULL, 
+                paymentSystemName VARCHAR(255) NOT NULL, 
                 UNIQUE INDEX UNIQ_10E984CDBEF83E0A (chart_id), 
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
@@ -77,6 +78,7 @@ class Version20150616172549 extends AbstractMigration
             ALTER TABLE formalibre__order 
             ADD chart_id INT DEFAULT NULL, 
             ADD shared_workspace_id INT DEFAULT NULL, 
+            ADD quantity INT NOT NULL, 
             DROP owner_id, 
             DROP vatAmount, 
             DROP vatRate, 
@@ -158,6 +160,7 @@ class Version20150616172549 extends AbstractMigration
             ADD paymentInstruction_id INT DEFAULT NULL, 
             DROP chart_id, 
             DROP shared_workspace_id, 
+            DROP quantity, 
             CHANGE hasdiscount hasDiscout TINYINT(1) NOT NULL
         ");
         $this->addSql("
