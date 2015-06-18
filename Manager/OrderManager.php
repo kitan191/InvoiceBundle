@@ -4,7 +4,7 @@ namespace FormaLibre\InvoiceBundle\Manager;
 
 use JMS\DiExtraBundle\Annotation as DI;
 use Claroline\CoreBundle\Persistence\ObjectManager;
-use FormaLibre\Entity\Order;
+use FormaLibre\InvoiceBundle\Entity\Order;
 
 /**
 * @DI\Service("formalibre.manager.order_manager")
@@ -15,24 +15,33 @@ class OrderManager
 
     /**
      * @DI\InjectParams({
-     *     "om" = @DI\Inject("claroline.persistence.object_manager")
+     *     "om" = @DI\Inject("claroline.persistence.object_manager"),
+     *     "sharedWorkspaceManager" = @DI\Inject("formalibre.manager.shared_workspace_manager")
      * })
      */
     public function __construct(
-        ObjectManager $om
+        ObjectManager $om,
+        SharedWorkspaceManager $sharedWorkspaceManager
     )
     {
         $this->om = $om;
         $this->orderRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Order');
+        $this->sharedWorkspaceManager = $sharedWorkspaceManager;
     }
 
-    public function getPayedOrders($getQuery = false)
+    public function complete(Order $order)
     {
-        return $this->orderRepository->getPayedOrders($getQuery);
+         switch ($order->getProduct()->getType()) {
+            case 'SHARED_WS': $this->executeWorkspaceOrder($order); break;
+        }
     }
 
-    public function setOrderAmounts(Order $order)
+    public function executeWorkspaceOrder(Order $order)
     {
-        //... do stuff here
+        $sws = $this->sharedWorkspaceManager->executeOrder($order);
+        $sws->setIsTest($isTestOrder);
+        $this->om->persist($sws);
+        $this->om->flush();
+        $hasFreeMonth = $this->hasFreeTestMonth($order->getOwner());
     }
 }

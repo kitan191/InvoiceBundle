@@ -60,43 +60,4 @@ class ProductManager
     {
         return $this->productRepository->findByType($type);
     }
-
-    public function handleError(SharedWorkspace $sws, $serverOutput = null, $target = null)
-    {
-        $this->sendMailError($sws, $serverOutput, $target);
-
-        throw new PaymentHandlingFailedException();
-    }
-
-    public function sendMailError(SharedWorkspace $sws, $serverOutput = null, $targetUrl = null)
-    {
-        $subject = 'Erreur lors de la gestion des espaces commerciaux.';
-        $body = '<div> Un espace d\'activité a été payé par ' . $sws->getOwner()->getUsername() . ' </div>';
-        $body = '<div> Son email est ' . $sws->getOwner()->getMail() . ' </div>';
-        $body .= '<div> Une erreur est survenue après son payment </div>';
-        $body .= '<div> La commande consiste en un espace dont la date d\'expiration est ' . $sws->getExpDate()->format(\DateTime::RFC2822) . '</div>';
-        $body .= "<div> Nombre d'utilisateur: {$sws->getMaxUser()} - Nombre de ressource: {$sws->getMaxRes()} - Taille maximale: {$sws->getMaxStorage()} </div>";
-        $to = $this->ch->getParameter('formalibre_commercial_email_support');
-
-        if ($targetUrl) {
-            $body .= "<div>target: {$targetUrl}</div>";
-        }
-
-        if ($serverOutput) {
-            $body .= "<div>{$serverOutput}</div>";
-        }
-
-        $this->mailManager->send(
-            $subject,
-            $body,
-            array(),
-            null,
-            array('to' => array($to))
-        );
-    }
-
-    public function getByCode($code)
-    {
-        return $this->productRepository->findOneByCode($code);
-    }
 }

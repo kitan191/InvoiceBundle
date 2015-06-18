@@ -14,21 +14,21 @@ class ChartManager
 {
     /**
      * @DI\InjectParams({
-     *     "invoiceManager"         = @DI\Inject("formalibre.manager.invoice_manager"),
      *     "sharedWorkspaceManager" = @DI\Inject("formalibre.manager.shared_workspace_manager"),
-     *     "om"                     = @DI\Inject("claroline.persistence.object_manager")
+     *     "om"                     = @DI\Inject("claroline.persistence.object_manager"),
+     *     "configHandler"          = @DI\Inject("claroline.config.platform_config_handler")
      * })
      */
     public function __construct(
-        InvoiceManager $invoiceManager,
         ObjectManager $om,
-        SharedWorkspaceManager $sharedWorkspaceManager
+        SharedWorkspaceManager $sharedWorkspaceManager,
+        $configHandler
     )
     {
-        $this->invoiceManager = $invoiceManager;
         $this->sharedWorkspaceManager = $sharedWorkspaceManager;
         $this->om = $om;
         $this->chartRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Chart');
+        $this->configHandler = $configHandler;
     }
 
     public function getChart($chartId)
@@ -42,21 +42,10 @@ class ChartManager
         $order->setChart($chart);
     }
 
-    public function validate(Chart $chart)
-    {
-        $orders = $chart->getOrders();
-
-        foreach ($order as $order) {
-            switch ($order->getProduct()->getType()) {
-                case 'SHARED_WS': $this->completeSharedWorkspaceOrder($order); break;
-            }
-        }
-    }
-
     public function completeSharedWorkspaceOrder(Order $order)
     {
         $duration = $order->hasDiscount() ?
-            $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
+            $order->getPriceSolution()->getMonthDuration() + $this->configHandler->getParameter('formalibre_test_month_duration'):
             $order->getPriceSolution()->getMonthDuration();
 
         $this->sharedWorkspaceManager->executeWorkspaceOrder(

@@ -1,0 +1,20 @@
+{% if chart.getInvoice().getPaymentSystemName() == 'bank_transfer' %}
+    <div class="url-container">
+        Informations concernant le paiement par virement:
+        <ul style="list-style-type: none;">
+            <li> Forma-Libre S.A., Chemin du cyclotron, 6, 1345, Louvain-la-Neuve, Belgique </li>
+            <li> Montant: {{ chart.getInvoice.getTotalAmount()|format_price() }} EUR </li>
+            <li> Communication structurée: {{ communication|format_structured_communication() }} </li>
+            <li> Numéro de compte: BE36 7320 3521 4081 </li>
+            <li> BIC: CREGBEBB </li>
+            <li> CBC banque-assurance </li>
+            <li> Avenue Paul Delvaux, n°1, 1340, Ottiginies, Belgique </li>
+        </ul>
+        Votre espace d'activité vous sera ouvert dans un délai de 5 jours ouvrables maximum. Après réception de votre virement, vous serez averti via mail de l'ouverture de celui-ci
+    </div>
+{% endif %}
+<div class="footer" style="text-align:center;">
+    <small>
+        {{ 'invoice_footer'|trans({}, 'invoice')|raw }}
+    </small>
+</div>

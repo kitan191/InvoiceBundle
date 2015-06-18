@@ -4,8 +4,8 @@ namespace FormaLibre\InvoiceBundle\Manager;
 
 use JMS\DiExtraBundle\Annotation as DI;
 use Claroline\CoreBundle\Persistence\ObjectManager;
-use Claroline\CoreBundle\Manager\MailManager;
 use Claroline\CoreBundle\Entity\User;
+use Claroline\CoreBundle\Manager\MailManager;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
@@ -24,17 +24,18 @@ class SharedWorkspaceManager
     private $logger;
     private $vatManager;
     private $ch;
-    private $mailManager;
     private $container;
+    private $mailManager;
 
     /**
      * @DI\InjectParams({
-     *     "om" = @DI\Inject("claroline.persistence.object_manager"),
-     *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
-     *     "logger" = @DI\Inject("logger"),
-     *     "ch" = @DI\Inject("claroline.config.platform_config_handler"),
-     *     "mailManager" = @DI\Inject("claroline.manager.mail_manager"),
-     *     "container" = @DI\Inject("service_container")
+     *     "om"           = @DI\Inject("claroline.persistence.object_manager"),
+     *     "vatManager"   = @DI\Inject("formalibre.manager.vat_manager"),
+     *     "logger"       = @DI\Inject("logger"),
+     *     "ch"           = @DI\Inject("claroline.config.platform_config_handler"),
+     *     "container"    = @DI\Inject("service_container"),
+     *     "mailManager"  = @DI\Inject("claroline.manager.mail_manager"),
+     *     "cryptography" = @DI\Inject("formalibre.manager.cryptography_manager")
      * })
      */
     public function __construct(
@@ -42,8 +43,9 @@ class SharedWorkspaceManager
         VATManager $vatManager,
         $logger,
         $ch,
-        $mailManager,
-        $container
+        $container,
+        MailManager $mailManager,
+        CryptographyManager $cryptography
     )
     {
         $this->om                        = $om;
@@ -52,17 +54,38 @@ class SharedWorkspaceManager
         $this->logger                    = $logger;
         $this->vatManager                = $vatManager;
         $this->ch                        = $ch;
-        $this->mailManager               = $mailManager;
         $this->container                 = $container;
+        $this->mailManager               = $mailManager;
+        $this->crypto                    = $cryptography;
     }
 
-    public function addSharedWorkspace(User $user, Order $order, $monthDuration)
+    public function executeOrder($order)
     {
+        $sws = $order->getSharedWorkspace();
+
+        $sws === null ?
+            $this->addRemoteWorkspace($order):
+            $this->addRemoteWorkspaceExpDate($order);
+    }
+
+    public function addRemoteWorkspace(Order $order)
+    {
+        $sws = $this->addSharedWorkspace($order);
+        $this->createRemoteSharedWorkspace($sws);
+
+        return $sws;
+    }
+
+    public function addSharedWorkspace(Order $order)
+    {
+        $priceSolution = $order->getPriceSolution();
+        $duration = $priceSolution->getDuration();
         $product = $order->getProduct();
+        $user = $order->getChart()->getOwner();
         //get the duration right
         $details = $product->getDetails();
         $expDate = new \DateTime();
-        $interval =  new \DateInterval("P{$monthDuration}M");
+        $interval =  new \DateInterval("P{$duration}M");
         $expDate->add($interval);
         $sws = new SharedWorkspace();
         $sws->setOwner($user);
@@ -78,7 +101,7 @@ class SharedWorkspaceManager
         return $sws;
     }
 
-    public function createRemoteSharedWorkspace(SharedWorkspace $sws, User $user)
+    public function createRemoteSharedWorkspace(SharedWorkspace $sws)
     {
         $userJson = array(
             'username' => $user->getUsername(),
@@ -99,9 +122,8 @@ class SharedWorkspaceManager
             'workspace' => $workspaceJson
         ));
 
-        $payload = $this->encrypt($payload);
         $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/create';
-        $serverOutput = $this->sendPost($payload, $targetUrl);
+        $serverOutput = $this->crypto->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
 
         if ($data === null) {
@@ -138,8 +160,10 @@ class SharedWorkspaceManager
         return json_decode($serverOutput);
     }
 
-    public function addRemoteWorkspaceExpDate($order, SharedWorkspace $sws, $monthDuration)
+    public function addRemoteWorkspaceExpDate(Order $order)
     {
+        $sws = $order->getSharedWorkspace();
+        $duration = $order->getPriceSolution()->getDuration();
         $product = $order->getProduct();
         $details = $product->getDetails();
         $expDate = $sws->getExpDate();
@@ -175,15 +199,6 @@ class SharedWorkspaceManager
         $this->handleError($sws, $serverOutput, $targetUrl);
     }
 
-    private function addRemoteWorkspace(Order $order, $duration)
-    {
-        $user = $order->getOwner();
-        $sws = $this->addSharedWorkspace($user, $order, $duration);
-        $this->createRemoteSharedWorkspace($sws, $user);
-
-        return $sws;
-    }
-
     public function hasFreeTestMonth($user)
     {
         if ($user === 'anon.') return true;
@@ -215,19 +230,41 @@ class SharedWorkspaceManager
         return true;
     }
 
-    public function executeWorkspaceOrder(Order $order, $duration, $sws = null, $isTestOrder = false)
+    /**************************************************************************/
+    /************************ ERROR HANDLING **********************************/
+    /**************************************************************************/
+
+    public function handleError(SharedWorkspace $sws, $serverOutput = null, $target = null)
     {
-        if ($sws === null) {
-            $sws = $this->addRemoteWorkspace($order, $duration);
-        } else {
-            $this->addRemoteWorkspaceExpDate($order, $sws, $duration);
+        $this->sendMailError($sws, $serverOutput, $target);
+
+        throw new PaymentHandlingFailedException();
+    }
+
+    public function sendMailError(SharedWorkspace $sws, $serverOutput = null, $targetUrl = null)
+    {
+        $subject = 'Erreur lors de la gestion des espaces commerciaux.';
+        $body = '<div> Un espace d\'activité a été payé par ' . $sws->getOwner()->getUsername() . ' </div>';
+        $body = '<div> Son email est ' . $sws->getOwner()->getMail() . ' </div>';
+        $body .= '<div> Une erreur est survenue après son payment </div>';
+        $body .= '<div> La commande consiste en un espace dont la date d\'expiration est ' . $sws->getExpDate()->format(\DateTime::RFC2822) . '</div>';
+        $body .= "<div> Nombre d'utilisateur: {$sws->getMaxUser()} - Nombre de ressource: {$sws->getMaxRes()} - Taille maximale: {$sws->getMaxStorage()} </div>";
+        $to = $this->ch->getParameter('formalibre_commercial_email_support');
+
+        if ($targetUrl) {
+            $body .= "<div>target: {$targetUrl}</div>";
         }
 
-        $sws->setIsTest($isTestOrder);
-        $this->om->persist($sws);
-        $this->om->flush();
-        $hasFreeMonth = $this->hasFreeTestMonth($order->getOwner());
-        $this->sendSuccessMail($sws, $order, $duration, $hasFreeMonth);
-        if ($this->hasFreeTestMonth($order->getOwner())) $this->useFreeTestMonth($order->getOwner());
+        if ($serverOutput) {
+            $body .= "<div>{$serverOutput}</div>";
+        }
+
+        $this->mailManager->send(
+            $subject,
+            $body,
+            array(),
+            null,
+            array('to' => array($to))
+        );
     }
 }

@@ -10,23 +10,30 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use JMS\SecurityExtraBundle\Annotation as SEC;
 use FormaLibre\InvoiceBundle\Entity\Order;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use FormaLibre\InvoiceBundle\Entity\Invoice;
 
 /**
 * @SEC\PreAuthorize("canOpenAdminTool('formalibre_admin_invoice')")
 */
 class AdministrationController extends Controller
 {
-    /** @DI\Inject("formalibre.manager.payment_manager") */
-    private $paymentManager;
-
-    /** @DI\Inject("formalibre.manager.order_manager") */
-    private $orderManager;
+    /** @DI\Inject("formalibre.manager.invoice_manager") */
+    private $invoiceManager;
 
     /** @DI\Inject("claroline.pager.pager_factory") */
     private $pagerFactory;
 
     /** @DI\Inject("%claroline.param.pdf_directory%") */
     private $pdfDirectory;
+
+    /** @DI\Inject("security.authorization_checker") */
+    private $authorization;
+
+    /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
+    private $sharedWorkspaceManager;
+
+    /** @DI\Inject("payment.plugin_controller") */
+    private $ppc;
 
     /**
      * @EXT\Route(
@@ -62,10 +69,7 @@ class AdministrationController extends Controller
      */
     public function openPendingAction($page, $search)
     {
-        $query = $search === '' ?
-            $this->paymentManager->getPendingBankTransfer(true) :
-            $this->paymentManager->getBankTransferByCommunication($search, true);
-        $pager = $this->pagerFactory->createPager($query, $page, 25);
+        $pager = $this->pagerFactory->createPager($this->invoiceManager->getUnpayed(true), $page, 25);
 
         return array('pager' => $pager, 'search' => $search);
     }
@@ -136,38 +140,27 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/bank_transfer_validate/{payment}",
-     *      name="formalibre_validate_bank_transfer",
-     *      defaults={"swsId" = 0}
+     *      "/bank_transfer_validate/{invoice}",
+     *      name="formalibre_validate_bank_transfer"
      * )
      * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
      *
      * @return Response
      */
-    public function validateBankTransferAction(Payment $payment)
+    public function validateBankTransferAction(Invoice $invoice)
     {
         //the admin is the only one able to do this.
         if (!$this->authorization->isGranted('ROLE_ADMIN')) {
             throw new \AccessDeniedException();
         }
 
-/*
-        $order = $this->paymentManager->getOrderFromPayment($payment);
-        $extra = $order->getExtendedData();
-        $sws = $sws = $this->em->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace')
-            ->find($extra['shared_workspace_id']);
-        $this->ppc->approve($payment, $order->getPaymentInstruction()->getAmount());
-        $duration = $order->hasDiscount() ?
-            $order->getPriceSolution()->getMonthDuration() + $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'):
-            $order->getPriceSolution()->getMonthDuration();
-        $this->productManager->executeWorkspaceOrder(
-            $order,
-            $duration,
-            $sws
-        );
+        $payments = $invoice->getChart()->getPaymentInstruction()->getPayments();
+        $payment = $payments[0];
+        $this->ppc->approve($payment, $invoice->getTotalAmount());
+        $this->invoiceManager->validate($invoice);
         $route = $this->router->generate('admin_invoice_open_pending');
 
-        return new RedirectResponse($route);*/
+        return new RedirectResponse($route);
     }
 }

@@ -88,13 +88,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for transfer in pager.currentPageResults %}
+                    {% for invoice in pager.currentPageResults %}
                     <tr>
-                        <td> {{ transfer.getPaymentInstruction().getExtendedData().get('communication')|format_structured_communication()}} </td>
-                        <td> {{ transfer.getApprovingAmount() }}</td>
-                        <td> <a href="{{ path('formalibre_validate_bank_transfer', {'payment': transfer.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
-                        <td> {{ transfer.getCreatedAt()|intl_date_format() }} </td>
-                        <td> {% set order = transfer|get_payement_order() %} {{ order.getOwner().getUsername() }}</td>
+                        <td>
+                            {% if invoice.getChart().getExtendedData().communication is defined %}
+                                {{ invoice.getChart().getExtendedData().communication|format_structured_communication()}}
+                            {% endif %}
+                        </td>
+                        <td> {{ invoice.getTotalAmount() }}</td>
+                        <td> <a href="{{ path('formalibre_validate_bank_transfer', {'invoice': invoice.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
+                        <td> {{ invoice.getChart().getCreationDate()|intl_date_format() }} </td>
+                        <td> {{ invoice.getChart().getOwner().getUsername() }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

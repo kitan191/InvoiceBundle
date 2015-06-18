@@ -5,7 +5,7 @@ namespace FormaLibre\InvoiceBundle\Manager;
 use JMS\DiExtraBundle\Annotation as DI;
 
 /**
-* @DI\Service("formalibre.manager.cryptographt_manager")
+* @DI\Service("formalibre.manager.cryptography_manager")
 */
 class CryptographyManager
 {
@@ -27,8 +27,9 @@ class CryptographyManager
         $this->ch                        = $ch;
     }
 
-    private function sendPost($payload, $url)
+    public function sendPost($payload, $url)
     {
+        $payload = $this->encrypt($payload);
         $qs = http_build_query(array('payload' => $payload));
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
