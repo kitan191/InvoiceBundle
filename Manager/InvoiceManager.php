@@ -61,7 +61,7 @@ class InvoiceManager
 
     public function getPdf(Invoice $invoice)
     {
-        if (file_exists($path = $this->pdfDir . '/invoice/' . $invoice->getId() . '.pdf')) return $path;
+        if (file_exists($path = $this->pdfDir . '/invoice/' . $invoice->getId() . '.pdf')) @unlink($path);
 
         @mkdir($this->pdfDir);
         @mkdir($this->pdfDir . '/invoice');

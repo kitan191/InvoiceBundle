@@ -7,6 +7,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 use FormaLibre\InvoiceBundle\Entity\Invoice;
 
 class InvoiceController extends Controller
@@ -60,12 +61,16 @@ class InvoiceController extends Controller
      *      "/download/invoice/{invoice}",
      *      name="invoice_download"
      * )
-     * @EXT\Template
      *
      * @return Response
      */
     public function downloadAction(Invoice $invoice)
-    {
+    {/*
+        return new Response($this->renderView(
+            'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
+            array('chart' => $invoice->getChart())
+        ));
+*/
         $user = $this->tokenStorage->getToken()->getUser();
 
         if ($invoice->getChart()->getOwner() !== $user) {
@@ -80,11 +85,13 @@ class InvoiceController extends Controller
                 readfile($file);
             }
         );
+
         $response->headers->set('Content-Transfer-Encoding', 'octet-stream');
         $response->headers->set('Content-Type', 'application/force-download');
         $response->headers->set('Content-Disposition', 'attachment; filename=invoice.pdf');
         $response->headers->set('Content-Type', 'application/pdf');
         $response->headers->set('Connection', 'close');
+
         return $response;
     }
 }
