@@ -19,7 +19,7 @@
                 'href': path('admin_invoice_open_invoice')
             },
             {
-                'name': order.getId(),
+                'name': invoice.getId(),
                 'href': ''
             }
         ])
@@ -28,7 +28,7 @@
 
 {% block section_content %}
     <div class="panel-heading">
-        <h3 class="panel-title">{{ order.getId() }}</h3>
+        <h3 class="panel-title">{{ invoice.getId() }}</h3>
     </div>
     <div class="panel-body">
         {% block controls %}
@@ -55,7 +55,7 @@
         <hr>
     </div>
     <div class="panel-footer">
-        <a class="btn btn-primary" href="{{ path('admin_invoice_download', {'order': order.getId() }) }}">
+        <a class="btn btn-primary" href="{{ path('admin_invoice_download', {'invoice': invoice.getId() }) }}">
             <i class="fa fa-download"></i> {{ 'download'|trans({}, 'platform') }}
         </a>
     </div>
@@ -65,7 +65,7 @@
     <script type="text/javascript" src="{{ asset('bundles/clarolinepdfplayer/js/pdf.js') }}"></script>
     <script type="text/javascript">
 
-    var url = '{{ path ("admin_invoice_show", {"order": order.getId()}) }}';
+    var url = '{{ path ("admin_invoice_download", {"invoice": invoice.getId()}) }}';
 
     PDFJS.disableWorker = true;
 

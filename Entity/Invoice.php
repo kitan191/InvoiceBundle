@@ -139,4 +139,14 @@ class Invoice
     {
         return $this->paymentSystemName;
     }
+
+    public function setIsPayed($isPayed)
+    {
+        $this->isPayed = $isPayed;
+    }
+
+    public function isPayed()
+    {
+        return $this->isPayed;
+    }
 }

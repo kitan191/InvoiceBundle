@@ -39,9 +39,8 @@ class OrderManager
     public function executeWorkspaceOrder(Order $order)
     {
         $sws = $this->sharedWorkspaceManager->executeOrder($order);
-        $sws->setIsTest($isTestOrder);
         $this->om->persist($sws);
         $this->om->flush();
-        $hasFreeMonth = $this->hasFreeTestMonth($order->getOwner());
+        $hasFreeMonth = $this->sharedWorkspaceManager->hasFreeTestMonth($sws->getOwner());
     }
 }

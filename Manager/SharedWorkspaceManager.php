@@ -61,17 +61,18 @@ class SharedWorkspaceManager
 
     public function executeOrder($order)
     {
-        $sws = $order->getSharedWorkspace();
-
-        $sws === null ?
+        $sws = $order->getSharedWorkspace() === null ?
             $this->addRemoteWorkspace($order):
             $this->addRemoteWorkspaceExpDate($order);
+
+        return $sws;
     }
 
     public function addRemoteWorkspace(Order $order)
     {
         $sws = $this->addSharedWorkspace($order);
         $this->createRemoteSharedWorkspace($sws);
+        $this->sendSuccessMail($sws);
 
         return $sws;
     }
@@ -79,7 +80,7 @@ class SharedWorkspaceManager
     public function addSharedWorkspace(Order $order)
     {
         $priceSolution = $order->getPriceSolution();
-        $duration = $priceSolution->getDuration();
+        $duration = $priceSolution->getMonthDuration();
         $product = $order->getProduct();
         $user = $order->getChart()->getOwner();
         //get the duration right
@@ -103,6 +104,8 @@ class SharedWorkspaceManager
 
     public function createRemoteSharedWorkspace(SharedWorkspace $sws)
     {
+        $user = $sws->getOwner();
+
         $userJson = array(
             'username' => $user->getUsername(),
             'first_name' => $user->getFirstName(),
@@ -228,6 +231,11 @@ class SharedWorkspaceManager
         if ($workspace->count_resources > $productData['max_resources']) return false;
 
         return true;
+    }
+
+    public function sendSuccessMail(SharedWorkspace $sws)
+    {
+
     }
 
     /**************************************************************************/

@@ -84,7 +84,7 @@ class ChartController extends Controller
         }
 
         try {
-            $this->chartManager->validate($chart);
+            $this->invoiceManager->validate($chart);
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'

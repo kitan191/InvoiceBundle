@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use JMS\SecurityExtraBundle\Annotation as SEC;
 use FormaLibre\InvoiceBundle\Entity\Order;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use FormaLibre\InvoiceBundle\Entity\Invoice;
 
 /**
@@ -34,6 +35,9 @@ class AdministrationController extends Controller
 
     /** @DI\Inject("payment.plugin_controller") */
     private $ppc;
+
+    /** @DI\Inject("router") */
+    private $router;
 
     /**
      * @EXT\Route(
@@ -92,7 +96,7 @@ class AdministrationController extends Controller
      */
     public function showInvoicesAction($page, $search)
     {
-        $query = $this->orderManager->getPayedOrders(true);
+        $query = $this->invoiceManager->getPayed(true);
         $pager = $this->pagerFactory->createPager($query, $page, 25);
 
         return array('pager' => $pager, 'search' => $search);
@@ -100,28 +104,28 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/invoice/{order}/show",
+     *      "/admin/invoice/{invoice}/show",
      *      name="admin_invoice_show"
      * )
      * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function showInvoiceAction(Order $order)
+    public function showInvoiceAction(invoice $invoice)
     {
-        return array('order' => $order);
+        return array('invoice' => $invoice);
     }
 
     /**
      * @EXT\Route(
-     *      "/admin/invoice/{order}/download",
+     *      "/admin/invoice/{invoice}/download",
      *      name="admin_invoice_download"
      * )
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function downloadInvoiceAction(Order $order)
+    public function downloadInvoiceAction(Invoice $invoice)
     {
         $response = new StreamedResponse();
-        $file = $this->pdfDirectory. '/invoice/' . $order->getId() . '.pdf';
+        $file = $this->pdfDirectory. '/invoice/' . $invoice->getId() . '.pdf';
 
         $response->setCallBack(
             function () use ($file) {

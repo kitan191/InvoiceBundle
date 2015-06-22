@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/06/17 02:39:25
+ * Generation date: 2015/06/22 09:34:55
  */
-class Version20150617143925 extends AbstractMigration
+class Version20150622093455 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -119,7 +119,8 @@ class Version20150617143925 extends AbstractMigration
         ");
         $this->addSql("
             ALTER TABLE formalibre__shared_workspace 
-            DROP product_id
+            DROP product_id, 
+            DROP isTest
         ");
     }
 
@@ -182,7 +183,8 @@ class Version20150617143925 extends AbstractMigration
         ");
         $this->addSql("
             ALTER TABLE formalibre__shared_workspace 
-            ADD product_id INT DEFAULT NULL
+            ADD product_id INT DEFAULT NULL, 
+            ADD isTest INT NOT NULL
         ");
         $this->addSql("
             ALTER TABLE formalibre__shared_workspace 

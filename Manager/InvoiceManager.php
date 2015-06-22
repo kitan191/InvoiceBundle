@@ -115,6 +115,18 @@ class InvoiceManager
         return ($getQuery) ? $query: $query->getResult();
     }
 
+    public function getPayed($getQuery = false)
+    {
+        $dql = "
+            SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
+            WHERE i.isPayed = true
+        ";
+
+        $query = $this->em->createQuery($dql);
+
+        return ($getQuery) ? $query: $query->getResult();
+    }
+
     public function validate(Invoice $invoice)
     {
         $chart = $invoice->getChart();
@@ -124,11 +136,8 @@ class InvoiceManager
             $this->orderManager->complete($order);
         }
 
-        //send mail and so on...
-    }
-
-    public function sendSuccessMail(SharedWorkspace $sws, Order $order, $duration = null)
-    {
-
+        $invoice->setIsPayed(true);
+        $this->om->persist($invoice);
+        $this->om->flush();
     }
 }

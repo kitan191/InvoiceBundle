@@ -86,9 +86,6 @@
                             {{ 'last_name'|trans({}, 'platform') }}
                         </th>
                         <th>
-                            {{ 'company'|trans({}, 'platform') }}
-                        </th>
-                        <th>
                             {{ 'email'|trans({}, 'platform') }}
                         </th>
                         <th>
@@ -97,16 +94,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for order in pager.currentPageResults %}
+                    {% for invoice in pager.currentPageResults %}
                     <tr>
-                        <td> {{ order.getCreationDate()|intl_date_format() }} </td>
-                        <td> {{ order.getAmount() }}
-                        <td> {{ order.getVatAmount() }}
-                        <th> {{ order.getOwner().getFirstName() }} </th>
-                        <th> {{ order.getOwner().getLastName() }} </th>
-                        <th> {{ order.getOwner|get_user_company() }}</th>
-                        <th> {{ order.getOwner().getMail() }} </th>
-                        <th> <a href="{{ path('admin_invoice_show', {'order': order.getId() })}}"> {{ 'invoice'|trans({}, 'platform') }} </a>
+                        <td> {{ invoice.getChart().getCreationDate()|intl_date_format() }} </td>
+                        <td> {{ invoice.getAmount() }}
+                        <td> {{ invoice.getVatAmount() }}
+                        <th> {{ invoice.getChart().getOwner().getFirstName() }} </th>
+                        <th> {{ invoice.getChart().getOwner().getLastName() }} </th>
+                        <th> {{ invoice.getChart().getOwner().getMail() }} </th>
+                        <th> <a href="{{ path('admin_invoice_show', {'invoice': invoice.getId() })}}"> {{ 'invoice'|trans({}, 'platform') }} </a>
                     </tr>
                     {% endfor %}
                 </tbody>

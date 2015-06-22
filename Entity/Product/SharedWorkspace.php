@@ -56,11 +56,6 @@ class SharedWorkspace
      */
     private $autoSubscribe = false;
 
-    /**
-     * @ORM\Column(type="integer", nullable=false)
-     */
-    private $isTest = false;
-
     public function getId()
     {
         return $this->id;
@@ -144,15 +139,5 @@ class SharedWorkspace
     public function getProduct()
     {
         return $this->product;
-    }
-
-    public function setIsTest($test)
-    {
-        $this->isTest = $test;
-    }
-
-    public function isTest()
-    {
-        return $this->isTest;
     }
 }

@@ -88,6 +88,11 @@ class Product
         $this->type = $type;
     }
 
+    public function getType()
+    {
+        return $this->type;
+    }
+
     public function addPriceSolution(PriceSolution $price)
     {
         $this->priceSolutions->add($price);
