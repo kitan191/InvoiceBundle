@@ -41,17 +41,4 @@ class ChartManager
         if (!$chart) $chart = new Chart();
         $order->setChart($chart);
     }
-
-    public function completeSharedWorkspaceOrder(Order $order)
-    {
-        $duration = $order->hasDiscount() ?
-            $order->getPriceSolution()->getMonthDuration() + $this->configHandler->getParameter('formalibre_test_month_duration'):
-            $order->getPriceSolution()->getMonthDuration();
-
-        $this->sharedWorkspaceManager->executeWorkspaceOrder(
-            $order,
-            $duration,
-            $order->getSharedWorkspace()
-        );
-    }
 }

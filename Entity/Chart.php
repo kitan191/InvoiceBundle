@@ -121,7 +121,12 @@ class Chart
         return $this->creationDate;
     }
 
-    public function setValidationDate($date)
+    public function setCreationDate(\DateTime $creationDate)
+    {
+        $this->creationDate = $creationDate;
+    }
+
+    public function setValidationDate(\DateTime $date)
     {
         $this->validationDate = $date;
     }

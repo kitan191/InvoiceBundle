@@ -4,7 +4,7 @@ namespace FormaLibre\InvoiceBundle;
 
 use Claroline\CoreBundle\Library\PluginBundle;
 use Claroline\KernelBundle\Bundle\ConfigurationBuilder;
-use Claroline\BundleBundle\Installation\AdditionalInstaller;
+use FormaLibre\InvoiceBundle\Installation\AdditionalInstaller;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Claroline\KernelBundle\Bundle\AutoConfigurableInterface;
 use FormaLibre\InvoiceBundle\DependencyInjection\Compiler\DynamicConfigPass;
@@ -68,5 +68,10 @@ class FormaLibreInvoiceBundle extends PluginBundle implements AutoConfigurableIn
     private function buildPath($file, $folder = 'suggested')
     {
         return __DIR__ . "/Resources/config/{$folder}/{$file}.yml";
+    }
+
+    public function getAdditionalInstaller()
+    {
+        return new AdditionalInstaller();
     }
 }

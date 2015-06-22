@@ -138,6 +138,8 @@ class InvoiceManager
     public function validate(Invoice $invoice)
     {
         $chart = $invoice->getChart();
+        $validDate = new \DateTime();
+        $chart->setValidationDate($validDate);
         $orders = $chart->getOrders();
 
         foreach ($orders as $order) {
@@ -146,6 +148,7 @@ class InvoiceManager
 
         $invoice->setIsPayed(true);
         $this->om->persist($invoice);
+        $this->om->persist($validDate);
         $this->om->flush();
     }
 }
