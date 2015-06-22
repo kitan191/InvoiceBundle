@@ -52,6 +52,9 @@ class InvoiceManager
 
     public function create(Chart $chart)
     {
+        //if it alreadu has an invoice, we don't create an other one...
+        if ($chart->getInvoice()) return $chart->getInvoice();
+
         $invoice = new Invoice();
         $invoice->setChart($chart);
         $user = $chart->getOwner();

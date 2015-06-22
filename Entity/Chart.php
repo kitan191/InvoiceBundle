@@ -30,7 +30,6 @@ class Chart
      *     mappedBy="chart"
      * )
      */
-
     private $invoice;
     /**
      * @ORM\ManyToOne(

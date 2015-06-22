@@ -32,6 +32,9 @@ class ChartController extends Controller
     /** @DI\Inject("formalibre.manager.invoice_manager") */
     private $invoiceManager;
 
+    /** @DI\Inject("router") */
+    private $router;
+
     /**
      * @EXT\Route(
      *      "/payment_complete/chart/{chart}",
@@ -49,7 +52,7 @@ class ChartController extends Controller
         }
 
         $instruction = $chart->getPaymentInstruction();
-        $this->invoiceManager->create($chart);
+        $invoice = $this->invoiceManager->create($chart);
 
         if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
             $payment = $this->ppc->createPayment(
@@ -84,7 +87,7 @@ class ChartController extends Controller
         }
 
         try {
-            $this->invoiceManager->validate($chart);
+            $this->invoiceManager->validate($invoice);
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
