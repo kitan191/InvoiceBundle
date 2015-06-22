@@ -1,0 +1,10 @@
+<div>
+    {{ 'order_thanks'|trans({}, 'invoice') }}
+</div>
+<div>
+    {{ 'workpace_confirm'|trans({'%code%': code, '%expiration_date%': expirationDate|date('d/m/Y'), '%name%': name}, 'invoice') }}
+</div>
+
+<small>
+    {{ 'invoice_footer'|trans({}, 'invoice')|raw }}
+</small>

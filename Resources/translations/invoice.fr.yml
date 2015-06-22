@@ -62,3 +62,7 @@ invoice_date: Date de facture
 payment_method: Méthode de paiement
 booking_thanks: Merci de votre Réservation
 booking_confirm: Nous vous confirmons la réservation de votre espace d'activité. Vous trouverez une copie des informations relatives à votre achat en pièce jointe.
+order_thanks: Merci de votre commande FormaLibre
+workpace_confirm: |
+    Votre espace d'activité se nome %name% (%code%).
+    Il expirera le %expiration_date%

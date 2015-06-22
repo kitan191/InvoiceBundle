@@ -26,6 +26,9 @@ class SharedWorkspaceManager
     private $ch;
     private $container;
     private $mailManager;
+    private $templating;
+    private $mailer;
+    private $translator;
 
     /**
      * @DI\InjectParams({
@@ -35,7 +38,10 @@ class SharedWorkspaceManager
      *     "ch"           = @DI\Inject("claroline.config.platform_config_handler"),
      *     "container"    = @DI\Inject("service_container"),
      *     "mailManager"  = @DI\Inject("claroline.manager.mail_manager"),
-     *     "cryptography" = @DI\Inject("formalibre.manager.cryptography_manager")
+     *     "cryptography" = @DI\Inject("formalibre.manager.cryptography_manager"),
+     *     "templating"   = @DI\Inject("templating"),
+     *     "mailer"       = @DI\Inject("claroline.manager.mail_manager"),
+     *     "translator"   = @DI\Inject("translator")
      * })
      */
     public function __construct(
@@ -45,7 +51,10 @@ class SharedWorkspaceManager
         $ch,
         $container,
         MailManager $mailManager,
-        CryptographyManager $cryptography
+        CryptographyManager $cryptography,
+        $templating,
+        MailManager $mailManager,
+        $translator
     )
     {
         $this->om                        = $om;
@@ -57,6 +66,9 @@ class SharedWorkspaceManager
         $this->container                 = $container;
         $this->mailManager               = $mailManager;
         $this->crypto                    = $cryptography;
+        $this->templating                = $templating;
+        $this->mailManager               = $mailManager;
+        $this->translator                = $translator;
     }
 
     public function executeOrder($order)
@@ -68,6 +80,7 @@ class SharedWorkspaceManager
         $this->om->persist($order);
         $this->om->persist($sws);
         $this->om->flush();
+        $this->sendMailOrderInfo($sws);
 
         return $sws;
     }
@@ -76,7 +89,6 @@ class SharedWorkspaceManager
     {
         $sws = $this->addSharedWorkspace($order);
         $this->createRemoteSharedWorkspace($sws);
-        $this->sendSuccessMail($sws);
 
         return $sws;
     }
@@ -249,9 +261,20 @@ class SharedWorkspaceManager
         return $orders[0];
     }
 
-    public function sendSuccessMail(SharedWorkspace $sws)
+    public function sendMailOrderInfo(SharedWorkspace $sws)
     {
+        $workspace = $this->getWorkspaceData($sws);
+        $subject = $this->translator->trans('formalibre_invoice', array(), 'invoice');
 
+        $body = $this->templating->render(
+            'FormaLibreInvoiceBundle:SharedWorkspace:mail_info.html.twig', array(
+                'code' => $workspace->code,
+                'name' => $workspace->name,
+                'expirationDate' => $sws->getExpDate()
+            )
+        );
+
+        $this->mailManager->send($subject, $body, array($sws->getOwner()));
     }
 
     /**************************************************************************/

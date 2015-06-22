@@ -71,6 +71,11 @@ class ChartController extends Controller
             if ($ex instanceof ActionRequiredException) {
                 $action = $ex->getAction();
                 if ($action instanceof VisitUrl) {
+                    //if it's a bank transfer, we send the invoice here
+                    if ($instruction->getPaymentSystemName() === 'bank_transfer') {
+                        $this->invoiceManager->send($invoice);
+                    }
+
                     return new RedirectResponse($action->getUrl());
                 }
                 throw $ex;
@@ -88,6 +93,7 @@ class ChartController extends Controller
 
         try {
             $this->invoiceManager->validate($invoice);
+            $this->invoiceManager->send($invoice);
         } catch (PaymentHandlingFailedException $e) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'

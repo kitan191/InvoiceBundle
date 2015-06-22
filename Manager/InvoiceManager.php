@@ -78,16 +78,19 @@ class InvoiceManager
         $this->om->persist($invoice);
         $this->om->flush();
 
+        return $invoice;
+    }
+
+    public function send(Invoice $invoice)
+    {
         $pdfInvoice = $this->getPdf($invoice);
         $subject = $this->translator->trans('formalibre_invoice', array(), 'invoice');
         $body = $this->templating->render(
-            'FormaLibreInvoiceBundle:Invoice:confirm_bank_transfer.html.twig',
+            'FormaLibreInvoiceBundle:Invoice:email.html.twig',
             array('invoice' => $invoice)
         );
 
-        $this->mailManager->send($subject, $body, array($user), null, array('attachment' => $pdfInvoice));
-
-        return $invoice;
+        $this->mailManager->send($subject, $body, array($invoice->getChart()->getOwner()), null, array('attachment' => $pdfInvoice));
     }
 
     public function getPdf(Invoice $invoice)
