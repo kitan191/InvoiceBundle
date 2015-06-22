@@ -64,6 +64,10 @@ class SharedWorkspaceManager
         $sws = $order->getSharedWorkspace() === null ?
             $this->addRemoteWorkspace($order):
             $this->addRemoteWorkspaceExpDate($order);
+        $order->setSharedWorkspace($sws);
+        $this->om->persist($order);
+        $this->om->persist($sws);
+        $this->om->flush();
 
         return $sws;
     }
@@ -101,7 +105,6 @@ class SharedWorkspaceManager
         $sws->setMaxRes($details['max_resources']);
         $sws->setMaxStorage($details['max_storage']);
         $sws->setExpDate($expDate);
-        $sws->setProduct($order->getProduct());
         $sws->setRemoteId(0); //if it wasn't created properly, 0 means somethung went wrong obv.
         $this->om->persist($sws);
         $this->om->flush();
@@ -173,7 +176,7 @@ class SharedWorkspaceManager
     public function addRemoteWorkspaceExpDate(Order $order)
     {
         $sws = $order->getSharedWorkspace();
-        $duration = $order->getPriceSolution()->getDuration();
+        $monthDuration = $order->getPriceSolution()->getMonthDuration();
         $product = $order->getProduct();
         $details = $product->getDetails();
         $expDate = $sws->getExpDate();
@@ -186,9 +189,8 @@ class SharedWorkspaceManager
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
         $payload = json_encode(array('expiration_date' => $expDate->getTimeStamp()));
-        $payload = $this->encrypt($payload);
         $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $sws->getRemoteId() . '/exp_date/increase';
-        $serverOutput = $this->sendPost($payload, $targetUrl);
+        $serverOutput = $this->crypto->sendPost($payload, $targetUrl);
         $data = json_decode($serverOutput);
 
         if ($data === null) {
@@ -203,7 +205,7 @@ class SharedWorkspaceManager
             $this->om->persist($sws);
             $this->om->flush();
 
-            return;
+            return $sws;
         }
 
         $this->handleError($sws, $serverOutput, $targetUrl);
@@ -238,6 +240,13 @@ class SharedWorkspaceManager
         if ($workspace->count_resources > $productData['max_resources']) return false;
 
         return true;
+    }
+
+    public function getLastOrder(SharedWorkspace $sws)
+    {
+        $orders = $sws->getOrders();
+
+        return $orders[0];
     }
 
     public function sendSuccessMail(SharedWorkspace $sws)

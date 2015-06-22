@@ -5,6 +5,7 @@ namespace FormaLibre\InvoiceBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 use Gedmo\Mapping\Annotation as Gedmo;
+use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 
 /**
  * @ORM\Table(name="formalibre__order")
@@ -50,17 +51,18 @@ class Order
     private $hasDiscount = false;
 
     /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    private $quantity = 1;
+
+    /**
      * @ORM\ManyToOne(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace"
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace",
+     *     inversedBy="orders"
      * )
      * @ORM\JoinColumn(name="shared_workspace_id", onDelete="SET NULL")
      */
     private $sharedWorkspace;
-
-    /**
-     * @ORM\Column(type="integer", nullable=false)
-     */
-    private $quantity = 1;
 
     public function getId()
     {
@@ -107,9 +109,9 @@ class Order
         return $this->chart;
     }
 
-    public function setSharedWorkspace(SharedWorkspace $sws)
+    public function getQuantity()
     {
-        $this->setSharedWorkspace = $sws;
+        return $this->quantity;
     }
 
     public function getSharedWorkspace()
@@ -117,8 +119,8 @@ class Order
         return $this->sharedWorkspace;
     }
 
-    public function getQuantity()
+    public function setSharedWorkspace(SharedWorkspace $sws)
     {
-        return $this->quantity;
+        $this->sharedWorkspace = $sws;
     }
 }

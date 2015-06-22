@@ -221,10 +221,14 @@ class SharedWorkspaceController extends Controller
         }
 
         $order = new Order();
-        $order->setOwner($this->tokenStorage->getToken()->getUser());
+        $chart = new Chart();
+        $order->setChart($chart);
+        $order->setSharedWorkspace($sws);
+        $product = $this->sharedWorkspaceManager->getLastOrder($sws)->getProduct();
+        $order->setProduct($product);
+        $this->em->persist($chart);
         $this->em->persist($order);
         $this->em->flush();
-        $product = $sws->getProduct();
         $formType = new SharedWorkspaceForm(
             $product,
             $this->router,
@@ -234,9 +238,9 @@ class SharedWorkspaceController extends Controller
             $this->vatManager
         );
         $form = $this->createForm($formType)->createView();
-        $workspace = $this->productManager->getWorkspaceData($sws);
+        $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sws);
 
-        return array('form' => $form, 'product' => $product, 'order' => $order, 'sws' => $sws, 'workspace' => $workspace);
+        return array('form' => $form, 'chart' => $chart, 'product' => $product, 'order' => $order, 'workspace' => $workspace);
     }
 
     /**

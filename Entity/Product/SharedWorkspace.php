@@ -56,6 +56,14 @@ class SharedWorkspace
      */
     private $autoSubscribe = false;
 
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Order",
+     *     mappedBy="sharedWorkspace"
+     * )
+     **/
+    private $orders;
+
     public function getId()
     {
         return $this->id;
@@ -131,13 +139,8 @@ class SharedWorkspace
         return $this->remoteId;
     }
 
-    public function setProduct(Product $product)
+    public function getOrders()
     {
-        $this->product = $product;
-    }
-
-    public function getProduct()
-    {
-        return $this->product;
+        return $this->orders;
     }
 }
