@@ -50,7 +50,7 @@ class Listener
 
     private function getDisplayInvoicePage()
     {
-        $params = array('_controller' => 'FormaLibreInvoiceBundle:Invoice:show');
+        $params = array('_controller' => 'FormaLibreInvoiceBundle:SharedWorkspace:list');
         $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
         $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
 

@@ -29,7 +29,8 @@ class Order
 
     /**
      * @ORM\ManyToOne(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Chart"
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Chart",
+     *     inversedBy="orders"
      * )
      * @ORM\JoinColumn(name="chart_id", onDelete="SET NULL")
      */
@@ -50,8 +51,7 @@ class Order
 
     /**
      * @ORM\ManyToOne(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace",
-     *     inversedBy="order"
+     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace"
      * )
      * @ORM\JoinColumn(name="shared_workspace_id", onDelete="SET NULL")
      */

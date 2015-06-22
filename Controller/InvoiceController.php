@@ -21,41 +21,6 @@ class InvoiceController extends Controller
     /** @DI\Inject("formalibre.manager.invoice_manager") */
     private $invoiceManager;
 
-
-    /**
-     * @EXT\Route(
-     *      "/show",
-     *      name="invoice_show_all"
-     * )
-     * @EXT\Template
-     *
-     * @return Response
-     */
-    public function showAction()
-    {
-        return array('data' => array());
-
-        $user = $this->tokenStorage->getToken()->getUser();
-        $sharedWorkspaces = $this->productManager->getSharedWorkspaceByUser($user);
-        $data = array();
-
-        foreach ($sharedWorkspaces as $sharedWorkspace) {
-            $el = array();
-            $workspace = $this->productManager->getWorkspaceData($sharedWorkspace);
-            $el['shared_workspace'] = $sharedWorkspace;
-
-            if ($workspace) {
-                $el['workspace'] = $workspace;
-            } else {
-                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
-            }
-
-            $data[] = $el;
-        }
-
-        return array('data' => $data);
-    }
-
     /**
      * @EXT\Route(
      *      "/download/invoice/{invoice}",

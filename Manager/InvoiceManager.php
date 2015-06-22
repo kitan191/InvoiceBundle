@@ -76,7 +76,7 @@ class InvoiceManager
         $pdfInvoice = $this->getPdf($invoice);
         $subject = $this->translator->trans('formalibre_invoice', array(), 'invoice');
         $body = $this->templating->render(
-            'FormaLibreInvoiceBundle:email:confirm_bank_transfer.html.twig',
+            'FormaLibreInvoiceBundle:Invoice:confirm_bank_transfer.html.twig',
             array('invoice' => $invoice)
         );
 

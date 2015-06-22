@@ -1,7 +1,7 @@
 workspace_shared_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/SharedWorkspaceController.php"
     type: annotation
-    prefix: /workspace
+    prefix: /shared/
 
 invoice_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/InvoiceController.php"
@@ -11,9 +11,9 @@ invoice_controller:
 admin_invoice_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/AdministrationController.php"
     type: annotation
-    prefix: /
+    prefix: /admin
 
 chart_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/ChartController.php"
     type: annotation
-    prefix: /
+    prefix: /chart
