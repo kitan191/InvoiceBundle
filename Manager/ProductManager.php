@@ -29,35 +29,25 @@ class ProductManager
 
     /**
      * @DI\InjectParams({
-     *     "om" = @DI\Inject("claroline.persistence.object_manager"),
-     *     "vatManager" = @DI\Inject("formalibre.manager.vat_manager"),
-     *     "logger" = @DI\Inject("logger"),
-     *     "ch" = @DI\Inject("claroline.config.platform_config_handler"),
-     *     "mailManager" = @DI\Inject("claroline.manager.mail_manager"),
-     *     "container" = @DI\Inject("service_container")
+     *     "om" = @DI\Inject("claroline.persistence.object_manager")
      * })
      */
     public function __construct(
-        ObjectManager $om,
-        VATManager $vatManager,
-        $logger,
-        $ch,
-        $mailManager,
-        $container
+        ObjectManager $om
     )
     {
         $this->om                        = $om;
         $this->productRepository         = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
-        $this->sharedWorkspaceRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
-        $this->logger                    = $logger;
-        $this->vatManager                = $vatManager;
-        $this->ch                        = $ch;
-        $this->mailManager               = $mailManager;
-        $this->container                 = $container;
+        $this->priceSolutionRepository   = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\PriceSolution');
     }
 
     public function getProductsByType($type)
     {
         return $this->productRepository->findByType($type);
+    }
+
+    public function getPriceSolution(Product $product, $duration)
+    {
+        return $this->priceSolutionRepository->findOneBy(array('product' => $product, 'monthDuration' => $duration));
     }
 }

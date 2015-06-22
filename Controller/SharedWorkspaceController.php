@@ -48,6 +48,9 @@ class SharedWorkspaceController extends Controller
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
 
+    /** @DI\Inject("formalibre.manager.invoice_manager") */
+    private $invoiceManager;
+
     /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
     private $sharedWorkspaceManager;
 
@@ -258,7 +261,7 @@ class SharedWorkspaceController extends Controller
 
         $user = $this->tokenStorage->getToken()->getUser();
 
-        if (!$this->productManager->hasFreeTestMonth($user)) {
+        if (!$this->sharedWorkspaceManager->hasFreeTestMonth($user)) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:freeTestMonthUsedException.html.twig'
             );
@@ -266,16 +269,17 @@ class SharedWorkspaceController extends Controller
             return new Response($content);;
         }
 
+        $chart = new Chart();
+        $ps = $this->productManager->getPriceSolution($product, 1);
         $order = new Order();
-        $order->setOwner($user);
-        $order->setProduct($product);
 
-        $this->productManager->executeWorkspaceOrder(
-            $order,
-            $this->container->get('claroline.config.platform_config_handler')->getParameter('formalibre_test_month_duration'),
-            null,
-            true
-        );
+        $chart->setOwner($user);
+        $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
+        $order->setPriceSolution($ps);
+        $order->setProduct($product);
+        $order->setChart($chart);
+        $invoice = $this->invoiceManager->create($chart);
+        $this->invoiceManager->validate($invoice);
 
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
