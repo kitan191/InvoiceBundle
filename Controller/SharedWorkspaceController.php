@@ -272,12 +272,12 @@ class SharedWorkspaceController extends Controller
         $chart = new Chart();
         $ps = $this->productManager->getPriceSolution($product, 1);
         $order = new Order();
-
         $chart->setOwner($user);
         $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
         $order->setPriceSolution($ps);
         $order->setProduct($product);
         $order->setChart($chart);
+        $this->sharedWorkspaceManager->useFreeTestMonth($user);
         $invoice = $this->invoiceManager->create($chart);
         $this->invoiceManager->validate($invoice);
 

@@ -86,6 +86,13 @@ class SharedWorkspaceManager
         //get the duration right
         $details = $product->getDetails();
         $expDate = new \DateTime();
+
+        if ($this->hasFreeTestMonth($user)) {
+            $duration += $this->ch->getParameter('formalibre_test_month_duration');
+            $order->setHasDiscount(true);
+            $this->useFreeTestMonth($user);
+        }
+
         $interval =  new \DateInterval("P{$duration}M");
         $expDate->add($interval);
         $sws = new SharedWorkspace();

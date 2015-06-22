@@ -69,7 +69,7 @@ class InvoiceManager
         $invoice->setTotalAmount($netTotal + $netTotal * $vatRate);
         $chart->getPaymentInstruction() ?
             $invoice->setPaymentSystemName($chart->getPaymentInstruction()->getPaymentSystemName()):
-            $invoice->setPaymentSystemName('free');
+            $invoice->setPaymentSystemName('none');
         $chart->setInvoice($invoice);
         $this->om->persist($chart);
         $this->om->persist($invoice);
