@@ -46,12 +46,12 @@ class Listener
     *
     * @param DisplayToolEvent $event
     */
-    public function onDisplayInvoice(DisplayToolEvent $event)
+    public function onDisplayForms(DisplayToolEvent $event)
     {
-        $event->setContent($this->getDisplayInvoicePage());
+        $event->setContent($this->getDisplayedForms());
     }
 
-    private function getDisplayInvoicePage()
+    private function getDisplayedForms()
     {
         $params = array('_controller' => 'FormaLibreInvoiceBundle:SharedWorkspace:forms');
         $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
@@ -113,11 +113,34 @@ class Listener
             $workspaceData[] = $el;
         }
 
-         $content = $this->container->get('templating')->render(
+        $content = $this->container->get('templating')->render(
             'FormaLibreInvoiceBundle:MyPurchase:widget.html.twig',
             array('workspace_data' => $workspaceData)
         );
 
         return $content;
      }
+
+     /**
+      * @DI\Observe("widget_formalibre_invoice")
+      *
+      * @param DisplayToolEvent $event
+      */
+      public function onDisplayInvoice(DisplayWidgetEvent $event)
+      {
+          $event->setContent($this->getDisplayedInvoice());
+      }
+
+      private function getDisplayedInvoice()
+      {
+          $charts = $this->container->get('formalibre.manager.chart_manager')
+            ->getByUser($this->tokenStorage->getToken()->getUser());
+
+          $content = $this->container->get('templating')->render(
+              'FormaLibreInvoiceBundle:Invoice:widget.html.twig',
+              array('charts' => $charts)
+          );
+
+          return $content;
+      }
 }

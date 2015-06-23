@@ -6,6 +6,7 @@ use JMS\DiExtraBundle\Annotation as DI;
 use FormaLibre\InvoiceBundle\Entity\Chart;
 use FormaLibre\InvoiceBundle\Entity\Order;
 use Claroline\CoreBundle\Persistence\ObjectManager;
+use Claroline\CoreBundle\Entity\User;
 
 /**
 * @DI\Service("formalibre.manager.chart_manager")
@@ -40,5 +41,10 @@ class ChartManager
     {
         if (!$chart) $chart = new Chart();
         $order->setChart($chart);
+    }
+
+    public function getByUser(User $user)
+    {
+        return $this->chartRepository->findByOwner($user);
     }
 }

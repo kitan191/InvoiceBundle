@@ -104,46 +104,6 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/invoice/{invoice}/show",
-     *      name="admin_invoice_show"
-     * )
-     * @EXT\Template
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function showInvoiceAction(invoice $invoice)
-    {
-        return array('invoice' => $invoice);
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/admin/invoice/{invoice}/download",
-     *      name="admin_invoice_download"
-     * )
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function downloadInvoiceAction(Invoice $invoice)
-    {
-        $response = new StreamedResponse();
-        $file = $this->pdfDirectory. '/invoice/' . $invoice->getId() . '.pdf';
-
-        $response->setCallBack(
-            function () use ($file) {
-                readfile($file);
-            }
-        );
-
-        $response->headers->set('Content-Transfer-Encoding', 'octet-stream');
-        $response->headers->set('Content-Type', 'application/force-download');
-        $response->headers->set('Content-Disposition', 'attachment; filename=' . urlencode('invoice.pdf'));
-        $response->headers->set('Content-Type', 'application/pdf');
-        $response->headers->set('Connection', 'close');
-
-        return $response;
-    }
-
-    /**
-     * @EXT\Route(
      *      "/bank_transfer_validate/{invoice}",
      *      name="formalibre_validate_bank_transfer"
      * )

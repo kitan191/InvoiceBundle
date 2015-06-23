@@ -5,6 +5,7 @@ namespace FormaLibre\InvoiceBundle\Manager;
 use JMS\DiExtraBundle\Annotation as DI;
 use FormaLibre\InvoiceBundle\Entity\Chart;
 use FormaLibre\InvoiceBundle\Entity\Invoice;
+use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Knp\Bundle\SnappyBundle\Snappy\LoggableGenerator;
 use Claroline\CoreBundle\Manager\MailManager;
@@ -150,5 +151,10 @@ class InvoiceManager
         $this->om->persist($invoice);
         $this->om->persist($chart);
         $this->om->flush();
+    }
+
+    public function getInvoiceCode()
+    {
+        return '0';
     }
 }

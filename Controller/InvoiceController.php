@@ -15,11 +15,33 @@ class InvoiceController extends Controller
     /** @DI\Inject("security.token_storage") */
     private $tokenStorage;
 
+    /** @DI\Inject("security.authorization_checker") */
+    private $authorization;
+
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
 
     /** @DI\Inject("formalibre.manager.invoice_manager") */
     private $invoiceManager;
+
+    /**
+     * @EXT\Route(
+     *      "/admin/invoice/{invoice}/show",
+     *      name="admin_invoice_show"
+     * )
+     * @EXT\Template
+     */
+    public function showAction(invoice $invoice)
+    {
+        if (
+            $invoice->getChart()->getOwner() !== $this->tokenStorage->getToken()->getUser() &&
+            !$this->authorization->isGranted('ROLE_ADMIN')
+        ) {
+            throw new AccessDeniedException;
+        }
+
+        return array('invoice' => $invoice);
+    }
 
     /**
      * @EXT\Route(
@@ -30,16 +52,12 @@ class InvoiceController extends Controller
      * @return Response
      */
     public function downloadAction(Invoice $invoice)
-    {/*
-        return new Response($this->renderView(
-            'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
-            array('chart' => $invoice->getChart())
-        ));
-*/
+    {
         $user = $this->tokenStorage->getToken()->getUser();
 
-        if ($invoice->getChart()->getOwner() !== $user) {
-            throw new \AccessDeniedException;
+        if ($invoice->getChart()->getOwner() !== $user &&
+            !$this->authorization->isGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedException;
         }
 
         $file = $this->invoiceManager->getPdf($invoice);

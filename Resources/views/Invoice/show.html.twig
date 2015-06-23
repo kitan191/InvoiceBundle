@@ -6,19 +6,6 @@
     {{
         macros.breadcrumbs([
             {
-                'icon': 'fa fa-cog',
-                'name': 'administration'|trans({}, 'platform'),
-                'href': path('claro_admin_index')
-            },
-            {
-                'name': 'invoices'|trans({}, 'invoice'),
-                'href': path('claro_admin_index')
-            },
-            {
-                'name': 'show'|trans({}, 'invoice'),
-                'href': path('admin_invoice_open_invoice')
-            },
-            {
                 'name': invoice.getId(),
                 'href': ''
             }
@@ -55,7 +42,7 @@
         <hr>
     </div>
     <div class="panel-footer">
-        <a class="btn btn-primary" href="{{ path('admin_invoice_download', {'invoice': invoice.getId() }) }}">
+        <a class="btn btn-primary" href="{{ path('invoice_download', {'invoice': invoice.getId() }) }}">
             <i class="fa fa-download"></i> {{ 'download'|trans({}, 'platform') }}
         </a>
     </div>
@@ -65,7 +52,7 @@
     <script type="text/javascript" src="{{ asset('bundles/clarolinepdfplayer/js/pdf.js') }}"></script>
     <script type="text/javascript">
 
-    var url = '{{ path ("admin_invoice_download", {"invoice": invoice.getId()}) }}';
+    var url = '{{ path ("invoice_download", {"invoice": invoice.getId()}) }}';
 
     PDFJS.disableWorker = true;
 
