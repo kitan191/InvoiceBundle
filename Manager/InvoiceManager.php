@@ -98,14 +98,20 @@ class InvoiceManager
 
     public function getPdf(Invoice $invoice)
     {
-        if (file_exists($path = $this->pdfDir . '/invoice/' . $invoice->getId() . '.pdf')) @unlink($path);
+        if (file_exists($path = $this->pdfDir . '/invoice/' . $invoice->getInvoiceNumber() . '.pdf')) @unlink($path);
 
         @mkdir($this->pdfDir);
         @mkdir($this->pdfDir . '/invoice');
 
+        $extra = $invoice->getChart()->getExtendedData();
+        $communication = isset($extra['communication']) ? $extra['communication']: null;
+
         $view = $this->templating->render(
             'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
-            array('chart' => $invoice->getChart())
+            array(
+                'chart' => $invoice->getChart(),
+                'communication' => $communication
+            )
         );
 
         $this->snappy->generateFromHtml($view, $path);

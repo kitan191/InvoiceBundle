@@ -95,6 +95,7 @@ class Updater050100 extends Updater
             $invoice->setVatAmount($row['vatAmount']);
             $invoice->setAmount($row['amount']);
             $invoice->setTotalAmount($row['amount'] + $row['vatAmount']);
+            $invoice->setInvoiceNumber($row['id']);
 
             if ($paymentInstruction) {
                 $paymentSystemName = $paymentInstruction->getPaymentSystemName();

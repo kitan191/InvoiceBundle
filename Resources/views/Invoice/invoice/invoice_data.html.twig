@@ -1,3 +1,10 @@
+{% macro li(chart, facetName) %}
+    {% if get_facet_value(chart.getOwner(), facetName) %}
+        <li> {{ facetName|trans({}, 'platform') }}: {{ get_facet_value(chart.getOwner(), facetName) }} </li>
+    {% endif %}
+{% endmacro %}
+
+{% import _self as func %}
 {# we use a table because wkhtmltoptf isn't really happy with bootstrap #}
 <table>
     <tr>
@@ -5,12 +12,16 @@
             <img style="display: block; max-width:150px; max-height:20%;" src="{{ asset('bundles/formalibreinvoice/images/invoice_logo.jpg', absolute=true) }}" alt="logo_formalibre"/>
         </td>
         <td width="20%">
-            {{ 'invoice_number'|trans({}, 'invoice') }}: {{ chart.getInvoice().getId() }}
             <ul style="list-style-type: none; padding-left:0;">
-                <li> {{ chart.getOwner().getLastName() }} {{ chart.getOwner().getFirstName() }} </li>
-                {% if company is defined %} <li> {{ company }} </li> {% endif %}
+                <li> {{ 'invoice_number'|trans({}, 'invoice') }}: {{ chart.getInvoice().getInvoiceNumber() }} </li>
                 <li> {{ 'invoice_date'|trans({}, 'invoice' ) }}: {{ chart.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
+                <li> {{ chart.getOwner().getLastName() }} {{ chart.getOwner().getFirstName() }} </li>
                 <li> {{ 'payment_method'|trans({}, 'invoice') }}: {{ chart.getInvoice().getPaymentSystemName()|trans({}, 'invoice') }} </li>
+                {{ func.li(chart, 'formalibre_street') }}
+                {{ func.li(chart, 'formalibre_cp') }}
+                {{ func.li(chart, 'formalibre_town') }}
+                {{ func.li(chart, 'formalibre_country') }}
+                {{ func.li(chart, 'formalibre_vat') }}
             </ul>
         </td>
     </tr>

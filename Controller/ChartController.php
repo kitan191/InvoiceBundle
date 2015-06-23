@@ -123,11 +123,12 @@ class ChartController extends Controller
         $instruction = $chart->getPaymentInstruction();
         $extra = $instruction->getExtendedData();
         $chart->setExtendedData(array('communication' => $extra->get('communication')));
+        $extData = $chart->getExtendedData();
         $this->em->persist($chart);
         $this->em->flush();
 
         return array(
-            'communication' => $extra->get('communication'),
+            'communication' => $extData['communication'],
             'chart' => $chart
         );
     }

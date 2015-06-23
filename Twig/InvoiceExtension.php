@@ -44,6 +44,16 @@ class InvoiceExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getFunctions()
+    {
+        return array(
+            new \Twig_SimpleFunction('get_facet_value', array($this, 'getFieldValue'))
+        );
+    }
+
     public function formatCommunication($number)
     {
         $str = (string) $number;
@@ -64,7 +74,7 @@ class InvoiceExtension extends \Twig_Extension
         return number_format($number, 2, ',', '.');
     }
 
-    private function getFieldValue(User $user, $fieldName)
+    public function getFieldValue(User $user, $fieldName)
     {
         $facetManager = $this->container->get('claroline.manager.facet_manager');
         $ffvs = $facetManager->getFieldValuesByUser($user);
@@ -75,7 +85,7 @@ class InvoiceExtension extends \Twig_Extension
             }
         }
 
-        return '';
+        return null;
     }
 
     /**

@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 
-{% set communication = null %}
-
 <html>
     <head>
       <title> formalibre </title>
@@ -32,7 +30,7 @@
                 with {'chart': chart}
             %}
             {% include 'FormaLibreInvoiceBundle:Invoice:invoice\\footer.html.twig'
-                with {'communication': communication, 'chart': chart}
+                with {'chart': chart, 'communication': communication}
             %}
         </div>
     </body>

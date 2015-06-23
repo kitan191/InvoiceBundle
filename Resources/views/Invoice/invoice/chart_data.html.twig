@@ -19,12 +19,14 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="pull-right">
-        <ul style="list-style-type: none;">
-            <li><b>{{ 'net_total'|trans({}, 'invoice') }}: {{ chart.getInvoice().getAmount()|format_price() }} € </b></li>
-            <li><b>{{ 'vat_rate'|trans({}, 'invoice') }}: {{ chart.getInvoice().getVatRate() * 100 }} % </b></li>
-            <li><b> {{ 'vat_total'|trans({}, 'invoice') }}: {{ chart.getInvoice().getVatAmount()|format_price() }} € </b></li>
-            <li><b> {{ 'vati_total'|trans({}, 'invoice') }}: {{ chart.getInvoice().getTotalAmount()|format_price() }} € </b></li>
-        </ul>
+    <div class="pull-right panel panel-default">
+        <div class="panel-body">
+            <ul style="list-style-type: none;">
+                <li><b>{{ 'net_total'|trans({}, 'invoice') }}: {{ chart.getInvoice().getAmount()|format_price() }} € </b></li>
+                <li><b>{{ 'vat_rate'|trans({}, 'invoice') }}: {{ chart.getInvoice().getVatRate() * 100 }} % </b></li>
+                <li><b> {{ 'vat_total'|trans({}, 'invoice') }}: {{ chart.getInvoice().getVatAmount()|format_price() }} € </b></li>
+                <li><b> {{ 'vati_total'|trans({}, 'invoice') }}: {{ chart.getInvoice().getTotalAmount()|format_price() }} € </b></li>
+            </ul>
+        </div>
     </div>
 </div>
