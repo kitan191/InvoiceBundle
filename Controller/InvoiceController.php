@@ -71,7 +71,7 @@ class InvoiceController extends Controller
 
         $response->headers->set('Content-Transfer-Encoding', 'octet-stream');
         $response->headers->set('Content-Type', 'application/force-download');
-        $response->headers->set('Content-Disposition', 'attachment; filename=invoice.pdf');
+        $response->headers->set('Content-Disposition', 'attachment; filename=invoice-' . $invoice->getInvoiceNumber() . '.pdf');
         $response->headers->set('Content-Type', 'application/pdf');
         $response->headers->set('Connection', 'close');
 

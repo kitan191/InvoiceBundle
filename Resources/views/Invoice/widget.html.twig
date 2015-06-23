@@ -10,7 +10,7 @@
             <tbody>
                 {% for chart in charts %}
                     <tr>
-                        <th> {{ chart.getInvoice().getId()}} </th>
+                        <th> {{ chart.getInvoice().getInvoiceNumber()}} </th>
                         <th> <a href="{{ path('admin_invoice_show', {'invoice': chart.getInvoice().getId()} ) }}"> {{ 'display'|trans({}, 'platform') }} </a> </th>
                     </tr>
                 {% endfor %}

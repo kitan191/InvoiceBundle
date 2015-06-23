@@ -71,6 +71,9 @@
                 <thead>
                     <tr>
                         <th>
+                            {{ 'number'|trans({}, 'platform') }}
+                        </th>
+                        <th>
                             {{ 'date'|trans({}, 'platform') }}
                         </th>
                         <th>
@@ -96,6 +99,7 @@
                 <tbody>
                     {% for invoice in pager.currentPageResults %}
                     <tr>
+                        <td> {{ invoice.getInvoiceNumber() }} </td>
                         <td> {{ invoice.getChart().getCreationDate()|intl_date_format() }} </td>
                         <td> {{ invoice.getAmount() }}
                         <td> {{ invoice.getVatAmount() }}

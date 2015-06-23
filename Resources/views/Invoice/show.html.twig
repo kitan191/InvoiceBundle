@@ -6,7 +6,7 @@
     {{
         macros.breadcrumbs([
             {
-                'name': invoice.getId(),
+                'name': invoice.getInvoiceNumber(),
                 'href': ''
             }
         ])
@@ -15,7 +15,7 @@
 
 {% block section_content %}
     <div class="panel-heading">
-        <h3 class="panel-title">{{ invoice.getId() }}</h3>
+        <h3 class="panel-title">{{ invoice.getInvoiceNumber() }}</h3>
     </div>
     <div class="panel-body">
         {% block controls %}

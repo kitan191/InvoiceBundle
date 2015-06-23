@@ -49,6 +49,7 @@ class InvoiceManager
         $this->translator = $translator;
         $this->em = $em;
         $this->orderManager = $orderManager;
+        $this->invoiceRepository = $em->getRepository('FormaLibreInvoiceBundle:Invoice');
     }
 
     public function create(Chart $chart)
@@ -71,6 +72,7 @@ class InvoiceManager
         $invoice->setAmount($netTotal);
         $invoice->setVatAmount($netTotal * $vatRate);
         $invoice->setTotalAmount($netTotal + $netTotal * $vatRate);
+        $invoice->setInvoiceNumber($this->getInvoiceCode());
         $chart->getPaymentInstruction() ?
             $invoice->setPaymentSystemName($chart->getPaymentInstruction()->getPaymentSystemName()):
             $invoice->setPaymentSystemName('none');
@@ -155,6 +157,21 @@ class InvoiceManager
 
     public function getInvoiceCode()
     {
-        return '0';
+        $base = date('y') . date('m') . date('d');
+
+        $dql = "
+            SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
+            WHERE i.invoiceNumber LIKE :base
+        ";
+
+        $query = $this->em->createQuery($dql);
+        $query->setParameter('base', $base . '%');
+        $results = $query->getResult();
+
+        $amt = count($results);
+        $amt++;
+        $code = str_pad($amt, 4, '0', STR_PAD_LEFT);
+
+        return $base . $code;
     }
 }

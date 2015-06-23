@@ -149,4 +149,14 @@ class Invoice
     {
         return $this->isPayed;
     }
+
+    public function setInvoiceNumber($invoiceNumber)
+    {
+        $this->invoiceNumber = $invoiceNumber;
+    }
+
+    public function getInvoiceNumber()
+    {
+        return $this->invoiceNumber;
+    }
 }
