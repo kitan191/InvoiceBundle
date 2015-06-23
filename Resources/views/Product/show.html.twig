@@ -1,0 +1,38 @@
+{% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+
+{% extends layout %}
+
+{% block breadcrumb %}
+    {{
+        macros.desktopBreadcrumbs([
+            {
+                'name': product.getCode(),
+                'href': ''
+            }
+        ])
+    }}
+{% endblock %}
+
+{% block content %}
+
+<div class="section-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="well">
+                {{
+                    'SHARE_WS_DESCRIPTION'|trans(
+                        {
+                            '%code%': product.code|trans({}, 'invoice'),
+                            '%users%': product.details.max_users,
+                            '%storage%': product.details.max_storage,
+                            '%resources%': product.details.max_resources
+                        },
+                        'invoice'
+                    )|raw
+                }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

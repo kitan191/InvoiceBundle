@@ -52,7 +52,7 @@ class InvoiceManager
 
     public function create(Chart $chart)
     {
-        //if it alreadu has an invoice, we don't create an other one...
+        //if it already has an invoice, we don't create an other one...
         if ($chart->getInvoice()) return $chart->getInvoice();
 
         $invoice = new Invoice();
@@ -148,7 +148,7 @@ class InvoiceManager
 
         $invoice->setIsPayed(true);
         $this->om->persist($invoice);
-        $this->om->persist($validDate);
+        $this->om->persist($chart);
         $this->om->flush();
     }
 }

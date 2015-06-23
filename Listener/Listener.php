@@ -14,6 +14,7 @@ use Claroline\CoreBundle\Event\DisplayToolEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Claroline\CoreBundle\Event\OpenAdministrationToolEvent;
+use Claroline\CoreBundle\Event\DisplayWidgetEvent;
 
 /**
 * @DI\Service()
@@ -36,6 +37,8 @@ class Listener
     {
         $this->container = $container;
         $this->httpKernel = $httpKernel;
+        $this->tokenStorage = $this->container->get('security.token_storage');
+        $this->sharedWorkspaceManager = $this->container->get('formalibre.manager.shared_workspace_manager');
     }
 
    /**
@@ -50,7 +53,7 @@ class Listener
 
     private function getDisplayInvoicePage()
     {
-        $params = array('_controller' => 'FormaLibreInvoiceBundle:SharedWorkspace:list');
+        $params = array('_controller' => 'FormaLibreInvoiceBundle:SharedWorkspace:forms');
         $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
         $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
 
@@ -77,4 +80,44 @@ class Listener
 
         return $response;
     }
+
+    /**
+     * @DI\Observe("widget_formalibre_purchased")
+     *
+     * @param DisplayToolEvent $event
+     */
+     public function onDisplayPurchased(DisplayWidgetEvent $event)
+     {
+         $event->setContent($this->getDisplayPurchased());
+     }
+
+     private function getDisplayPurchased()
+     {
+        $user = $this->tokenStorage->getToken()->getUser();
+        $sharedWorkspaces = $this->sharedWorkspaceManager->getSharedWorkspaceByUser($user);
+        $workspaceData = array();
+
+        foreach ($sharedWorkspaces as $sharedWorkspace) {
+            $el = array();
+            $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+            $el['shared_workspace'] = $sharedWorkspace;
+
+            if ($workspace) {
+                $el['workspace'] = $workspace;
+            } else {
+                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
+            }
+
+            $el['product'] = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace)->getProduct();
+
+            $workspaceData[] = $el;
+        }
+
+         $content = $this->container->get('templating')->render(
+            'FormaLibreInvoiceBundle:MyPurchase:widget.html.twig',
+            array('workspace_data' => $workspaceData)
+        );
+
+        return $content;
+     }
 }

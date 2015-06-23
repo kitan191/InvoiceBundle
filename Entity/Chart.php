@@ -141,6 +141,11 @@ class Chart
         return $this->orders;
     }
 
+    public function addOrder(Order $order)
+    {
+        $this->orders->add($order);
+    }
+
     public function setExtendedData(array $data)
     {
         $this->extendedData = $data;

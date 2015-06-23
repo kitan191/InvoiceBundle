@@ -7,6 +7,10 @@ plugin:
           is_displayable_in_desktop: true
           class: dollar
 
+    widgets:
+        - name: formalibre_purchased
+          is_configurable: false
+
     admin_tools:
         - name: formalibre_admin_invoice
           class: dollar

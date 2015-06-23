@@ -102,7 +102,7 @@ class ChartController extends Controller
             return new Response($content);
         }
 
-        return new RedirectResponse($this->router->generate('shared_workspace_show_all', array()));
+        return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
 
     /**

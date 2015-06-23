@@ -41,6 +41,5 @@ class OrderManager
         $sws = $this->sharedWorkspaceManager->executeOrder($order);
         $this->om->persist($sws);
         $this->om->flush();
-        $hasFreeMonth = $this->sharedWorkspaceManager->hasFreeTestMonth($sws->getOwner());
     }
 }

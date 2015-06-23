@@ -17,3 +17,13 @@ chart_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/ChartController.php"
     type: annotation
     prefix: /chart
+
+my_purchase_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/MyPurchaseController.php"
+    type: annotation
+    prefix: /purchase
+
+product_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/ProductController.php"
+    type: annotation
+    prefix: /product

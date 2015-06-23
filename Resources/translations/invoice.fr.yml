@@ -66,3 +66,4 @@ order_thanks: Merci de votre commande FormaLibre
 workpace_confirm: |
     Votre espace d'activité se nome %name% (%code%).
     Il expirera le %expiration_date%
+product_name: Nom du produit

@@ -1,7 +1,7 @@
 <div class="panel panel-body">
     <div class="top default-block top-margin">
         <div class="div-buttons pull-right">
-            <a href="{{ path('shared_workspace_show_all') }}" class="btn btn-primary pull-right"> {{ 'my_invoices'|trans({}, 'invoice') }} </a>
+            <a href="{{ path('claro_desktop_open') }}" class="btn btn-primary pull-right"> {{ 'my_invoices'|trans({}, 'invoice') }} </a>
             </br></br>
             <a href="{{ path('invoice_download', {'invoice': chart.getInvoice().getId()}) }}" class="btn btn-default btn pull-right"> {{ 'download'|trans({}, 'platform') }} </a>
         </div>

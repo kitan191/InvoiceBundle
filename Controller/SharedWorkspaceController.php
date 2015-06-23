@@ -280,42 +280,14 @@ class SharedWorkspaceController extends Controller
         $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
         $order->setPriceSolution($ps);
         $order->setProduct($product);
+        $chart->addOrder($order);
         $order->setChart($chart);
+        $this->em->persist($order);
+        $this->em->persist($chart);
         $this->sharedWorkspaceManager->useFreeTestMonth($user);
         $invoice = $this->invoiceManager->create($chart);
         $this->invoiceManager->validate($invoice);
 
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/show/all",
-     *      name="shared_workspace_show_all"
-     * )
-     * @EXT\Template
-     *
-     * @return Response
-     */
-    public function listAction()
-    {
-        $user = $this->tokenStorage->getToken()->getUser();
-        $sharedWorkspaces = $this->sharedWorkspaceManager->getSharedWorkspaceByUser($user);
-        $data = array();
-        foreach ($sharedWorkspaces as $sharedWorkspace) {
-            $el = array();
-            $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
-            $el['shared_workspace'] = $sharedWorkspace;
-
-            if ($workspace) {
-                $el['workspace'] = $workspace;
-            } else {
-                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
-            }
-
-            $data[] = $el;
-        }
-
-        return array('data' => $data);
     }
 }
