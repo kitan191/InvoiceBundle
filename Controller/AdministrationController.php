@@ -80,23 +80,23 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/open/invoice/{page}",
+     *      "/admin/open/invoice/{page}/isPayed/{isPayed}",
      *      name="admin_invoice_open_invoice",
-     *      defaults={"page"=1, "search"=""},
+     *      defaults={"page"=1, "search"="", "isPayed"="true"},
      *      options = {"expose"=true}
      * )
      * @EXT\Route(
-     *      "/admin/open/invoice/{page}/search/{search}",
+     *      "/admin/open/invoice/{page}/search/{search}/{isPayed}",
      *      name="admin_invoice_open_invoice_search",
-     *      defaults={"page"=1},
+     *      defaults={"page"=1, "isPayed"="true"},
      *      options = {"expose"=true}
      * )
      * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function showInvoicesAction($page, $search)
+    public function showInvoicesAction($page, $search, $isPayed)
     {
-        $query = $this->invoiceManager->getPayed(true);
+        $query = $this->invoiceManager->getAllInvoices(true);
         $pager = $this->pagerFactory->createPager($query, $page, 25);
 
         return array('pager' => $pager, 'search' => $search);

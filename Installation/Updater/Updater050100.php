@@ -34,6 +34,7 @@ class Updater050100 extends Updater
         $this->productRepo = $this->om->getRepository('FormaLibreInvoiceBundle:Product');
         $this->priceRepo = $this->om->getRepository('FormaLibreInvoiceBundle:PriceSolution');
         $this->instructRepo = $this->om->getRepository('JMS\Payment\CoreBundle\Entity\PaymentInstruction');
+        $this->transRepo = $this->om->getRepository('JMS\Payment\CoreBundle\Entity\FinancialTransaction');
     }
 
     public function preUpdate()
@@ -44,7 +45,7 @@ class Updater050100 extends Updater
         $this->log('truncating the previous table...');
         //ignore the foreign keys for mysql
         $this->conn->query('SET FOREIGN_KEY_CHECKS=0');
-        $this->conn->query('truncate table formalibre__order');    
+        $this->conn->query('truncate table formalibre__order');
     }
 
     public function postUpdate()
@@ -98,7 +99,8 @@ class Updater050100 extends Updater
 
                 if ($paymentInstruction) {
                     $paymentSystemName = $paymentInstruction->getPaymentSystemName();
-                    $isPayed = $paymentInstruction->getState() === 4 ? true: false;
+                    $transaction = $this->transRepo->findByPayment($paymentInstruction->getId());
+                    $isPayed = $row['vatRate'] !== null ? true: false;
                 } else {
                     $paymentSystemName = 'none';
                     $isPayed = false;

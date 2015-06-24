@@ -210,8 +210,10 @@ class InvoiceManager
         return $exporter->export($titles, $data);
     }
 
-    public function getAllInvoices()
+    public function getAllInvoices($getQuery = false)
     {
+        if ($getQuery) return $this->em->createQuery("SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i");
+
         return $this->invoiceRepository->findAll();
     }
 }
