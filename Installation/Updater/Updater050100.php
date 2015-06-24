@@ -38,15 +38,13 @@ class Updater050100 extends Updater
 
     public function preUpdate()
     {
-        /*
         $this->log('backing up the order table...');
         $this->conn->query('CREATE TABLE formalibre__order_tmp
             AS (SELECT * FROM formalibre__order)');
         $this->log('truncating the previous table...');
         //ignore the foreign keys for mysql
         $this->conn->query('SET FOREIGN_KEY_CHECKS=0');
-        $this->conn->query('truncate table formalibre__order');
-        */
+        $this->conn->query('truncate table formalibre__order');    
     }
 
     public function postUpdate()
