@@ -23,7 +23,7 @@ class Updater050100 extends Updater
     /** @var  Connection */
     private $conn;
 
-    const MAX_BATCH_SIZE = 2;
+    const MAX_BATCH_SIZE = 20;
 
     public function __construct(ContainerInterface $container)
     {
@@ -53,68 +53,70 @@ class Updater050100 extends Updater
         $i = 0;
 
         foreach ($orders as $row) {
-            $this->log('Restoring order for ' . $row['id'] . '...');
-            $owner = $this->userRepo->find($row['owner_id']);
+            if ($row['owner_id'] !== null) {
+                $this->log('Restoring order for ' . $row['id'] . '...');
+                $owner = $this->userRepo->find($row['owner_id']);
 
-            $product = $row['product_id'] ? $this->productRepo->find($row['product_id']): null;
-            $priceSolution = $row['price_solution_id'] ? $this->priceRepo->find($row['price_solution_id']): null;
+                $product = $row['product_id'] ? $this->productRepo->find($row['product_id']): null;
+                $priceSolution = $row['price_solution_id'] ? $this->priceRepo->find($row['price_solution_id']): null;
 
-            $paymentInstruction = $row['paymentInstruction_id'] ?
-                $this->instructRepo->find($row['paymentInstruction_id']): null;
+                $paymentInstruction = $row['paymentInstruction_id'] ?
+                    $this->instructRepo->find($row['paymentInstruction_id']): null;
 
-            $order = new Order();
-            if ($product) $order->setProduct($product);
-            if ($priceSolution) $order->setPriceSolution($priceSolution);
-            $order->hasDiscount($row['hasDiscout']);
+                $order = new Order();
+                if ($product) $order->setProduct($product);
+                if ($priceSolution) $order->setPriceSolution($priceSolution);
+                $order->hasDiscount($row['hasDiscout']);
 
-            $chart = new Chart();
-            if ($paymentInstruction) $chart->setPaymentInstruction($paymentInstruction);
-            $chart->setOwner($owner);
+                $chart = new Chart();
+                if ($paymentInstruction) $chart->setPaymentInstruction($paymentInstruction);
+                $chart->setOwner($owner);
 
-            if ($row['extendedData']) {
-                $extData = $row['extendedData'];
-                $obj = json_decode($extData);
-                $chart->setExtendedData(get_object_vars($obj));
-            }
+                if ($row['extendedData']) {
+                    $extData = $row['extendedData'];
+                    $obj = json_decode($extData);
+                    $chart->setExtendedData(get_object_vars($obj));
+                }
 
-            if ($row['validation_date']) {
-                $validationDate = new \DateTime($row['validation_date']);
-                $chart->setValidationDate($validationDate);
-            }
-            $creationDate = new \DateTime($row['creation_date']);
-            $chart->setCreationDate($creationDate);
-            $chart->setIpAdress($row['ipAdress']);
-            $order->setChart($chart);
+                if ($row['validation_date']) {
+                    $validationDate = new \DateTime($row['validation_date']);
+                    $chart->setValidationDate($validationDate);
+                }
+                $creationDate = new \DateTime($row['creation_date']);
+                $chart->setCreationDate($creationDate);
+                $chart->setIpAdress($row['ipAddress']);
+                $order->setChart($chart);
 
-            $invoice = new Invoice();
-            $invoice->setVatNumber($row['vatNumber']);
-            $invoice->setChart($chart);
-            $invoice->setVatRate($row['vatRate']);
-            $invoice->setVatAmount($row['vatAmount']);
-            $invoice->setAmount($row['amount']);
-            $invoice->setTotalAmount($row['amount'] + $row['vatAmount']);
-            $invoice->setInvoiceNumber($row['id']);
+                $invoice = new Invoice();
+                $invoice->setVatNumber($row['vatNumber']);
+                $invoice->setChart($chart);
+                $invoice->setVatRate($row['vatRate']);
+                $invoice->setVatAmount($row['vatAmount']);
+                $invoice->setAmount($row['amount']);
+                $invoice->setTotalAmount($row['amount'] + $row['vatAmount']);
+                $invoice->setInvoiceNumber($row['id']);
 
-            if ($paymentInstruction) {
-                $paymentSystemName = $paymentInstruction->getPaymentSystemName();
-                $isPayed = $paymentInstruction->getState() === 4 ? true: false;
-            } else {
-                $paymentSystemName = 'none';
-                $isPayed = false;
-            }
+                if ($paymentInstruction) {
+                    $paymentSystemName = $paymentInstruction->getPaymentSystemName();
+                    $isPayed = $paymentInstruction->getState() === 4 ? true: false;
+                } else {
+                    $paymentSystemName = 'none';
+                    $isPayed = false;
+                }
 
-            $invoice->setPaymentSystemName($paymentSystemName);
-            $invoice->setIsPayed($isPayed);
-            $invoice->setChart($chart);
+                $invoice->setPaymentSystemName($paymentSystemName);
+                $invoice->setIsPayed($isPayed);
+                $invoice->setChart($chart);
 
-            $this->om->persist($order);
-            $this->om->persist($chart);
-            $this->om->persist($invoice);
+                $this->om->persist($order);
+                $this->om->persist($chart);
+                $this->om->persist($invoice);
 
-            $i++;
+                $i++;
 
-            if ($i % self::MAX_BATCH_SIZE === 0) {
-                $this->om->flush();
+                if ($i % self::MAX_BATCH_SIZE === 0) {
+                    $this->om->flush();
+                }
             }
         }
 
