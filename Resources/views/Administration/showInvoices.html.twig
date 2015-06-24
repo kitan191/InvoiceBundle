@@ -55,6 +55,7 @@
     </div>
     <div class="panel-body">
         <div class="row">
+            <a class="btn btn-primary" href="{{ path('formalibre_export_invoice') }}"> {{ 'export'|trans({}, 'platform') }} </a>
             <div class="col-md-4">
                  <div class="input-group">
                     <input class="form-control" type="text" id="search-items-txt" placeholder="{{ 'search'|trans({}, 'platform') }}" value={{ search }}>
@@ -80,9 +81,6 @@
                             {{ 'amount'|trans({}, 'invoice') }}
                         </th>
                         <th>
-                            {{ 'vat'|trans({}, 'invoice') }}
-                        </th>
-                        <th>
                             {{ 'first_name'|trans({}, 'platform') }}
                         </th>
                         <th>
@@ -90,6 +88,12 @@
                         </th>
                         <th>
                             {{ 'email'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'formalibre_vat'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'formalibre_company_name'|trans({}, 'platform') }}
                         </th>
                         <th>
                             {{ 'invoice'|trans({}, 'invoice') }}
@@ -101,11 +105,12 @@
                     <tr>
                         <td> {{ invoice.getInvoiceNumber() }} </td>
                         <td> {{ invoice.getChart().getCreationDate()|intl_date_format() }} </td>
-                        <td> {{ invoice.getAmount() }}
-                        <td> {{ invoice.getVatAmount() }}
+                        <td> {{ invoice.getTotalAmount() }}
                         <th> {{ invoice.getChart().getOwner().getFirstName() }} </th>
                         <th> {{ invoice.getChart().getOwner().getLastName() }} </th>
                         <th> {{ invoice.getChart().getOwner().getMail() }} </th>
+                        <th> {{ get_facet_value(invoice.getChart().getOwner(), 'formalibre_vat') }} </th>
+                        <th> {{ get_facet_value(invoice.getChart().getOwner(), 'formalibre_company_name') }} </th>
                         <th> <a href="{{ path('admin_invoice_show', {'invoice': invoice.getId() })}}"> {{ 'invoice'|trans({}, 'platform') }} </a>
                     </tr>
                     {% endfor %}

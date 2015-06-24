@@ -127,4 +127,47 @@ class AdministrationController extends Controller
 
         return new RedirectResponse($route);
     }
+
+    /**
+     * @EXT\Route(
+     *      "/export/{format}",
+     *      name="formalibre_export_invoice",
+     *      defaults={"format"="xls"}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function exportAction($format)
+    {
+        //the admin is the only one able to do this.
+        if (!$this->authorization->isGranted('ROLE_ADMIN')) {
+            throw new \AccessDeniedException();
+        }
+
+        $invoices = $this->invoiceManager->getAllInvoices();
+        $file = $this->invoiceManager->export(
+            $invoices, $this->container->get('claroline.exporter.' . $format)
+        );
+
+        $response = new StreamedResponse();
+
+        $response->setCallBack(
+            function () use ($file) {
+                readfile($file);
+            }
+        );
+        $response->headers->set('Content-Transfer-Encoding', 'octet-stream');
+        $response->headers->set('Content-Type', 'application/force-download');
+        $response->headers->set('Content-Disposition', 'attachment; filename=users.' . $format);
+
+        switch ($format) {
+            case 'csv': $response->headers->set('Content-Type', 'text/csv'); break;
+            case 'xls': $response->headers->set('Content-Type', 'application/vnd.ms-excel'); break;
+        }
+
+        $response->headers->set('Connection', 'close');
+
+        return $response;
+    }
 }

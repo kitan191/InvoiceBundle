@@ -26,6 +26,7 @@ class InvoiceManager
      *     "translator"   = @DI\Inject("translator"),
      *     "em"           = @DI\Inject("doctrine.orm.entity_manager"),
      *     "orderManager" = @DI\Inject("formalibre.manager.order_manager"),
+     *     "container"    = @DI\Inject("service_container")
      * })
      */
     public function __construct(
@@ -37,7 +38,8 @@ class InvoiceManager
         MailManager $mailManager,
         $translator,
         $em,
-        OrderManager $orderManager
+        OrderManager $orderManager,
+        $container
     )
     {
         $this->om = $om;
@@ -50,6 +52,7 @@ class InvoiceManager
         $this->em = $em;
         $this->orderManager = $orderManager;
         $this->invoiceRepository = $em->getRepository('FormaLibreInvoiceBundle:Invoice');
+        $this->container = $container;
     }
 
     public function create(Chart $chart)
@@ -179,5 +182,36 @@ class InvoiceManager
         $code = str_pad($amt, 4, '0', STR_PAD_LEFT);
 
         return $base . $code;
+    }
+
+    /**
+     * Export a list of invoice
+     */
+    public function export(array $invoices, $exporter)
+    {
+        $invExt = $this->container->get('forma_libre.invoice_bundle.twig.invoice_extension');
+        $titles = array('number', 'date', 'amount', 'first name', 'last name', 'email', 'vat number', 'company name');
+        $data = array();
+
+        foreach ($invoices as $invoice) {
+            $chart = $invoice->getChart();
+            $data[] = array(
+                $invoice->getInvoiceNumber(),
+                $invoice->getChart()->getCreationDate()->format($this->translator->trans('date_range.format.with_hours', array(), 'platform')),
+                $invoice->getTotalAmount(),
+                $invoice->getChart()->getOwner()->getFirstName(),
+                $invoice->getChart()->getOwner()->getLastName(),
+                $invoice->getChart()->getOwner()->getMail(),
+                $invExt->getFieldValue($invoice->getChart()->getOwner(), 'formalibre_vat'),
+                $invExt->getFieldValue($invoice->getChart()->getOwner(), 'formalibre_company_name')
+            );
+        }
+
+        return $exporter->export($titles, $data);
+    }
+
+    public function getAllInvoices()
+    {
+        return $this->invoiceRepository->findAll();
     }
 }

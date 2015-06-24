@@ -13,8 +13,8 @@
             <tr>
                 <td> {{ order.getProduct().getCode() }} </td>
                 <td> {{ order.getQuantity() }} </td>
-                <td> {{ order.getPriceSolution().getPrice()|format_price() }} €</td>
-                <td> {{ (order.getQuantity() * order.getPriceSolution().getPrice())|format_price() }} €</td>
+                <td> {{ order.getPriceSolution().getPrice()|format_price() }} € </td>
+                <td> {{ (order.getQuantity() * order.getPriceSolution().getPrice())|format_price() }} € </td>
             </tr>
             {% endfor %}
         </tbody>
