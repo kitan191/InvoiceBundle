@@ -14,6 +14,9 @@ plugin:
         - name: formalibre_invoice
           is_configurable: false
 
+        - name: formalibre_campus
+          is_configurable: false
+
     admin_tools:
         - name: formalibre_admin_invoice
           class: dollar

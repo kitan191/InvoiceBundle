@@ -108,7 +108,8 @@ class Listener
                 $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
             }
 
-            $el['product'] = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace)->getProduct();
+            $sws = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace);
+            if ($sws) $el['product'] = $sws->getProduct();
 
             $workspaceData[] = $el;
         }
@@ -143,4 +144,26 @@ class Listener
 
           return $content;
       }
+
+      /**
+       * @DI\Observe("widget_formalibre_campus")
+       *
+       * @param DisplayToolEvent $event
+       */
+       public function onDisplayCampus(DisplayWidgetEvent $event)
+       {
+           $event->setContent($this->getDisplayCampus());
+       }
+
+       private function getDisplayCampus()
+       {
+           $user = $this->tokenStorage->getToken()->getUser();
+
+           $content = $this->container->get('templating')->render(
+               'FormaLibreInvoiceBundle:Campus:widget.html.twig',
+               array('user' => $user)
+           );
+
+           return $content;
+       }
 }
