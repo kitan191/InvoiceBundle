@@ -67,5 +67,5 @@ workpace_confirm: |
     Votre espace d'activité se nome %name% (%code%).
     Il expirera le %expiration_date%
 product_name: Nom du produit
-campus_connection_message: Vous pouvez vous connecter au campus en cliquant sur <a href="http://%baseurl%/login"> ce lien </a>. Votre nom d'utilisateur est %username%.
-forgot_password_message: Vous pouvez demander un nouveau mot de passe pour le campus en cliquant <a href="http://%baseurl%/reset"> ici </a>
+campus_connection_message: Vous pouvez vous connecter au campus en cliquant sur <a href="%baseurl%/login"> ce lien </a>. Votre nom d'utilisateur est %username%.
+forgot_password_message: Vous pouvez demander un nouveau mot de passe pour le campus en cliquant <a href="%baseurl%/reset"> ici </a>
