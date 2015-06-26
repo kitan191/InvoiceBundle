@@ -80,26 +80,34 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/open/invoice/{page}/isPayed/{isPayed}",
+     *      "/admin/open/invoice/{page}/isPayed/{isPayed}/from/{from}/to/{to}",
      *      name="admin_invoice_open_invoice",
-     *      defaults={"page"=1, "search"="", "isPayed"="true"},
+     *      defaults={"page"=1, "search"="", "isPayed"="true", "from": "1420153200", "to": "1451689200"},
      *      options = {"expose"=true}
      * )
      * @EXT\Route(
-     *      "/admin/open/invoice/{page}/search/{search}/{isPayed}",
+     *      "/admin/open/invoice/{page}/search/{search}/{isPayed}/from/{from}/to/{to}",
      *      name="admin_invoice_open_invoice_search",
-     *      defaults={"page"=1, "isPayed"="true"},
+     *      defaults={"page"=1, "isPayed"="true", "from": "1420153200", "to": "1451689200"},
      *      options = {"expose"=true}
      * )
      * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function showInvoicesAction($page, $search, $isPayed)
+    public function showInvoicesAction($page, $search, $isPayed, $from, $to)
     {
-        $query = $this->invoiceManager->getAllInvoices(true);
+        $boolPayed = $isPayed === "true" ? true: false;
+        $query = $this->invoiceManager->getInvoices($boolPayed, $search, $from, $to, true);
         $pager = $this->pagerFactory->createPager($query, $page, 25);
 
-        return array('pager' => $pager, 'search' => $search);
+        return array(
+            'pager' => $pager,
+            'search' => $search,
+            'isPayed' => $isPayed,
+            'page' => $page,
+            'from' => $from,
+            'to' => $to
+        );
     }
 
     /**
@@ -130,22 +138,24 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/export/{format}",
+     *      "/export/{format}/from/{from}/to/{to}/isPayed/{isPayed}/search/{search}",
      *      name="formalibre_export_invoice",
-     *      defaults={"format"="xls"}
+     *      defaults={"format"="xls", "search" = ""}
      * )
      * @Security("has_role('ROLE_ADMIN')")
      *
      * @return Response
      */
-    public function exportAction($format)
+    public function exportAction($format, $search, $isPayed, $from, $to)
     {
+        $boolPayed = $isPayed === "true" ? true: false;
+        
         //the admin is the only one able to do this.
         if (!$this->authorization->isGranted('ROLE_ADMIN')) {
             throw new \AccessDeniedException();
         }
 
-        $invoices = $this->invoiceManager->getAllInvoices();
+        $invoices = $this->invoiceManager->getInvoices($boolPayed, $search, $from, $to, false);
         $file = $this->invoiceManager->export(
             $invoices, $this->container->get('claroline.exporter.' . $format)
         );

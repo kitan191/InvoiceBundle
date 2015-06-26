@@ -210,10 +210,38 @@ class InvoiceManager
         return $exporter->export($titles, $data);
     }
 
-    public function getAllInvoices($getQuery = false)
+    public function getInvoices($isPayed = true, $search = '', $from = 0, $to = 2147483647, $getQuery = false)
     {
-        if ($getQuery) return $this->em->createQuery("SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i");
+        $dql = "
+            SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
+            JOIN i.chart chart
+            JOIN chart.owner owner
+            WHERE i.isPayed = :isPayed
+            AND chart.validationDate BETWEEN :from and :to
+        ";
 
-        return $this->invoiceRepository->findAll();
+        if ($search) {
+            $search = strtoupper($search);
+            $dql .= '
+                AND (
+                    UPPER(owner.mail) LIKE :search OR
+                    UPPER(owner.firstName) LIKE :search OR
+                    UPPER(owner.lastName) like :search OR
+                    UPPER(i.invoiceNumber) like :search
+                )
+            ';
+        }
+
+        $fromTime = new \DateTime();
+        $fromTime->setTimeStamp($from);
+        $toTime = new \DateTime();
+        $toTime->setTimeStamp($to);
+        $query = $this->em->createQuery($dql);
+        $query->setParameter('isPayed', $isPayed);
+        $query->setParameter('from', $fromTime);
+        $query->setParameter('to', $toTime);
+        if ($search) $query->setParameter('search', "%{$search}%");
+
+        return $getQuery ? $query: $query->getResult();
     }
 }
