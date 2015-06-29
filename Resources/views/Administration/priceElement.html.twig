@@ -1,0 +1,12 @@
+{% twig_js name="PriceElement" %}
+
+<li id="price-el-{{ priceSolution.id }}">
+    {{ 'show_price_solution'|transchoice(priceSolution.monthDuration, {'%id%': priceSolution.id,'%duration%': priceSolution.monthDuration, '%price%': priceSolution.price}, 'invoice') }}  -
+    <a
+        class="remove-price-solution"
+        href="{{ path('formalibre_price_solution_remove', {'priceSolution': priceSolution.id}) }}"
+        data-price-solution-id='{{ priceSolution.id }}'
+    >
+        {{ 'delete'|trans({}, 'platform') }}
+    </a>
+</li>

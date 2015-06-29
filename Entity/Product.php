@@ -43,6 +43,11 @@ class Product
      */
     private $priceSolutions;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $isActivated = false;
+
     public function __construct()
     {
         $this->priceSolutions = new ArrayCollection();
@@ -101,5 +106,15 @@ class Product
     public function getPriceSolutions()
     {
         return $this->priceSolutions;
+    }
+
+    public function setIsActivated($isActivated)
+    {
+        $this->isActivated = $isActivated;
+    }
+
+    public function isActivated()
+    {
+        return $this->isActivated;
     }
 }

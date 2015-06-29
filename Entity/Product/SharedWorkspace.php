@@ -4,7 +4,6 @@ namespace FormaLibre\InvoiceBundle\Entity\Product;
 
 use Doctrine\ORM\Mapping as ORM;
 use Claroline\CoreBundle\Entity\User;
-use FormaLibre\InvoiceBundle\Entity\Product;
 
 /**
  * @ORM\Table(name="formalibre__shared_workspace")

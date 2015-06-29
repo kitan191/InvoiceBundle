@@ -76,3 +76,9 @@ invoices: Factures
 amount: Prix
 pending: En attente
 execute: Exécuter
+products: Produits
+show_price_solution: '{0}%price% EUR (%id%)|[1,Inf]%duration% mois pour %price% EUR (%id%)'
+activate: Activer
+price: Prix
+details: Détails
+remove_price_confirm: Êtes-vous sûr de vouloir supprimer le prix %id% ?

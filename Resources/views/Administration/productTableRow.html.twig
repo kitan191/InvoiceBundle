@@ -1,0 +1,23 @@
+{% twig_js name="ProductTableRow" %}
+
+<tr>
+    <td> {{ product.code }} </td>
+    <td>
+        <ul>
+            {% for key, value in product.details %}
+                <li> {{ key|trans({}, 'invoice') ~ ': ' ~ value }} </l>
+            {% endfor %}
+        <ul>
+    </td>
+    <td>
+        <ul id='price-list-{{ product.id }}'>
+            {% for priceSolution in product.priceSolutions %}
+                {% include 'FormaLibreInvoiceBundle:Administration:priceElement.html.twig' with {'priceSolution': priceSolution} %}
+            {% endfor %}
+        </ul>
+        <a class="add-price-solution" data-product-id="{{ product.id}}" href="#"> {{ 'add'|trans({}, 'platform') }} </a>
+    </td>
+    <td>
+        <input class='chk-activation' data-product-id='{{ product.id }}' type="checkbox" {% if product.isActivated == 1 %} checked {% endif %}></input>
+    </td>
+</tr>

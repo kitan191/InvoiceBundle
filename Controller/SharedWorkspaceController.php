@@ -85,7 +85,8 @@ class SharedWorkspaceController extends Controller
         $this->em->persist($chart);
         $this->em->persist($order);
         $this->em->flush();
-        $products = $this->get('formalibre.manager.product_manager')->getProductsByType('SHARED_WS');
+        $products = $this->get('formalibre.manager.product_manager')
+            ->getProductsBy(array('type' => 'SHARED_WS', 'isActivated' => true));
         $forms = array();
 
         foreach ($products as $product) {

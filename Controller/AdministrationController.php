@@ -9,8 +9,13 @@ use JMS\Payment\CoreBundle\Entity\Payment;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use JMS\SecurityExtraBundle\Annotation as SEC;
 use FormaLibre\InvoiceBundle\Entity\Order;
+use FormaLibre\InvoiceBundle\Entity\Product;
+use FormaLibre\InvoiceBundle\Entity\PriceSolution;
+use FormaLibre\InvoiceBundle\Form\PriceSolutionForm;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use FormaLibre\InvoiceBundle\Entity\Invoice;
 
 /**
@@ -20,6 +25,9 @@ class AdministrationController extends Controller
 {
     /** @DI\Inject("formalibre.manager.invoice_manager") */
     private $invoiceManager;
+
+    /** @DI\Inject("formalibre.manager.product_manager") */
+    private $productManager;
 
     /** @DI\Inject("claroline.pager.pager_factory") */
     private $pagerFactory;
@@ -33,11 +41,17 @@ class AdministrationController extends Controller
     /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
     private $sharedWorkspaceManager;
 
+    /** @DI\Inject("formalibre.manager.price_solution_manager") */
+    private $priceSolutionManager;
+
     /** @DI\Inject("payment.plugin_controller") */
     private $ppc;
 
     /** @DI\Inject("router") */
     private $router;
+
+    /** @DI\Inject("claroline.persistence.object_manager") */
+    private $om;
 
     /**
      * @EXT\Route(
@@ -149,7 +163,7 @@ class AdministrationController extends Controller
     public function exportAction($format, $search, $isPayed, $from, $to)
     {
         $boolPayed = $isPayed === "true" ? true: false;
-        
+
         //the admin is the only one able to do this.
         if (!$this->authorization->isGranted('ROLE_ADMIN')) {
             throw new \AccessDeniedException();
@@ -179,5 +193,203 @@ class AdministrationController extends Controller
         $response->headers->set('Connection', 'close');
 
         return $response;
+    }
+
+    /******************************************/
+    /*************** PRODUCTS *****************/
+    /******************************************/
+
+    /**
+     * @EXT\Route(
+     *      "/product/index",
+     *      name="formalibre_product_index"
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+
+     * @return Response
+     */
+    public function productIndexAction()
+    {
+        $products = $this->productManager->getAvailableProductsType();
+
+        return array('products' => $products);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/product/list/{code}",
+     *      name="formalibre_show_products"
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function productsListAction($code)
+    {
+        $products = $this->productManager->getProductsByType($code);
+
+        return array('products' => $products, 'code' => $code);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/product/{product}/activate/{isActivated}",
+     *      name="formalibre_activate_products",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function activateProductAction(Product $product, $isActivated)
+    {
+        $boolActivated = $isActivated === 'true' ? true: false;
+        $this->productManager->activateProduct($product, $boolActivated);
+
+        return new Response('success');
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/price_solution/product/{product}/form",
+     *      name="formalibre_price_solution_form",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     * @return Response
+     */
+    public function priceSolutionCreationFormAction(Product $product)
+    {
+        $form = $this->createForm(new PriceSolutionForm());
+
+        return array('form' => $form->createView(), 'product' => $product);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/price_solution/product/{product}/create",
+     *      name="formalibre_price_solution_create",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+
+     * @return Response
+     */
+    public function addPriceSolutionAction(Product $product)
+    {
+        $form = $this->createForm(new PriceSolutionForm());
+        $form->handleRequest($this->get('request'));
+
+        if ($form->isValid()) {
+            $priceSolution = $this->priceSolutionManager->create(
+                $product,
+                $form->get('price')->getData(),
+                $form->get('monthDuration')->getData()
+            );
+
+            return new JsonResponse(
+                array(
+                    'price' => $priceSolution->getPrice(),
+                    'monthDuration' => $priceSolution->getMonthDuration(),
+                    'id' => $priceSolution->getId(),
+                    'product_id' => $product->getId()
+                )
+            );
+        }
+
+       return $this->render(
+           'FormaLibreInvoiceBundle:Administration:priceSolutionCreationForm.html.twig',
+           array('form' => $form->createView(), 'product' => $product)
+       );
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/price_solution/{priceSolution}/remove",
+     *      name="formalibre_price_solution_remove",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+
+     * @return Response
+     */
+    public function removePriceSolution(PriceSolution $priceSolution)
+    {
+        $this->priceSolutionManager->remove($priceSolution);
+
+        return new Response('success');
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/product/{type}/form",
+     *      name="formalibre_product_create_form",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function addProductFormAction($type)
+    {
+        $form = $this->createForm($this->productManager->getFormByType($type));
+
+        return array('form' => $form->createView(), 'type' => $type);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/product/{type}/create",
+     *      name="formalibre_product_create",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function addProductForm($type)
+    {
+        $form = $this->createForm($this->productManager->getFormByType($type));
+        $form->handleRequest($this->get('request'));
+
+        if ($form->isValid()) {
+            $product = $this->productManager->createFromFormByType($form, $type);
+
+            return new JsonResponse(
+                array(
+                    'id' => $product->getId(),
+                    'code' => $product->getCode(),
+                    'type' => $product->getType(),
+                    'details' => $product->getDetails(),
+                    'priceSolutions' => array()
+                )
+            );
+        }
+
+        return $this->render(
+            'FormaLibreInvoiceBundle:Administration:addProductForm.html.twig',
+            array('form' => $form->createView(), 'type' => $type)
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/product/{product}/remove",
+     *      name="formalibre_product_remove",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+
+     * @return Response
+     */
+    public function removeProduct(Product $product)
+    {
+        $this->productManager->remove($product);
+
+        return new Response('success');
     }
 }

@@ -21,5 +21,8 @@ plugin:
         - name: formalibre_admin_invoice
           class: dollar
 
+        - name: formalibre_product_creator
+          class: cart-plus
+
     themes:
         - name: "Formalibre"

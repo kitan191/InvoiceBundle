@@ -166,4 +166,23 @@ class Listener
 
            return $content;
        }
+
+       /**
+        * @DI\Observe("administration_tool_formalibre_product_creator")
+        *
+        * @param DisplayToolEvent $event
+        */
+       public function onDisplayAdminProduct(OpenAdministrationToolEvent $event)
+       {
+           $event->setResponse($this->openAdminProducts());
+       }
+
+       private function openAdminProducts()
+       {
+           $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:productIndex');
+           $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+           $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+
+           return $response;
+       }
 }

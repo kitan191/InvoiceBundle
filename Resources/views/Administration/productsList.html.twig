@@ -1,0 +1,101 @@
+{% macro renderPager(search, pager, order, direction) %}
+    {% if search == '' %}
+    {{
+        pagerfanta(
+            pager,
+            'twitter_bootstrap_translated',
+            {
+                'proximity' : 1,
+                'routeName': 'admin_invoice_open_pending'
+            }
+        )
+    }}
+    {% else %}
+        {{
+            pagerfanta(
+                pager,
+                'twitter_bootstrap_translated',
+                {
+                    'proximity' : 1,
+                    'routeName': 'admin_invoice_open_pending_search',
+                    'routeParams': {'search': search }
+                }
+            )
+        }}
+    {% endif %}
+{% endmacro %}
+{% from _self import renderPager %}
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block title %}{{ parent() ~ ' - ' ~ 'invoice' | trans({}, 'invoice') | striptags | raw }}{% endblock %}
+
+{% block breadcrumb %}
+    {{
+        macros.breadcrumbs([
+            {
+                'icon': 'fa fa-cog',
+                'name': 'administration'|trans({}, 'platform'),
+                'href': path('claro_admin_index')
+            },
+            {
+                'name': 'products'|trans({}, 'invoice'),
+                'href': path('formalibre_product_index')
+            },
+            {
+                'name': code|trans({}, 'invoice'),
+                'href': ''
+            }
+        ])
+    }}
+{% endblock %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ 'products'|trans({}, 'invoice') }}</h3>
+    </div>
+    <div class="panel-body">
+         <div class="table-responsive">
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>
+                            {{ 'code'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'details'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'price'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'activate'|trans({}, 'invoice') }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="table-product-body">
+                    {% for product in products %}
+                        {% include 'FormaLibreInvoiceBundle:Administration:productTableRow.html.twig' with {'product': product} %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <a id='add-product-btn' href='{{ path('formalibre_product_create_form', {'type': code}) }}' class="btn btn-primary"> {{ 'add'|trans({}, 'platform') }} </a>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts
+        'js/translations/invoice/*.js'
+    %}<script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+    {% javascripts debug=false filter='twig_js, jsmin' vars=["locale"]
+        "@FormaLibreInvoiceBundle/Resources/views/Administration/productTableRow.html.twig"
+        "@FormaLibreInvoiceBundle/Resources/views/Administration/priceElement.html.twig"
+    %}<script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+
+    <script type="text/javascript" src="{{ asset('bundles/formalibreinvoice/js/products.js') }}"></script>
+{% endblock %}

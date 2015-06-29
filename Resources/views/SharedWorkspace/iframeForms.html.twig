@@ -1,5 +1,5 @@
 {% for form in forms %}
-<div class="col-md-3">
+<div class="col-md-{{ 12//forms|length }}">
     {% if hasFreeTest %}
     <a class="btn btn-primary" href="{{ path('formalibre_free_test_workspace', {'product': form['product'].getId()}) }}"> {{ 'free_test'|trans({}, 'invoice') }} </a>
     </br>
