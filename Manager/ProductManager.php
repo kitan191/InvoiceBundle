@@ -10,6 +10,8 @@ use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use FormaLibre\InvoiceBundle\Form\SharedWorkspaceCreationForm;
+use FormaLibre\InvoiceBundle\Form\CreditSupportType;
+use FormaLibre\InvoiceBundle\Form\SupportTechType;
 
 /**
 * @DI\Service("formalibre.manager.product_manager")
@@ -77,6 +79,10 @@ class ProductManager
         switch ($type) {
             case 'SHARED_WS':
                 $form = new SharedWorkspaceCreationForm(); break;
+            case 'CREDIT_SUPPORT':
+                $form = new CreditSupportType(); break;
+            case 'TECHNICAL_SUPPORT':
+                $form = new SupportTechType(); break;
             default: throw new \Exception('Unknown type.');
         }
 
@@ -86,40 +92,12 @@ class ProductManager
     public function createFromFormByType($form, $type)
     {
         $code = $form->get('code')->getData();
-
-        switch ($type) {
-            case 'SHARED_WS':
-                $product = $this->createSharedWorkspace(
-                    $code,
-                    $type,
-                    $form->get('max_users')->getData(),
-                    $form->get('max_storage')->getData(),
-                    $form->get('max_resources')->getData()
-                );
-                break;
-            default: throw new \Exception('Unknown type.');
-        }
-
-        return $product;
-    }
-
-    public function createSharedWorkspace(
-        $code,
-        $type,
-        $maxUsers,
-        $maxStorage,
-        $maxResources
-    ) {
-        $details = array(
-            'max_users' => $maxUsers,
-            'max_resources' => $maxResources,
-            'max_storage' => $maxStorage
-        );
-
         $product = new Product();
         $product->setCode($code);
         $product->setType($type);
-        $product->setDetails($details);
+        $data = $form->getData();
+        unset($data['code']);
+        $product->setDetails($data);
         $this->om->persist($product);
         $this->om->flush();
 

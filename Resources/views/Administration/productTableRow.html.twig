@@ -1,7 +1,7 @@
 {% twig_js name="ProductTableRow" %}
 
-<tr>
-    <td> {{ product.code }} </td>
+<tr id="row-product-{{ product.id }}">
+    <td> {{ product.code }} </br> <a class="remove-product" data-product-id="{{ product.id }}" href="{{ path('formalibre_product_remove', {'product': product.id}) }}"> {{ 'delete'|trans({}, 'platform') }} </a> </td>
     <td>
         <ul>
             {% for key, value in product.details %}

@@ -38,7 +38,20 @@
             translator.trans('remove_price_confirm', {'id': priceSolutionId}, 'invoice'),
             translator.trans('delete', {}, 'platform')
         );
-    })
+    });
+
+    $('body').on('click', '.remove-product', function(event) {
+        event.preventDefault();
+        var removeUrl = $(event.currentTarget).attr('href');
+        var productId = $(event.currentTarget).attr('data-product-id');
+        modal.confirmRequest(
+            removeUrl,
+            removeProduct,
+            productId,
+            translator.trans('remove_product_confirm', {'id': productId}, 'invoice'),
+            translator.trans('delete', {}, 'platform')
+        );
+    });
 
     var addPrice = function(data, textStatus, jqXHR) {
         $('#price-list-' + data.product_id).append(Twig.render(PriceElement, {'priceSolution': data}));
@@ -50,5 +63,9 @@
 
     var removePrice = function(event, priceSolutionId) {
         $('#price-el-' + priceSolutionId).remove();
+    }
+
+    var removeProduct = function(event, productId) {
+        $('#row-product-' + productId).remove();
     }
 }());
