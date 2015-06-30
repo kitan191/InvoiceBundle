@@ -1,0 +1,103 @@
+<div id="footer" class="invoice-footer">
+    <br>
+    <div class="col-md-12 row">
+        <div class="col-md-1">
+        </div>
+        
+        <div class="col-md-3">
+            <span class="invoice-footer-title">
+                {{ 'forma_libre_sa'|trans({}, 'invoice') }}
+            </span>
+            <ul class="invoice-footer-ul list-unstyled">
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'about'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'our_team'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'claroline_consortium'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'contact'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+                    
+        <div class="col-md-1">
+        </div>
+                    
+        <div class="col-md-2">
+            <span class="invoice-footer-title">
+                {{ 'our_services'|trans({}, 'invoice') }}
+            </span>
+            <ul class="invoice-footer-ul list-unstyled">
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'hostings'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'supports'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'trainings'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+            
+        <div class="col-md-1">
+        </div>
+                    
+        <div class="col-md-3">
+            <span class="invoice-footer-title">
+                {{ 'custom_services'|trans({}, 'invoice') }}
+            </span>
+            <ul class="invoice-footer-ul list-unstyled">
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'specific_development'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+                <li class="invoice-footer-li margin-left-md">
+                    <a href="">
+                        > {{ 'consulting'|trans({}, 'invoice') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="invoice-footer-infos" class="col-md-12 row">
+        <small>
+            <div class="invoice-footer-info center-text">
+                {{ 'forma_libre_info_1'|trans({}, 'invoice') }}
+            </div>
+            <div class="invoice-footer-info center-text">
+                {{ 'forma_libre_info_2'|trans({}, 'invoice') }}
+            </div>
+            <div class="invoice-footer-info center-text">
+                {{ 'forma_libre_info_3'|trans({}, 'invoice') }}
+            </div>
+        </small>
+    </div>
+    <br>
+</div>
+
+{% block stylesheets %}
+    <link rel="stylesheet"
+          href="{{ asset('bundles/formalibreinvoice/css/footer.css') }}"
+          type="text/css"
+    />
+{% endblock %}

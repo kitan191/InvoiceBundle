@@ -69,3 +69,26 @@ workpace_confirm: |
 product_name: Nom du produit
 campus_connection_message: Vous pouvez vous connecter au campus en cliquant sur <a href="%baseurl%/login"> ce lien </a>. Votre nom d'utilisateur est %username%.
 forgot_password_message: Vous pouvez demander un nouveau mot de passe pour le campus en cliquant <a href="%baseurl%/reset"> ici </a>
+
+about: À propos
+campus: Campus
+claroline_consortium: Consortium Claroline
+consulting: Consultance
+contact: Contact
+custom_services: Services personnalisés
+forma_libre_info_1: Forma-Libre S.A. - CEI LLN - Chemin du Cyclotron, 6 - 1348 Louvain-la-Neuve (Belgique)
+forma_libre_info_2: 'RPM: Nivelles - TVA: BE 0599.995.379'
+forma_libre_info_3: 'Téléphone: + 32 10 870 494 - Courriel: info@claroline.com'
+forma_libre_sa: Forma-Libre S.A.
+functional_support: Support fonctionnel
+hostings: Hébergements
+language: Langue
+our_elearning: Nos E-learning
+our_learning_paths: Nos parcours
+our_services: Nos services
+our_team: Notre équipe
+specific_development: Développement spécifique
+supports: Supports
+technical_support: Support technique
+trainings: Formations
+workspace: Espace de travail

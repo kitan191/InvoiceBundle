@@ -1,0 +1,163 @@
+{% macro item(params) %}
+    <li role="presentation" {% if params.id is defined and params.id is not empty %} id="{{ params.id }}" {% endif %}class="{% if params.dropdown is defined and params.dropdown is not empty %}dropdown{% endif %}{{ params.route | default(' ') | compareRoute(' active') | raw }}">
+        <a  role="menuitem"
+            {% if params.dropdown is defined and params.dropdown is not empty %}class="pointer-hand dropdown-toggle" data-toggle="dropdown"{% endif %}
+            {% if params.href is defined and params.href is not empty %}href="{{ params.href }}"{% endif %}
+            {% if params.title is defined and params.title is not empty %}title="{{ params.title }}"{% endif %}
+            >
+            {% if params.icon is defined and params.icon is not empty %}<i class="fa fa-{{ params.icon }}"></i> {% endif %}
+            <span {% if params.breakhide is defined %}class="break-hide"{% endif %}>
+                {% if params.name is defined %} {{ params.name | trans({}, 'platform') }} {% endif %}
+            </span>
+            {% if params.badge is defined and params.badge is not empty %}<span class="badge">{{ params.badge }}</span>{% endif %}
+            {% if (params.dropdown is defined and params.dropdown is not empty) and (params.hideArrow is not defined or params.hideArrow is empty) %}<i class="caret"></i>{% endif %}
+        </a>
+        {% if params.dropdown is defined and params.dropdown is not empty %}
+        {{ params.dropdown | raw }}
+        {% endif %}
+    </li>
+{% endmacro %}
+
+{% block topBar %}
+    <div id="invoice_top_bar" class="navbar invoice-navbar-inverse invoice-navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+                <span id="invoice-language-box">
+                    <span class="locale-select label label-default">
+                        {{ app.request.locale | upper }}
+                    </span>
+                </span>
+            </div>
+            <div id="invoice-topbar-navbar-center" class="navbar-collapse collapse">
+                <ul id="invoice-topbar-navbar-center-list" class="nav navbar-nav">
+                    <li class="invoice-topbar-navbar-center-title invoice-topbar-navbar-center-title-link"
+                        data-name="{{ 'home'|trans({}, 'platform') }}"
+                    >
+                        <a href="">
+                            {{ 'home'|trans({}, 'platform') }}
+                        </a>
+                        <div class="invoice-topbar-navbar-center-title-underline">
+                        </div>
+                    </li>
+                    <li class="dropdown invoice-topbar-navbar-center-title invoice-topbar-navbar-center-title-dropdown"
+                        data-name="{{ 'hosts'|trans({}, 'invoice') }}"
+                    >
+                        <a href="#" class="dropdown-toggle">
+                            {{ 'hostings'|trans({}, 'invoice') }}
+                        </a>
+                        <div class="invoice-topbar-navbar-center-title-underline">
+                        </div>
+                        <ul class="dropdown-menu invoice-topbar-navbar-center-dropdown-menu">
+                            <li class="invoice-topbar-navbar-center-dropdown-item">
+                                <a href="">
+                                    {{ 'workspace'|trans({}, 'invoice') }}
+                                </a>
+                            </li>
+                            <li class="invoice-topbar-navbar-center-dropdown-item">
+                                <a href="">
+                                    {{ 'campus'|trans({}, 'invoice') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown invoice-topbar-navbar-center-title invoice-topbar-navbar-center-title-dropdown"
+                        data-name="{{ 'supports'|trans({}, 'invoice') }}"
+                    >
+                        <a href="#" class="dropdown-toggle">
+                            {{ 'supports'|trans({}, 'invoice') }}
+                        </a>
+                        <div class="invoice-topbar-navbar-center-title-underline">
+                        </div>
+                        <ul class="dropdown-menu invoice-topbar-navbar-center-dropdown-menu">
+                            <li class="invoice-topbar-navbar-center-dropdown-item">
+                                <a href="">
+                                    {{ 'technical_support'|trans({}, 'invoice') }}
+                                </a>
+                            </li>
+                            <li class="invoice-topbar-navbar-center-dropdown-item">
+                                <a href="">
+                                    {{ 'functional_support'|trans({}, 'invoice') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown invoice-topbar-navbar-center-title invoice-topbar-navbar-center-title-dropdown"
+                        data-name="{{ 'trainings'|trans({}, 'invoice') }}"
+                    >
+                        <a href="#" class="dropdown-toggle">
+                            {{ 'trainings'|trans({}, 'invoice') }}
+                        </a>
+                        <div class="invoice-topbar-navbar-center-title-underline">
+                        </div>
+                        <ul class="dropdown-menu invoice-topbar-navbar-center-dropdown-menu">
+                            <li class="invoice-topbar-navbar-center-dropdown-item">
+                                <a href="#">
+                                    {{ 'our_elearning'|trans({}, 'invoice') }}
+                                </a>
+                            </li>
+                            <li class="invoice-topbar-navbar-center-dropdown-item">
+                                <a href="#">
+                                    {{ 'our_learning_paths'|trans({}, 'invoice') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown invoice-topbar-navbar-center-title invoice-topbar-navbar-center-title-link"
+                        data-name="{{ 'contact'|trans({}, 'invoice') }}"
+                    >
+                        <a href="">
+                            {{ 'contact'|trans({}, 'invoice') }}
+                        </a>
+                        <div class="invoice-topbar-navbar-center-title-underline">
+                        </div>
+                    </li>
+                </ul>
+
+                <ul id="invoice-topbar-navbar-right" class="nav navbar-nav navbar-right">
+                    {% if isLogged %}
+                        {% import _self as topbar %}
+                        {% set username = app.user.firstName ~ ' ' ~ app.user.lastName %}
+                        {% set user = username | length > 16 ? username | slice(0, 16) ~ '...' : username %}
+                        {{ topbar.item({'name':user, 'icon':'user', 'route':'/profile', 'dropdown':block('dropdownLogged')}) }}
+
+                        {% block dropdownLogged %}
+                            {{ knp_menu_render('ClarolineCoreBundle:Builder:topBarRightMenu', {}, 'top_bar_right') }}
+                        {% endblock dropdownLogged %}
+                    {% else %}
+                        <li>
+                            <button id="invoice-topbar-login-btn" class="btn btn-default btn-sm margin-sm" data-url="{{ login_target }}">
+                                {{ 'login'|trans({}, 'platform') }}
+                            </button>
+                        </li>
+                        <li>
+                            <button id="invoice-topbar-register-btn" class="btn btn-default btn-sm margin-sm" data-url="{{ register_target }}">
+                                {{ 'register'|trans({}, 'platform') }}
+                            </button>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('bundles/formalibreinvoice/js/topBar.js') }}"
+            type="text/javascript"
+    >
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet"
+          href="{{ asset('bundles/formalibreinvoice/css/topBar.css') }}"
+          type="text/css"
+    />
+{% endblock %}
+
