@@ -91,4 +91,11 @@ specific_development: Développement spécifique
 supports: Supports
 technical_support: Support technique
 trainings: Formations
-workspace: Espace de travail
+
+invoice: Facture
+show_free: Montrer gratuits
+show_payed: Montrer payants
+invoices: Factures
+amount: Prix
+pending: En attente
+execute: Exécuter

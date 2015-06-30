@@ -59,7 +59,10 @@ class RegistrationExtension extends AbstractTypeExtension
                 'label'  => $this->translator->trans('formalibre_vat', array(), 'invoice'),
                 'mapped' => false,
                 'required' => false,
-                'constraints' => array(new Vat()),
+                'constraints' => array(
+                    new Vat(),
+                    new Callback(array('callback' => array($this, 'validateVAT')))
+                ),
                 'attr' => array('facet' => 'Company')
             )
         );
@@ -161,13 +164,13 @@ class RegistrationExtension extends AbstractTypeExtension
                 'required' => false,
                 'attr' => array('facet' => 'Company'),
                 'constraints' => array(
-                    new Callback(array('callback' => array($this, 'validateOrder')))
+                    new Callback(array('callback' => array($this, 'validateCompany')))
                 )
             )
         );
     }
 
-    public function validateOrder($data, ExecutionContextInterface $context)
+    public function validateCompany($data, ExecutionContextInterface $context)
     {
         /** @var \Symfony\Component\Form\Form $form */
         $form = $context->getRoot();
@@ -175,7 +178,19 @@ class RegistrationExtension extends AbstractTypeExtension
         $name = str_replace(' ', '', $name);
 
         if ($form->get('formalibre_user_type_choice')->getData() === 'c' && $name === '') {
-            $context->addViolation('organization_name_required');
+            $context->addViolation($this->translator->trans('organization_name_required', array(), 'validators'));
+        }
+    }
+
+    public function validateVAT($data, ExecutionContextInterface $context)
+    {
+        /** @var \Symfony\Component\Form\Form $form */
+        $form = $context->getRoot();
+        $vat = $form->get('formalibre_vat')->getData();
+        $vat = str_replace(' ', '', $vat);
+
+        if ($form->get('formalibre_user_type_choice')->getData() === 'c' && $vat === '') {
+            $context->addViolation($this->translator->trans('vat_required', array(), 'validators'));
         }
     }
 
