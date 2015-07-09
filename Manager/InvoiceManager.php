@@ -78,7 +78,7 @@ class InvoiceManager
         $invoice->setInvoiceNumber($this->getInvoiceCode());
         $chart->getPaymentInstruction() ?
             $invoice->setPaymentSystemName($chart->getPaymentInstruction()->getPaymentSystemName()):
-            $invoice->setPaymentSystemName('none');
+            $invoice->setPaymentSystemName('none (free)');
         $chart->setInvoice($invoice);
         $this->om->persist($chart);
         $this->om->persist($invoice);

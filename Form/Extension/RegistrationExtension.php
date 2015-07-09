@@ -44,6 +44,7 @@ class RegistrationExtension extends AbstractTypeExtension
                 $this->addTown($form);
                 $this->addCountryList($form);
                 $this->addUserTypeChoice($form);
+
                 $this->addCompanyValidation($form);
             }
         });
@@ -152,6 +153,23 @@ class RegistrationExtension extends AbstractTypeExtension
         );
     }
 
+    private function addVatChoice($form)
+    {
+        $form->add(
+            'formalibre_user_vat_choice',
+            'choice',
+            array(
+                'label' => ' ', //no label please
+                'mapped' => false,
+                'required' => true,
+                'choices' => array('y' => 'formalibre_has_vat', 'n' => 'formalibre_no_vat'),
+                'multiple' => false,
+                'expanded' => true,
+                'data' => 'y'
+            )
+        );
+    }
+
     private function addCompanyValidation($form)
     {
         $form->remove('formalibre_company_name');
@@ -188,10 +206,10 @@ class RegistrationExtension extends AbstractTypeExtension
         $form = $context->getRoot();
         $vat = $form->get('formalibre_vat')->getData();
         $vat = str_replace(' ', '', $vat);
-
+        /*
         if ($form->get('formalibre_user_type_choice')->getData() === 'c' && $vat === '') {
             $context->addViolation($this->translator->trans('vat_required', array(), 'validators'));
-        }
+        }*/
     }
 
     /**
