@@ -28,13 +28,13 @@
                     <span class="icon-bar"></span>
                 </button>
 
-                <span id="invoice-language-box">
+                {#<span id="invoice-language-box">
                     <span class="locale-select label label-default">
                         {{ app.request.locale | upper }}
                     </span>
-                </span>
+                </span>#}
             </div>
-            <div id="invoice-topbar-navbar-center" class="navbar-collapse collapse">
+            <div id="invoice-topbar-navbar-center" class="navbar-collapse collapse col-md-offset-2">
                 <ul id="invoice-topbar-navbar-center-list" class="nav navbar-nav">
                     <li class="invoice-topbar-navbar-center-title invoice-topbar-navbar-center-title-link"
                         data-name="{{ 'home'|trans({}, 'platform') }}"
@@ -129,6 +129,8 @@
                         {% block dropdownLogged %}
                             {{ knp_menu_render('ClarolineCoreBundle:Builder:topBarRightMenu', {}, 'top_bar_right') }}
                         {% endblock dropdownLogged %}
+                        
+                        {{ topbar.item({'name': '', 'icon':'home', 'href': path('claro_desktop_open')}) }}
                     {% else %}
                         <li>
                             <button id="invoice-topbar-login-btn" class="btn btn-default btn-sm margin-sm" data-url="{{ login_target }}">
