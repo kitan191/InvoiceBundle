@@ -1,0 +1,15 @@
+#footer {
+    background-color: #343b41;
+}
+
+.invoice-footer-title, .invoice-footer-li > a, .invoice-footer-info {
+    /*Set font*/
+}
+
+.invoice-footer-title {
+    color: #89c257;
+}
+
+.invoice-footer-li > a, .invoice-footer-info {
+    color: #ffffff;
+}
