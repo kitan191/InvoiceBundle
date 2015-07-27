@@ -8,7 +8,7 @@
         "php": ">=5.4.1",
         "claroline/core-bundle": "dev-6.x-dev",
         "claroline/pdf-generator-bundle": "dev-master",
-        "claroline/pdf-player-bundle": "dev-6.x-dev,
+        "claroline/pdf-player-bundle": "dev-6.x-dev",
         "jms/payment-core-bundle": "master-dev",
         "jms/payment-paypal-bundle": "dev-master"
     },
