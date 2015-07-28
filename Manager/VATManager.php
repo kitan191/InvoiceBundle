@@ -61,8 +61,6 @@ class VATManager
     }
 
     public function getVATRate($countryCode) {
-        return 0.21;
-
         //https://github.com/modmore/euvatrates.com
         $json = file_get_contents('https://euvatrates.com/rates.json');
         $data = json_decode($json);
