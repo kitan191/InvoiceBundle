@@ -61,6 +61,8 @@ class VATManager
     }
 
     public function getVATRate($countryCode) {
+        return 0.21;
+
         //https://github.com/modmore/euvatrates.com
         $json = file_get_contents('https://euvatrates.com/rates.json');
         $data = json_decode($json);
@@ -73,6 +75,7 @@ class VATManager
 
     public function getClientLocation()
     {
+        if ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') return 'BE';
         return strtoupper(file_get_contents('http://api.hostip.info/country.php?ip=' . $_SERVER['REMOTE_ADDR']));
     }
 }

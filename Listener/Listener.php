@@ -65,12 +65,12 @@ class Listener
      *
      * @param DisplayToolEvent $event
      */
-    public function onDisplayAdminInvoice(OpenAdministrationToolEvent $event)
+    public function onDisplayAdminIndex(OpenAdministrationToolEvent $event)
     {
-        $event->setResponse($this->openAdminPendingOperations());
+        $event->setResponse($this->openAdminIndex());
     }
 
-    private function openAdminPendingOperations()
+    private function openAdminIndex()
     {
         $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:index');
         $params['page'] = 1;

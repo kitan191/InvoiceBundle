@@ -45,7 +45,7 @@
             </div>
             <div class="col-md-9">
                 <div class="well">
-                    {{ 'expiration_date'|trans({}, 'invoice')}}: {{ workspace.expiration_date|date('d/m/Y') }} </br>
+                    {{ 'expiration_date'|trans({}, 'invoice')}}: {{ workspace.endDate|date('d/m/Y') }} </br> 
                     {{ 'name'|trans({}, 'platform') }}: {{ workspace.name }} </br>
                     {{ 'code'|trans({}, 'platform') }}: {{ workspace.code }}
                 </div>
