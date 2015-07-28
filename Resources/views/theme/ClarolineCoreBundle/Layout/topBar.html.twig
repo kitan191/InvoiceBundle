@@ -122,6 +122,11 @@
                 <ul id="invoice-topbar-navbar-right" class="nav navbar-nav navbar-right">
                     {% if isLogged %}
                         {% import _self as topbar %}
+                        
+                        {% if adminTools|length > 0 %}
+                            {{ topbar.item({'name':'administration', 'dropdown':block('dropdownAdministration')}) }}
+                        {% endif %}
+                        
                         {% set username = app.user.firstName ~ ' ' ~ app.user.lastName %}
                         {% set user = username | length > 16 ? username | slice(0, 16) ~ '...' : username %}
                         {{ topbar.item({'name':user, 'icon':'user', 'route':'/profile', 'dropdown':block('dropdownLogged')}) }}
@@ -147,7 +152,22 @@
             </div>
         </div>
     </div>
+                
+    {% block dropdownAdministration %}
+        <ul class="dropdown-menu" role="menu">
+            {% for tool in adminTools %}
+                {{ 
+                    topbar.item({
+                        'name': tool.getName()|trans({}, 'tools'),
+                        'href': path('claro_admin_open_tool', {'toolName': tool.getName() }),
+                        'icon': tool.getClass()
+                    })
+                }}
+            {% endfor %}
+        </ul>
+    {% endblock dropdownAdministration %}
 {% endblock %}
+
 
 {% block javascripts %}
     <script src="{{ asset('bundles/formalibreinvoice/js/topBar.js') }}"
