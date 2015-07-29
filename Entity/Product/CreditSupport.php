@@ -5,6 +5,10 @@ namespace FormaLibre\InvoiceBundle\Entity\Product;
 use Doctrine\ORM\Mapping as ORM;
 use Claroline\CoreBundle\Entity\User;
 
+/**
+ * @ORM\Table(name="formalibre__credit_support")
+ * @ORM\Entity(repositoryClass="FormaLibre\InvoiceBundle\Repository\CreditSupportRepository")
+ */
 class CreditSupport
 {
     /**
@@ -14,19 +18,15 @@ class CreditSupport
      */
     private $id;
 
-    /** ORM\Column(type="integer", nullable=false) */
-    private $creditAmount;
-
-    /** ORM\Column(type="integer", nullable=false) */
-    private $creditUsed = 0;
+    /**
+     * @ORM\Column(name="credit_amount", type="integer", nullable=false)
+     */
+    private $creditAmount = 0;
 
     /**
-     * @ORM\OneToMany(
-     *     targetEntity="FormaLibre\InvoiceBundle\Entity\Order",
-     *     mappedBy="sharedWorkspace"
-     * )
-     **/
-    private $orders;
+     * @ORM\Column(name="credit_used", type="integer", nullable=false)
+     */
+    private $creditUsed = 0;
 
     /**
      * @ORM\ManyToOne(
@@ -52,9 +52,19 @@ class CreditSupport
         return $this->creditAmount;
     }
 
-    public function addCreditUsed()
+    public function addCredits($nbCredits)
     {
-        $this->creditUsed++;
+        $this->creditAmount += $nbCredits;
+    }
+
+    public function removeCredits($nbCredits)
+    {
+        $this->creditAmount -= $nbCredits;
+    }
+
+    public function setCreditUsed($creditUsed)
+    {
+        $this->creditUsed = $creditUsed;
     }
 
     public function getCreditUsed()
@@ -62,13 +72,19 @@ class CreditSupport
         return $this->creditUsed;
     }
 
-    public function getOrders()
+    public function useCredits($nbCredits)
     {
-        return $this->orders;
+        $this->creditUsed += $nbCredits;
+        $this->creditAmount -= $nbCredits;
     }
 
     public function setOwner(User $owner)
     {
         $this->owner = $owner;
+    }
+
+    public function getOwner()
+    {
+        return $this->owner;
     }
 }
