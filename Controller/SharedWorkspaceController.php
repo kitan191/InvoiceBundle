@@ -218,7 +218,7 @@ class SharedWorkspaceController extends Controller
         }
 
         if ($this->tokenStorage->getToken()->getUser() !== $sws->getOwner()) {
-            throw new \AccessDeniedException();
+            throw new AccessDeniedException();
         }
 
         $order = new Order();

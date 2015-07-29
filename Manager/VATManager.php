@@ -73,6 +73,7 @@ class VATManager
 
     public function getClientLocation()
     {
+        if ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') return 'BE';
         return strtoupper(file_get_contents('http://api.hostip.info/country.php?ip=' . $_SERVER['REMOTE_ADDR']));
     }
 }

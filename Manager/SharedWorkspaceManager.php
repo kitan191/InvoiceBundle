@@ -6,6 +6,9 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Manager\MailManager;
+use Claroline\CoreBundle\Manager\OauthManager;
+use Claroline\CoreBundle\Manager\ApiManager;
+use Claroline\CoreBundle\Form\WorkspaceType;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
@@ -29,6 +32,7 @@ class SharedWorkspaceManager
     private $templating;
     private $mailer;
     private $translator;
+    private $formFactory;
 
     /**
      * @DI\InjectParams({
@@ -41,7 +45,10 @@ class SharedWorkspaceManager
      *     "cryptography" = @DI\Inject("formalibre.manager.cryptography_manager"),
      *     "templating"   = @DI\Inject("templating"),
      *     "mailer"       = @DI\Inject("claroline.manager.mail_manager"),
-     *     "translator"   = @DI\Inject("translator")
+     *     "translator"   = @DI\Inject("translator"),
+     *     "oauthManager" = @DI\Inject("claroline.manager.oauth_manager"),
+     *     "apiManager"   = @DI\Inject("claroline.manager.api_manager"),
+     *     "formFactory"  = @DI\Inject("form.factory")
      * })
      */
     public function __construct(
@@ -54,7 +61,10 @@ class SharedWorkspaceManager
         CryptographyManager $cryptography,
         $templating,
         MailManager $mailManager,
-        $translator
+        $translator,
+        OauthManager $oauthManager,
+        ApiManager $apiManager,
+        $formFactory
     )
     {
         $this->om                        = $om;
@@ -69,6 +79,12 @@ class SharedWorkspaceManager
         $this->templating                = $templating;
         $this->mailManager               = $mailManager;
         $this->translator                = $translator;
+        $this->oauthManager              = $oauthManager;
+        $this->apiManager                = $apiManager;
+        $this->oauthHost                 = $ch->getParameter('formalibre_target_platform_url');
+        $this->oauthId                   = $ch->getParameter('formalibre_target_id');
+        $this->oauthSecret               = $ch->getParameter('formalibre_target_secret');
+        $this->formFactory               = $formFactory;
     }
 
     public function executeOrder($order)
@@ -126,45 +142,49 @@ class SharedWorkspaceManager
 
     public function createRemoteSharedWorkspace(SharedWorkspace $sws)
     {
-        $user = $sws->getOwner();
+        $user   = $sws->getOwner();
+        $url    = 'api/users.json';
+        $type   = 'GET';
+        $tmppw  = uniqid();
 
-        $userJson = array(
-            'username' => $user->getUsername(),
-            'first_name' => $user->getFirstName(),
-            'last_name' => $user->getLastName(),
-            'email' => $user->getMail()
+        $payload = array(
+            'profile_form_creation[username]' => $user->getUsername(),
+            'profile_form_creation[firstName]' => $user->getFirstName(),
+            'profile_form_creation[lastName]' => $user->getLastName(),
+            'profile_form_creation[mail]' => $user->getMail(),
+            'profile_form_creation[administrativeCode]' => $user->getUsername(),
+            'profile_form_creation[plainPassword][first]' => $tmppw,
+            'profile_form_creation[plainPassword][second]' => $tmppw,
         );
 
-        $workspaceJson = array(
-            'max_storage' => $sws->getMaxStorage(),
-            'max_user' => $sws->getMaxUser(),
-            'max_resource' => $sws->getMaxRes(),
-            'expiration_date' => $sws->getExpDate()->getTimeStamp()
+        $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret, $payload, 'POST');
+        $url = 'api/workspaces/' . $user->getMail() . '/users.json';
+
+        $payload = array(
+            'workspace_form[name]' => uniqid(),
+            'workspace_form[code]' => uniqid(),
+            'workspace_form[maxStorageSize]' => $sws->getMaxStorage(),
+            'workspace_form[maxUsers]' => $sws->getMaxUser(),
+            'workspace_form[maxUploadResources]' => $sws->getMaxRes(),
+            'workspace_form[endDate]' => $sws->getExpDate()->format('d-m-Y')
         );
 
-        $payload = json_encode(array(
-            'user' => $userJson,
-            'workspace' => $workspaceJson
-        ));
+        $serverOutput = $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret, $payload, 'POST');
+        $workspace = json_decode($serverOutput);
 
-        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/create';
-        $serverOutput = $this->crypto->sendPost($payload, $targetUrl);
-        $data = json_decode($serverOutput);
-
-        if ($data === null) {
-            $this->handleError($sws, $serverOutput, $targetUrl);
+        if ($workspace === null) {
+            $this->handleError($sws, $serverOutput, $url);
         }
 
-        if ($data->code == 200) {
-            $id = $data->workspace->id;
-            $sws->setRemoteId($id);
+        if (property_exists($workspace, 'id')) {
+            $sws->setRemoteId($workspace->id);
             $this->om->persist($sws);
             $this->om->flush();
 
             return;
         }
 
-        $this->handleError($sws, $serverOutput, $targetUrl);
+        $this->handleError($sws, $serverOutput, $url);
     }
 
     public function getSharedWorkspaceByUser(User $user)
@@ -174,15 +194,10 @@ class SharedWorkspaceManager
 
     public function getWorkspaceData(SharedWorkspace $sws)
     {
-        $id = $sws->getRemoteId();
-        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $id;
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $targetUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $serverOutput = curl_exec($ch);
-        curl_close($ch);
+        $url = 'api/workspaces/' . $sws->getRemoteId() . '.json';
+        $serverOutput = $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret);
 
-        return json_decode($serverOutput);
+        return json_decode($serverOutput, true);
     }
 
     public function addRemoteWorkspaceExpDate(Order $order)
@@ -200,17 +215,19 @@ class SharedWorkspaceManager
 
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
-        $payload = json_encode(array('expiration_date' => $expDate->getTimeStamp()));
-        $targetUrl = $this->ch->getParameter('formalibre_target_platform_url') . '/workspacesubscription/workspace/' . $sws->getRemoteId() . '/exp_date/increase';
-        $serverOutput = $this->crypto->sendPost($payload, $targetUrl);
-        $data = json_decode($serverOutput);
+        $workspace = $this->getWorkspaceData($sws);
+        $workspaceType = new WorkspaceType();
+        $workspaceType->enableApi();
+        $form = $this->formFactory->create($workspaceType);
 
-        if ($data === null) {
+        $payload = $this->apiManager->formEncode($workspace, $form, $workspaceType);
+        $payload['workspace_form[endDate'] = $expDate->format('d-m-Y');
+
+        if ($workspace === null) {
             $this->handleError($sws, $serverOutput, $targetUrl);
         }
 
-        //double equal because it's a string
-        if ($data->code == 200) {
+        if (array_key_exists('id', $workspace)) {
             $updatedDate = new \DateTime();
             $updatedDate->setTimeStamp($expDate->getTimeStamp());
             $sws->setExpDate($updatedDate);
@@ -268,8 +285,8 @@ class SharedWorkspaceManager
 
         $body = $this->templating->render(
             'FormaLibreInvoiceBundle:SharedWorkspace:mail_info.html.twig', array(
-                'code' => $workspace->code,
-                'name' => $workspace->name,
+                'code' => $workspace['code'],
+                'name' => $workspace['name'],
                 'expirationDate' => $sws->getExpDate()
             )
         );

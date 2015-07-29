@@ -58,12 +58,14 @@ class AdministrationController extends Controller
      *      "/admin/index",
      *      name="admin_invoice_index"
      * )
-     * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
     {
-        return array();
+        return $this->render(
+            'FormaLibreInvoiceBundle:Administration:indexInvoices.html.twig',
+            array()
+        );
     }
 
     /**

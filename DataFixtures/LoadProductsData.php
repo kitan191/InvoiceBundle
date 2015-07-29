@@ -102,6 +102,7 @@ class LoadProductsData extends AbstractFixture implements ContainerAwareInterfac
             $product->setCode($info['code']);
             $product->setType($info['type']);
             $product->setDetails($info['details']);
+            $product->setIsActivated(true);
 
             foreach ($info['pricing'] as $duration => $price) {
                 $priceSolution = new PriceSolution();
