@@ -12,6 +12,8 @@ use FormaLibre\InvoiceBundle\Entity\Order;
 use FormaLibre\InvoiceBundle\Entity\Chart;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
+use FormaLibre\InvoiceBundle\Form\WorkspaceNameEditType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Payment\CoreBundle\Entity\Payment;
@@ -290,5 +292,127 @@ class SharedWorkspaceController extends Controller
         $this->invoiceManager->validate($invoice);
 
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/my/shared/workspaces/desktop/tool/index",
+     *      name="formalibre_my_shared_workspaces_desktop_tool_index"
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function mySharedWorkspacesDesktopToolIndexAction(User $authenticatedUser)
+    {
+        $sharedWorkspaces = $this->sharedWorkspaceManager
+            ->getSharedWorkspaceByUser($authenticatedUser);
+        $workspaceDatas = array();
+
+        foreach ($sharedWorkspaces as $sharedWorkspace) {
+            $el = array();
+            $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+            $additionalDatas = $this->sharedWorkspaceManager->getWorkspaceAdditionalDatas($sharedWorkspace);
+            $el['shared_workspace'] = $sharedWorkspace;
+
+            if ($workspace) {
+                $el['workspace'] = $workspace;
+            } else {
+                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
+            }
+
+            if ($additionalDatas) {
+                $el['workspace_additional_datas'] = $additionalDatas;
+            } else {
+                $el['workspace_additional_datas'] = array(
+                    'used_storage' => 0,
+                    'nb_users' => 0,
+                    'nb_resources' => 0
+                );
+            }
+
+            $sws = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace);
+
+            if ($sws) {
+                $el['product'] = $sws->getProduct();
+            }
+
+            $workspaceDatas[] = $el;
+        }
+
+        return array('workspaceDatas' => $workspaceDatas);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/shared/workspace/{sharedWorkspace}/remote/name/edit/form",
+     *     name="formalibre_shared_workspace_name_edit_form",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreInvoiceBundle:SharedWorkspace:sharedWorkspaceNameEditModalForm.html.twig")
+     */
+    public function sharedWorkspaceNameEditFormAction(
+        User $authenticatedUser,
+        SharedWorkspace $sharedWorkspace
+    )
+    {
+        $this->checkSharedWorkspaceEditionAccess($authenticatedUser, $sharedWorkspace);
+        $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+        $form = $this->formFactory->create(new WorkspaceNameEditType($workspace['name']));
+
+        return array(
+            'form' => $form->createView(),
+            'sharedWorkspace' => $sharedWorkspace
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/shared/workspace/{sharedworkspace}/remoted/name/edit",
+     *     name="formalibre_shared_workspace_name_edit",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreInvoiceBundle:SharedWorkspace:sharedWorkspaceNameEditModalForm.html.twig")
+     */
+    public function sharedWorkspaceNameEditAction(
+        User $authenticatedUser,
+        SharedWorkspace $sharedWorkspace
+    )
+    {
+        $this->checkSharedWorkspaceEditionAccess($authenticatedUser, $sharedWorkspace);
+        $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+        $form = $this->formFactory->create(new WorkspaceNameEditType($workspace['name']));
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $workspaceName = $form->get('name')->getData();
+            // call method to persist new name
+//            $this->sharedWorkspaceManager->editShareWorkspaceRemoteName(
+//                $sharedWorkspace,
+//                $workspaceName
+//            );
+
+            return new JsonResponse('succes', 200);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'sharedWorkspace' => $sharedWorkspace
+            );
+        }
+    }
+
+    private function checkSharedWorkspaceEditionAccess(
+        User $user,
+        SharedWorkspace $sharedWorkspace
+    )
+    {
+        if ($user->getId() !== $sharedWorkspace->getOwner()->getId()) {
+
+            throw new AccessDeniedException();
+        }
     }
 }

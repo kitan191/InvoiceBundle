@@ -6,6 +6,10 @@ plugin:
           is_displayable_in_workspace: false
           is_displayable_in_desktop: true
           class: dollar
+        - name: formalibre_my_shared_workspaces_tool
+          is_displayable_in_workspace: false
+          is_displayable_in_desktop: true
+          class: book
 
     widgets:
         - name: formalibre_purchased

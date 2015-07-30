@@ -200,6 +200,14 @@ class SharedWorkspaceManager
         return json_decode($serverOutput, true);
     }
 
+    public function getWorkspaceAdditionalDatas(SharedWorkspace $sws)
+    {
+        $url = 'api/workspaces/' . $sws->getRemoteId() . '/additional/datas.json';
+        $serverOutput = $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret);
+
+        return json_decode($serverOutput, true);
+    }
+
     public function addRemoteWorkspaceExpDate(Order $order)
     {
         $sws = $order->getSharedWorkspace();

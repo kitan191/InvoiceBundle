@@ -86,13 +86,13 @@ class Listener
      *
      * @param DisplayToolEvent $event
      */
-     public function onDisplayPurchased(DisplayWidgetEvent $event)
-     {
-         $event->setContent($this->getDisplayPurchased());
-     }
+    public function onDisplayPurchased(DisplayWidgetEvent $event)
+    {
+        $event->setContent($this->getDisplayPurchased());
+    }
 
-     private function getDisplayPurchased()
-     {
+    private function getDisplayPurchased()
+    {
         $user = $this->tokenStorage->getToken()->getUser();
         $sharedWorkspaces = $this->sharedWorkspaceManager->getSharedWorkspaceByUser($user);
         $workspaceData = array();
@@ -120,69 +120,84 @@ class Listener
         );
 
         return $content;
-     }
+    }
 
-     /**
-      * @DI\Observe("widget_formalibre_invoice")
-      *
-      * @param DisplayToolEvent $event
-      */
-      public function onDisplayInvoice(DisplayWidgetEvent $event)
-      {
-          $event->setContent($this->getDisplayedInvoice());
-      }
+    /**
+     * @DI\Observe("widget_formalibre_invoice")
+     *
+     * @param DisplayToolEvent $event
+     */
+    public function onDisplayInvoice(DisplayWidgetEvent $event)
+    {
+        $event->setContent($this->getDisplayedInvoice());
+    }
 
-      private function getDisplayedInvoice()
-      {
-          $charts = $this->container->get('formalibre.manager.chart_manager')
+    private function getDisplayedInvoice()
+    {
+        $charts = $this->container->get('formalibre.manager.chart_manager')
             ->getByUser($this->tokenStorage->getToken()->getUser());
 
-          $content = $this->container->get('templating')->render(
-              'FormaLibreInvoiceBundle:Invoice:widget.html.twig',
-              array('charts' => $charts)
-          );
+        $content = $this->container->get('templating')->render(
+            'FormaLibreInvoiceBundle:Invoice:widget.html.twig',
+            array('charts' => $charts)
+        );
 
-          return $content;
-      }
+        return $content;
+    }
 
-      /**
-       * @DI\Observe("widget_formalibre_campus")
-       *
-       * @param DisplayToolEvent $event
-       */
-       public function onDisplayCampus(DisplayWidgetEvent $event)
-       {
-           $event->setContent($this->getDisplayCampus());
-       }
+    /**
+    * @DI\Observe("widget_formalibre_campus")
+    *
+    * @param DisplayToolEvent $event
+    */
+    public function onDisplayCampus(DisplayWidgetEvent $event)
+    {
+       $event->setContent($this->getDisplayCampus());
+    }
 
-       private function getDisplayCampus()
-       {
-           $user = $this->tokenStorage->getToken()->getUser();
+    private function getDisplayCampus()
+    {
+       $user = $this->tokenStorage->getToken()->getUser();
 
-           $content = $this->container->get('templating')->render(
-               'FormaLibreInvoiceBundle:Campus:widget.html.twig',
-               array('user' => $user)
-           );
+       $content = $this->container->get('templating')->render(
+           'FormaLibreInvoiceBundle:Campus:widget.html.twig',
+           array('user' => $user)
+       );
 
-           return $content;
-       }
+       return $content;
+    }
 
-       /**
-        * @DI\Observe("administration_tool_formalibre_product_creator")
-        *
-        * @param DisplayToolEvent $event
-        */
-       public function onDisplayAdminProduct(OpenAdministrationToolEvent $event)
-       {
-           $event->setResponse($this->openAdminProducts());
-       }
+    /**
+    * @DI\Observe("administration_tool_formalibre_product_creator")
+    *
+    * @param DisplayToolEvent $event
+    */
+    public function onDisplayAdminProduct(OpenAdministrationToolEvent $event)
+    {
+       $event->setResponse($this->openAdminProducts());
+    }
 
-       private function openAdminProducts()
-       {
-           $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:productIndex');
-           $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
-           $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+    private function openAdminProducts()
+    {
+       $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:productIndex');
+       $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+       $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
 
-           return $response;
-       }
+       return $response;
+    }
+
+    /**
+     * @DI\Observe("open_tool_desktop_formalibre_my_shared_workspaces_tool")
+     *
+     * @param DisplayToolEvent $event
+     */
+    public function onMySharedWorkspacesDesktopToolOpen(DisplayToolEvent $event)
+    {
+        $params = array();
+        $params['_controller'] = 'FormaLibreInvoiceBundle:SharedWorkspace:mySharedWorkspacesDesktopToolIndex';
+        $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+        $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        $event->setContent($response->getContent());
+        $event->stopPropagation();
+    }
 }
