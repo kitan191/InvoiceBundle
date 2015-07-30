@@ -140,7 +140,6 @@ class SharedWorkspaceManager
     {
         $user   = $sws->getOwner();
         $url    = 'api/users.json';
-        $type   = 'GET';
         $tmppw  = uniqid();
 
         $payload = array(
@@ -153,7 +152,13 @@ class SharedWorkspaceManager
             'profile_form_creation[plainPassword][second]' => $tmppw,
         );
 
-        $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
+        $data = json_decode($serverOutput, true);
+
+        if ($data === null || isset($data['error'])) {
+            $this->handleError($sws, $serverOutput, $url);
+        }
+
         $url = 'api/workspaces/' . $user->getUsername() . '/users.json';
 
         $payload = array(
