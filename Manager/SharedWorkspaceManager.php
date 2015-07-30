@@ -42,7 +42,6 @@ class SharedWorkspaceManager
      *     "ch"           = @DI\Inject("claroline.config.platform_config_handler"),
      *     "container"    = @DI\Inject("service_container"),
      *     "mailManager"  = @DI\Inject("claroline.manager.mail_manager"),
-     *     "cryptography" = @DI\Inject("formalibre.manager.cryptography_manager"),
      *     "templating"   = @DI\Inject("templating"),
      *     "mailer"       = @DI\Inject("claroline.manager.mail_manager"),
      *     "translator"   = @DI\Inject("translator"),
@@ -58,7 +57,6 @@ class SharedWorkspaceManager
         $ch,
         $container,
         MailManager $mailManager,
-        CryptographyManager $cryptography,
         $templating,
         MailManager $mailManager,
         $translator,
@@ -75,15 +73,13 @@ class SharedWorkspaceManager
         $this->ch                        = $ch;
         $this->container                 = $container;
         $this->mailManager               = $mailManager;
-        $this->crypto                    = $cryptography;
         $this->templating                = $templating;
         $this->mailManager               = $mailManager;
         $this->translator                = $translator;
         $this->oauthManager              = $oauthManager;
         $this->apiManager                = $apiManager;
-        $this->oauthHost                 = $ch->getParameter('formalibre_target_platform_url');
-        $this->oauthId                   = $ch->getParameter('formalibre_target_id');
-        $this->oauthSecret               = $ch->getParameter('formalibre_target_secret');
+        $this->friendRepo                = $this->om->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
+        $this->campusPlatform            = $this->friendRepo->findOneByName($ch->getParameter('campusName'));
         $this->formFactory               = $formFactory;
     }
 
@@ -157,8 +153,8 @@ class SharedWorkspaceManager
             'profile_form_creation[plainPassword][second]' => $tmppw,
         );
 
-        $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret, $payload, 'POST');
-        $url = 'api/workspaces/' . $user->getMail() . '/users.json';
+        $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
+        $url = 'api/workspaces/' . $user->getUsername() . '/users.json';
 
         $payload = array(
             'workspace_form[name]' => uniqid(),
@@ -169,7 +165,7 @@ class SharedWorkspaceManager
             'workspace_form[endDate]' => $sws->getExpDate()->format('d-m-Y')
         );
 
-        $serverOutput = $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
         $workspace = json_decode($serverOutput);
 
         if ($workspace === null) {
@@ -195,7 +191,7 @@ class SharedWorkspaceManager
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '.json';
-        $serverOutput = $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret);
+        $serverOutput = $this->apiManager->url($this->campusPlatform, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -203,10 +199,12 @@ class SharedWorkspaceManager
     public function addRemoteWorkspaceExpDate(Order $order)
     {
         $sws = $order->getSharedWorkspace();
+        $user = $sws->getOwner();
         $monthDuration = $order->getPriceSolution()->getMonthDuration();
         $product = $order->getProduct();
         $details = $product->getDetails();
-        $expDate = $sws->getExpDate();
+        $workspace = $this->getWorkspaceData($sws);
+        $expDate = \DateTime::createFromFormat(\DateTime::ATOM, $workspace['endDate']);
         $now = new \DateTime();
 
         if ($now->getTimeStamp() > $expDate->getTimeStamp()) {
@@ -215,16 +213,21 @@ class SharedWorkspaceManager
 
         $interval =  new \DateInterval("P{$monthDuration}M");
         $expDate->add($interval);
-        $workspace = $this->getWorkspaceData($sws);
+
         $workspaceType = new WorkspaceType();
         $workspaceType->enableApi();
         $form = $this->formFactory->create($workspaceType);
 
         $payload = $this->apiManager->formEncode($workspace, $form, $workspaceType);
-        $payload['workspace_form[endDate'] = $expDate->format('d-m-Y');
+        $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
+        $url = 'api/workspaces/' . $sws->getRemoteId() . '/users/' . $user->getUsername() . '.json';
+        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'PUT');
+        $workspace = json_decode($serverOutput);
+
+        //add date here
 
         if ($workspace === null) {
-            $this->handleError($sws, $serverOutput, $targetUrl);
+            $this->handleError($sws, $serverOutput, $url);
         }
 
         if (array_key_exists('id', $workspace)) {
@@ -237,7 +240,7 @@ class SharedWorkspaceManager
             return $sws;
         }
 
-        $this->handleError($sws, $serverOutput, $targetUrl);
+        $this->handleError($sws, $serverOutput, $url);
     }
 
     public function hasFreeTestMonth($user)

@@ -18,8 +18,8 @@
                 {% for workspace in workspace_data %}
                     <tr>
                         {% set workspaceLink = 'http://' ~ config.getParameter('formalibre_commercial_url') ~ '/workspaces/' ~ workspace['shared_workspace'].getRemoteId() ~ '/open/tool/home' %}
-                        <th> <a href="{{ workspaceLink }}"> {{ workspace['workspace'].name }} </a> </th>
-                        <th> {{ workspace['workspace'].code }} </th>
+                        <th> {% if workspace['workspace'].error is not defined %} <a href="{{ workspaceLink }}"> {{ workspace['workspace'].name }} {% endif %} </a> </th>
+                        <th> {% if workspace['workspace'].error is not defined %} {{ workspace['workspace'].code }} {% endif %} </th>
                         <th> {{ workspace['shared_workspace'].getExpDate().getTimeStamp()|date('d/m/Y') }} </th>
                         <th>
                             {% if workspace['product'] is defined %}
