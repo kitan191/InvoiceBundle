@@ -173,7 +173,7 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
         $workspace = json_decode($serverOutput);
 
-        if ($workspace === null || isset($workspace['errors']) {
+        if ($workspace === null || isset($workspace['errors'])) {
             $this->handleError($sws, $serverOutput, $url);
         }
 
