@@ -2,7 +2,9 @@
 
 namespace FormaLibre\InvoiceBundle\Controller;
 
-use Claroline\CoreBundle\Entity\User;
+use Claroline\CoreBundle\Persistence\ObjectManager;
+use FormaLibre\InvoiceBundle\Entity\Chart;
+use FormaLibre\InvoiceBundle\Entity\Order;
 use FormaLibre\InvoiceBundle\Manager\CreditSupportManager;
 use FormaLibre\InvoiceBundle\Manager\ProductManager;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -19,6 +21,7 @@ class SupportCreditController extends Controller
 {
     private $authorization;
     private $creditSupportManager;
+    private $om;
     private $productManager;
     private $request;
     private $router;
@@ -29,6 +32,7 @@ class SupportCreditController extends Controller
      * @DI\InjectParams({
      *     "authorization"        = @DI\Inject("security.authorization_checker"),
      *     "creditSupportManager" = @DI\Inject("formalibre.manager.credit_support_manager"),
+     *     "om"                   = @DI\Inject("claroline.persistence.object_manager"),
      *     "productManager"       = @DI\Inject("formalibre.manager.product_manager"),
      *     "requestStack"         = @DI\Inject("request_stack"),
      *     "router"               = @DI\Inject("router"),
@@ -39,6 +43,7 @@ class SupportCreditController extends Controller
     public function __construct(
         AuthorizationCheckerInterface $authorization,
         CreditSupportManager $creditSupportManager,
+        ObjectManager $om,
         ProductManager $productManager,
         RequestStack $requestStack,
         RouterInterface $router,
@@ -48,6 +53,7 @@ class SupportCreditController extends Controller
     {
         $this->authorization = $authorization;
         $this->creditSupportManager = $creditSupportManager;
+        $this->om = $om;
         $this->productManager = $productManager;
         $this->request = $requestStack->getCurrentRequest();
         $this->router = $router;
@@ -124,13 +130,29 @@ class SupportCreditController extends Controller
                 );
             }
 
-            /*********************************
-             * TODO : Create Pending product *
-             *********************************/
+            $priceSolutions = $product->getPriceSolutions();
+            $priceSolution = $priceSolutions[0];
 
-            return new RedirectResponse(
-                $this->router->generate('formalibre_support_credits_products_purchase_thanks')
-            );
+            $order = new Order();
+            $chart = new Chart();
+            $order->setChart($chart);
+            $order->setProduct($product);
+            $chart->setOwner($user);
+            $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
+            $order->setPriceSolution($priceSolution);
+            $order->setChart($chart);
+            $this->om->persist($chart);
+            $this->om->persist($order);
+            $this->om->flush();
+
+            return new RedirectResponse($this->router->generate(
+                'chart_payment_pending',
+                array('chart' => $chart->getId()), true
+            ));
+
+//            return new RedirectResponse(
+//                $this->router->generate('formalibre_support_credits_products_purchase_thanks')
+//            );
         } else {
 
             return new RedirectResponse(
