@@ -22,6 +22,11 @@
         modal.displayForm(formUrl, addPrice, function() {}, 'form_price_solution_creation');
     });
 
+    $('body').on('click', '.edit-product', function(event) {
+        var formUrl = Routing.generate('formalibre_product_edit_form', {'product': $(event.currentTarget).attr('data-product-id')});
+        modal.displayForm(formUrl, editProduct, function() {}, 'formalibre_product_edit');
+    });
+
     $('body').on('click', '#add-product-btn', function(event) {
         event.preventDefault();
         modal.displayForm($(event.currentTarget).attr('href'), addProduct, function() {}, 'form_add_product');
@@ -55,6 +60,10 @@
 
     var addPrice = function(data, textStatus, jqXHR) {
         $('#price-list-' + data.product_id).append(Twig.render(PriceElement, {'priceSolution': data}));
+    }
+
+    var editProduct = function(data, $textStatus, jqXHR) {
+        window.location.reload(); 
     }
 
     var addProduct = function(data, textStatus, jqXHR) {
