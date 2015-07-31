@@ -22,3 +22,8 @@ product_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/ProductController.php"
     type: annotation
     prefix: /product
+
+support_credit_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/SupportCreditController.php"
+    type: annotation
+    prefix: /credit/

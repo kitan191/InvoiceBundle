@@ -49,5 +49,11 @@ price: Price
 details: Details
 rename_workspace: Rename workspace
 upgrade: Upgrade
+support_credit_purchase: Support credits purchase
+nb_credits: Number of credits
+saving: Saving
+hours: hours
+return_to_home_page: Return to home page
+thanks_for_your_purchase: Thanks for your purchase.
 subscribe: Subscribe
 pretty_name: Name
