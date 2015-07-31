@@ -8,7 +8,9 @@
         "php": ">=5.4.1",
         "claroline/core-bundle": "~6.0",
         "claroline/pdf-generator-bundle": "~6.0",
-        "claroline/pdf-player-bundle": "~6.0"
+        "claroline/pdf-player-bundle": "~6.0",
+        "jms/payment-core-bundle": "master-dev",
+        "jms/payment-paypal-bundle": "dev-master"
     },
     "autoload": {
         "psr-0": { "FormaLibre\\Invoice": "" }

@@ -28,6 +28,7 @@ class Updater060002 extends Updater
         $this->createSupportCreditsProducts();
         $this->deleteFormaLibrePurchasedWidget();
         $this->om->endFlushSuite();
+        $this->setMigration();
     }
 
     private function createSupportCreditsProducts()
@@ -114,6 +115,23 @@ class Updater060002 extends Updater
 
         foreach ($widgets as $widget) {
             $this->om->remove($widget);
+        }
+    }
+
+    private function setMigration()
+    {
+          $this->log('Updating migration versions...');
+        $conn = $this->om->getConnection();
+        $stmt = $conn->query("SELECT * from doctrine_formalibreinvoicebundle_versions where version=20150731173528");
+        $found = false;
+        while ($row = $stmt->fetch()) {
+            $found = true;
+        }
+        if (!$found) {
+            $this->log('Inserting migration 20150731173528.');
+            $conn->query("INSERT INTO doctrine_libreinvoicebundle_versions (version) VALUES (20150731173528)");
+        } else {
+            $this->log('Migrations found.');
         }
     }
 }

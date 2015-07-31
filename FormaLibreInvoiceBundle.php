@@ -14,7 +14,7 @@ use Claroline\KernelBundle\Bundle\ConfigurationProviderInterface;
 /**
  * Bundle class.
  */
-class FormaLibreInvoiceBundle extends PluginBundle
+class FormaLibreInvoiceBundle extends PluginBundle implements AutoConfigurableInterface, ConfigurationProviderInterface
 {
     public function build(ContainerBuilder $container)
     {
@@ -23,12 +23,21 @@ class FormaLibreInvoiceBundle extends PluginBundle
         $container->addCompilerPass(new DynamicConfigPass());
     }
 
-    /*
-    public function getAdditionalInstaller()
+    /**
+     * @todo find a way to remove this without breaking everything
+     */
+    public function suggestConfigurationFor(Bundle $bundle, $environment)
     {
-        return new AdditionalInstaller();
+        $bundleClass = get_class($bundle);
+        $config = new ConfigurationBuilder();
+        $simpleConfigs = array(
+            'JMS\Payment\CoreBundle\JMSPaymentCoreBundle' => 'jms_payment_core',
+            'JMS\Payment\PaypalBundle\JMSPaymentPaypalBundle' => 'jms_payment_paypal'
+        );
+        if (isset($simpleConfigs[$bundleClass])) {
+            return $config->addContainerResource($this->buildPath($simpleConfigs[$bundleClass]));
+        }
     }
-    */
 
     public function hasMigrations()
     {
