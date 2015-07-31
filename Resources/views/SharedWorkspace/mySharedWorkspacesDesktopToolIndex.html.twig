@@ -53,25 +53,38 @@
                         <th>
                             {{ 'product_name'|trans({}, 'invoice') }}
                         </th>
-                        <th>
-                            {{ 'actions'|trans({}, 'platform') }}
-                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for datas in workspaceDatas %}
                         <tr>
-                            {% set workspaceLink = 'http://' ~ config.getParameter('formalibre_target_platform_url') ~ '/workspaces/' ~ datas['shared_workspace'].getRemoteId() ~ '/open/tool/home' %}
+                            {% set workspaceLink = campusPlatform.getHost() ~ '/workspaces/' ~ datas['shared_workspace'].getRemoteId() ~ '/open/tool/home' %}
                             <td>
                                 <a href="{{ workspaceLink }}">
                                     {{ datas['workspace'].name }}
                                 </a>
+                                <button class="btn btn-default btn-sm rename-workspace-btn pull-right"
+                                        data-shared-workspace-id="{{ datas['shared_workspace'].getId() }}"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="{{ 'rename_workspace'|trans({}, 'invoice') }}"
+                                >
+                                    <i class="fa fa-edit"></i>
+                                </button>
                             </td>
                             <td>
                                 {{ datas['workspace'].code }}
                             </td>
                             <td>
                                 {{ datas['shared_workspace'].getExpDate().getTimeStamp()|date('d/m/Y') }}
+                                <a href="{{ path('renew_test_workspace', {'remoteId': datas['shared_workspace'].getRemoteId()}) }}"
+                                   class="btn btn-default btn-sm pull-right"
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="{{ 'renew'|trans({}, 'invoice') }}"
+                                >
+                                    <i class="fa fa-plus-circle"></i>
+                                </a>
                             </td>
                             <td>
                                 {{ datas['workspace_additional_datas'].used_storage }}
@@ -94,28 +107,6 @@
                                         {{ datas['product'].getCode() }}
                                     </a>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-default btn-sm rename-workspace-btn"
-                                            data-shared-workspace-id="{{ datas['shared_workspace'].getId() }}"
-                                            data-toggle="tooltip"
-                                            data-placement="left"
-                                            title="{{ 'rename_workspace'|trans({}, 'invoice') }}"
-                                    >
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                    <a href="{{ path('renew_test_workspace', {'remoteId': datas['shared_workspace'].getRemoteId()}) }}"
-                                       class="btn btn-default btn-sm"
-                                    >
-                                        {{ 'renew'|trans({}, 'invoice')}}
-                                    </a>
-                                    <a href="#"
-                                       class="btn btn-default btn-sm"
-                                    >
-                                        {{ 'upgrade'|trans({}, 'invoice')}}
-                                    </a>
-                                </div>
                             </td>
                         </tr>
                     {% endfor %}

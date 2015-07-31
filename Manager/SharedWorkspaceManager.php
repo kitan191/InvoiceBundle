@@ -204,7 +204,7 @@ class SharedWorkspaceManager
     public function getWorkspaceAdditionalDatas(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '/additional/datas.json';
-        $serverOutput = $this->apiManager->url($this->oauthHost, $url, $this->oauthId, $this->oauthSecret);
+        $serverOutput = $this->apiManager->url($this->campusPlatform, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -254,6 +254,27 @@ class SharedWorkspaceManager
         }
 
         $this->handleError($sws, $serverOutput, $url);
+    }
+
+    public function editShareWorkspaceRemoteName(array $workspace, $workspaceName)
+    {
+        $workspaceType = new WorkspaceType();
+        $workspaceType->enableApi();
+        $form = $this->formFactory->create($workspaceType);
+        $expDate = \DateTime::createFromFormat(\DateTime::ATOM, $workspace['endDate']);
+        $payload = $this->apiManager->formEncode($workspace, $form, $workspaceType);
+        $payload['workspace_form[name]'] = $workspaceName;
+        $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
+        $url = 'api/workspaces/' . $workspace['id'] . '/users/' . $workspace['creator']['username'] . '.json';
+        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'PUT');
+        $workspace = json_decode($serverOutput, true);
+
+        if (is_null($workspace) || isset($workspace['errors'])) {
+
+            throw new \Exception($serverOutput);
+        }
+
+        return $workspace;
     }
 
     public function hasFreeTestMonth($user)

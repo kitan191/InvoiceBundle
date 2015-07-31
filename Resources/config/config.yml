@@ -12,9 +12,6 @@ plugin:
           class: book
 
     widgets:
-        - name: formalibre_purchased
-          is_configurable: false
-
         - name: formalibre_invoice
           is_configurable: false
 
