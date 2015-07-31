@@ -155,7 +155,7 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
         $data = json_decode($serverOutput, true);
 
-        if ($data === null || isset($data['error'])) {
+        if ($data === null || isset($data['errors'])) {
             $this->handleError($sws, $serverOutput, $url);
         }
 
@@ -173,7 +173,7 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
         $workspace = json_decode($serverOutput);
 
-        if ($workspace === null) {
+        if ($workspace === null || isset($workspace['errors'])) {
             $this->handleError($sws, $serverOutput, $url);
         }
 
@@ -239,7 +239,7 @@ class SharedWorkspaceManager
 
         //add date here
 
-        if ($workspace === null) {
+        if ($workspace === null || isset($workspace['errors'])) {
             $this->handleError($sws, $serverOutput, $url);
         }
 
