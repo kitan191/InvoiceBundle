@@ -57,6 +57,11 @@ class ProductManager
         return $this->productRepository->findBy($array);
     }
 
+    public function getProductById($productId)
+    {
+        return $this->productRepository->findOneById($productId);
+    }
+
     //there is no const array yet in php =/ maybe it's 5.5 or so. I don't rememeber.
     public function getAvailableProductsType()
     {

@@ -32,7 +32,7 @@ class LoadSupportCreditsProductsData extends AbstractFixture implements Containe
                     'name' => 'Pack 20',
                     'nb_credits' => 20,
                     'nb_hours' => 4,
-                    'economy' => 0
+                    'saving' => 0
                 ),
                 'pricing' => 250
             ),
@@ -43,7 +43,7 @@ class LoadSupportCreditsProductsData extends AbstractFixture implements Containe
                     'name' => 'Pack 50',
                     'nb_credits' => 50,
                     'nb_hours' => 10,
-                    'economy' => 50
+                    'saving' => 50
                 ),
                 'pricing' => 575
             ),
@@ -54,7 +54,7 @@ class LoadSupportCreditsProductsData extends AbstractFixture implements Containe
                     'name' => 'Pack 100',
                     'nb_credits' => 100,
                     'nb_hours' => 20,
-                    'economy' => 250
+                    'saving' => 250
                 ),
                 'pricing' => 1000
             )

@@ -44,7 +44,7 @@ class Updater060002 extends Updater
                 'name' => 'Pack 20',
                 'nb_credits' => 20,
                 'nb_hours' => 4,
-                'economy' => 0
+                'saving' => 0
             );
             $pack20->setDetails($details);
             $pack20->setIsActivated(true);
@@ -68,7 +68,7 @@ class Updater060002 extends Updater
                 'name' => 'Pack 50',
                 'nb_credits' => 50,
                 'nb_hours' => 10,
-                'economy' => 50
+                'saving' => 50
             );
             $pack50->setDetails($details);
             $pack50->setIsActivated(true);
@@ -92,7 +92,7 @@ class Updater060002 extends Updater
                 'name' => 'Pack 100',
                 'nb_credits' => 100,
                 'nb_hours' => 20,
-                'economy' => 250
+                'saving' => 250
             );
             $pack100->setDetails($details);
             $pack100->setIsActivated(true);

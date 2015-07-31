@@ -1,0 +1,21 @@
+{% extends "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+
+{% block content %}
+    <div class="panel panel-default" id="support-credit-purchase-thanks">
+        <div class="panel-body">
+            <h1 class="text-center">
+                {{ 'thanks_for_your_purchase'|trans({}, 'invoice') }}
+            </h1>
+            <br>
+            <br>
+            <br>
+            <div class="text-center">
+                <a href="{{ path('claro_index') }}"
+                   class="btn btn-primary"
+                >
+                    {{ 'return_to_home_page'|trans({}, 'invoice') }}
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
