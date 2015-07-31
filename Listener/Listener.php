@@ -82,47 +82,6 @@ class Listener
     }
 
     /**
-     * @DI\Observe("widget_formalibre_purchased")
-     *
-     * @param DisplayToolEvent $event
-     */
-    public function onDisplayPurchased(DisplayWidgetEvent $event)
-    {
-        $event->setContent($this->getDisplayPurchased());
-    }
-
-    private function getDisplayPurchased()
-    {
-        $user = $this->tokenStorage->getToken()->getUser();
-        $sharedWorkspaces = $this->sharedWorkspaceManager->getSharedWorkspaceByUser($user);
-        $workspaceData = array();
-
-        foreach ($sharedWorkspaces as $sharedWorkspace) {
-            $el = array();
-            $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
-            $el['shared_workspace'] = $sharedWorkspace;
-
-            if ($workspace) {
-                $el['workspace'] = $workspace;
-            } else {
-                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
-            }
-
-            $sws = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace);
-            if ($sws) $el['product'] = $sws->getProduct();
-
-            $workspaceData[] = $el;
-        }
-
-        $content = $this->container->get('templating')->render(
-            'FormaLibreInvoiceBundle:MyPurchase:widget.html.twig',
-            array('workspace_data' => $workspaceData)
-        );
-
-        return $content;
-    }
-
-    /**
      * @DI\Observe("widget_formalibre_invoice")
      *
      * @param DisplayToolEvent $event
