@@ -68,7 +68,7 @@ workpace_confirm: |
     Il expirera le %expiration_date%
 product_name: Nom du produit
 campus_connection_message: Vous pouvez vous connecter au campus en cliquant sur <a href="%baseurl%/login"> ce lien </a>. Votre nom d'utilisateur est %username%.
-forgot_password_message: Vous pouvez demander un nouveau mot de passe pour le campus en cliquant <a href="%baseurl%/reset"> ici </a>
+forgot_password_message: Vous pouvez changer votre mot de passe pour le campus en cliquant <a href="%baseurl%/reset"> ici </a>
 invoice: Facture
 show_free: Montrer gratuits
 show_payed: Montrer payants
@@ -82,3 +82,5 @@ activate: Activer
 price: Prix
 details: Détails
 remove_price_confirm: Êtes-vous sûr de vouloir supprimer le prix %id% ?
+rename_workspace: Renommer l'espace d'activités
+upgrade: Upgrade

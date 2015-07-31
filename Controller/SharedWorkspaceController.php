@@ -12,6 +12,8 @@ use FormaLibre\InvoiceBundle\Entity\Order;
 use FormaLibre\InvoiceBundle\Entity\Chart;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
+use FormaLibre\InvoiceBundle\Form\WorkspaceNameEditType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Payment\CoreBundle\Entity\Payment;
@@ -21,44 +23,81 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class SharedWorkspaceController extends Controller
 {
-    /** @DI\Inject */
-    private $request;
-
-    /** @DI\Inject */
-    private $router;
-
-    /** @DI\Inject("doctrine.orm.entity_manager") */
-    private $em;
-
-    /** @DI\Inject("payment.plugin_controller") */
-    private $ppc;
-
-    /** @DI\Inject("translator") */
-    private $translator;
-
-    /** @DI\Inject("security.token_storage") */
-    private $tokenStorage;
-
-    /** @DI\Inject("security.authorization_checker") */
     private $authorization;
-
-    /** @DI\Inject("session") */
-    private $session;
-
-    /** @DI\Inject("formalibre.manager.product_manager") */
-    private $productManager;
-
-    /** @DI\Inject("formalibre.manager.invoice_manager") */
+    private $ch;
+    private $em;
+    private $formFactory;
     private $invoiceManager;
-
-    /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
-    private $sharedWorkspaceManager;
-
-    /** @DI\Inject("formalibre.manager.payment_manager") */
     private $paymentManager;
-
-    /** @DI\Inject("formalibre.manager.vat_manager") */
+    private $ppc;
+    private $productManager;
+    private $request;
+    private $router;
+    private $session;
+    private $sharedWorkspaceManager;
+    private $tokenStorage;
+    private $translator;
     private $vatManager;
+
+    private $friendRepo;
+    private $campusPlatform;
+
+    /**
+     * @DI\InjectParams({
+     *     "authorization"          = @DI\Inject("security.authorization_checker"),
+     *     "ch"                     = @DI\Inject("claroline.config.platform_config_handler"),
+     *     "em"                     = @DI\Inject("doctrine.orm.entity_manager"),
+     *     "formFactory"            = @DI\Inject("form.factory"),
+     *     "invoiceManager"         = @DI\Inject("formalibre.manager.invoice_manager"),
+     *     "paymentManager"         = @DI\Inject("formalibre.manager.payment_manager"),
+     *     "ppc"                    = @DI\Inject("payment.plugin_controller"),
+     *     "productManager"         = @DI\Inject("formalibre.manager.product_manager"),
+     *     "request"                = @DI\Inject("request"),
+     *     "router"                 = @DI\Inject("router"),
+     *     "session"                = @DI\Inject("session"),
+     *     "sharedWorkspaceManager" = @DI\Inject("formalibre.manager.shared_workspace_manager"),
+     *     "tokenStorage"           = @DI\Inject("security.token_storage"),
+     *     "translator"             = @DI\Inject("translator"),
+     *     "vatManager"             = @DI\Inject("formalibre.manager.vat_manager")
+     * })
+     */
+    public function __construct(
+        $authorization,
+        $ch,
+        $em,
+        $formFactory,
+        $invoiceManager,
+        $paymentManager,
+        $ppc,
+        $productManager,
+        $request,
+        $router,
+        $session,
+        $sharedWorkspaceManager,
+        $tokenStorage,
+        $translator,
+        $vatManager
+    )
+    {
+        $this->authorization = $authorization;
+        $this->ch = $ch;
+        $this->em = $em;
+        $this->formFactory = $formFactory;
+        $this->invoiceManager = $invoiceManager;
+        $this->paymentManager = $paymentManager;
+        $this->ppc = $ppc;
+        $this->productManager = $productManager;
+        $this->request = $request;
+        $this->router = $router;
+        $this->session = $session;
+        $this->sharedWorkspaceManager = $sharedWorkspaceManager;
+        $this->tokenStorage = $tokenStorage;
+        $this->translator = $translator;
+        $this->vatManager = $vatManager;
+
+        $this->friendRepo = $this->em->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
+        $this->campusPlatform = $this->friendRepo->findOneByName($this->ch->getParameter('campusName'));
+    }
 
     /**
      * @EXT\Route(
@@ -290,5 +329,126 @@ class SharedWorkspaceController extends Controller
         $this->invoiceManager->validate($invoice);
 
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/my/shared/workspaces/desktop/tool/index",
+     *      name="formalibre_my_shared_workspaces_desktop_tool_index"
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function mySharedWorkspacesDesktopToolIndexAction(User $authenticatedUser)
+    {
+        $sharedWorkspaces = $this->sharedWorkspaceManager
+            ->getSharedWorkspaceByUser($authenticatedUser);
+        $workspaceDatas = array();
+
+        foreach ($sharedWorkspaces as $sharedWorkspace) {
+            $el = array();
+            $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+            $additionalDatas = $this->sharedWorkspaceManager->getWorkspaceAdditionalDatas($sharedWorkspace);
+            $el['shared_workspace'] = $sharedWorkspace;
+
+            if ($workspace) {
+                $el['workspace'] = $workspace;
+            } else {
+                $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
+            }
+
+            if ($additionalDatas) {
+                $el['workspace_additional_datas'] = $additionalDatas;
+            } else {
+                $el['workspace_additional_datas'] = array(
+                    'used_storage' => -1,
+                    'nb_users' => -1,
+                    'nb_resources' => -1
+                );
+            }
+
+            $sws = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace);
+
+            if ($sws) {
+                $el['product'] = $sws->getProduct();
+            }
+
+            $workspaceDatas[] = $el;
+        }
+
+        return array('workspaceDatas' => $workspaceDatas, 'campusPlatform' => $this->campusPlatform);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/shared/workspace/{sharedWorkspace}/remote/name/edit/form",
+     *     name="formalibre_shared_workspace_name_edit_form",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreInvoiceBundle:SharedWorkspace:sharedWorkspaceNameEditModalForm.html.twig")
+     */
+    public function sharedWorkspaceNameEditFormAction(
+        User $authenticatedUser,
+        SharedWorkspace $sharedWorkspace
+    )
+    {
+        $this->checkSharedWorkspaceEditionAccess($authenticatedUser, $sharedWorkspace);
+        $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+        $form = $this->formFactory->create(new WorkspaceNameEditType($workspace['name']));
+
+        return array(
+            'form' => $form->createView(),
+            'sharedWorkspace' => $sharedWorkspace
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/shared/workspace/{sharedWorkspace}/remoted/name/edit",
+     *     name="formalibre_shared_workspace_name_edit",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreInvoiceBundle:SharedWorkspace:sharedWorkspaceNameEditModalForm.html.twig")
+     */
+    public function sharedWorkspaceNameEditAction(
+        User $authenticatedUser,
+        SharedWorkspace $sharedWorkspace
+    )
+    {
+        $this->checkSharedWorkspaceEditionAccess($authenticatedUser, $sharedWorkspace);
+        $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
+        $form = $this->formFactory->create(new WorkspaceNameEditType($workspace['name']));
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $workspaceName = $form->get('name')->getData();
+            $datas = $this->sharedWorkspaceManager->editShareWorkspaceRemoteName(
+                $workspace,
+                $workspaceName
+            );
+
+            return new JsonResponse($datas, 200);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'sharedWorkspace' => $sharedWorkspace
+            );
+        }
+    }
+
+    private function checkSharedWorkspaceEditionAccess(
+        User $user,
+        SharedWorkspace $sharedWorkspace
+    )
+    {
+        if ($user->getId() !== $sharedWorkspace->getOwner()->getId()) {
+
+            throw new AccessDeniedException();
+        }
     }
 }

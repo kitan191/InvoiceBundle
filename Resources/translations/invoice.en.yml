@@ -47,3 +47,5 @@ products: Products
 activate: Activate
 price: Price
 details: Details
+rename_workspace: Rename workspace
+upgrade: Upgrade
