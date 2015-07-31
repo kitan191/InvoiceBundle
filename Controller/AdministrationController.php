@@ -44,9 +44,6 @@ class AdministrationController extends Controller
     /** @DI\Inject("formalibre.manager.price_solution_manager") */
     private $priceSolutionManager;
 
-    /** @DI\Inject("payment.plugin_controller") */
-    private $ppc;
-
     /** @DI\Inject("router") */
     private $router;
 

@@ -29,7 +29,6 @@ class SharedWorkspaceController extends Controller
     private $formFactory;
     private $invoiceManager;
     private $paymentManager;
-    private $ppc;
     private $productManager;
     private $request;
     private $router;
@@ -38,7 +37,6 @@ class SharedWorkspaceController extends Controller
     private $tokenStorage;
     private $translator;
     private $vatManager;
-
     private $friendRepo;
     private $campusPlatform;
 
@@ -50,7 +48,6 @@ class SharedWorkspaceController extends Controller
      *     "formFactory"            = @DI\Inject("form.factory"),
      *     "invoiceManager"         = @DI\Inject("formalibre.manager.invoice_manager"),
      *     "paymentManager"         = @DI\Inject("formalibre.manager.payment_manager"),
-     *     "ppc"                    = @DI\Inject("payment.plugin_controller"),
      *     "productManager"         = @DI\Inject("formalibre.manager.product_manager"),
      *     "request"                = @DI\Inject("request"),
      *     "router"                 = @DI\Inject("router"),
@@ -68,7 +65,6 @@ class SharedWorkspaceController extends Controller
         $formFactory,
         $invoiceManager,
         $paymentManager,
-        $ppc,
         $productManager,
         $request,
         $router,
@@ -85,7 +81,6 @@ class SharedWorkspaceController extends Controller
         $this->formFactory = $formFactory;
         $this->invoiceManager = $invoiceManager;
         $this->paymentManager = $paymentManager;
-        $this->ppc = $ppc;
         $this->productManager = $productManager;
         $this->request = $request;
         $this->router = $router;
@@ -94,7 +89,6 @@ class SharedWorkspaceController extends Controller
         $this->tokenStorage = $tokenStorage;
         $this->translator = $translator;
         $this->vatManager = $vatManager;
-
         $this->friendRepo = $this->em->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
         $this->campusPlatform = $this->friendRepo->findOneByName($this->ch->getParameter('campusName'));
     }
@@ -130,16 +124,7 @@ class SharedWorkspaceController extends Controller
 
         foreach ($products as $product) {
             //now we generate the forms !
-            $form = $this->createForm(
-                new SharedWorkspaceForm(
-                    $product,
-                    $this->router,
-                    $this->em,
-                    $this->translator,
-                    $order,
-                    $this->vatManager
-                )
-            );
+            $form = $this->createForm(new SharedWorkspaceForm($product));
             $forms[] = array(
                 'form' => $form->createView(),
                 'product' => $product,
@@ -170,7 +155,8 @@ class SharedWorkspaceController extends Controller
      */
     public function addOrderToChartAction(Product $product, Order $order, Chart $chart)
     {
-        if ($chart->getPaymentInstruction()) {
+        //check it wasn't already submitted
+        if (false) {
             $content = $this->renderView(
                 'FormaLibreInvoiceBundle:errors:orderAlreadySubmitedException.html.twig'
             );
@@ -178,27 +164,17 @@ class SharedWorkspaceController extends Controller
             return new Response($content);
         }
 
-        if ($this->session->has('form_payment_data')) {
-            $instruction = $this->session->get('form_payment_data');
+        if ($this->session->has('form_price_data')) {
             $priceSolution = $this->session->get('form_price_data');
-            $this->session->remove('form_payment_data');
             $this->session->remove('form_price_data');
         }
 
-        $form = $this->createForm(new SharedWorkspaceForm(
-            $product,
-            $this->router,
-            $this->em,
-            $this->translator,
-            $order,
-            $this->vatManager
-        ));
+        $form = $this->createForm(new SharedWorkspaceForm($product    ));
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
                 //do that stuff here
             if (!$this->authorization->isGranted('ROLE_USER')) {
-                $this->session->set('form_payment_data', $form->get('payment')->getData());
                 $this->session->set('form_price_data', $form->get('price')->getData());
                 $redirectRoute =  $this->router->generate('workspace_product_payment_submit', array(
                     'order' => $order->getId(),
@@ -211,29 +187,24 @@ class SharedWorkspaceController extends Controller
                 return new RedirectResponse($route);
             }
 
-            $instruction = $form->get('payment')->getData();
             $priceSolution = $form->get('price')->getData();
         }
 
-        if ($instruction && $priceSolution) {
-            $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
-            $order->setProduct($product);
-            $chart->setOwner($this->tokenStorage->getToken()->getUser());
-            $this->ppc->createPaymentInstruction($instruction);
-            $chart->setPaymentInstruction($instruction);
-            $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
-            $order->setPriceSolution($priceSolution);
-            $order->setChart($chart);
-            $this->em->persist($chart);
-            $this->em->persist($order);
-            $this->em->flush();
-            $extData = $instruction->getExtendedData();
+        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
+        $order->setProduct($product);
+        $chart->setOwner($this->tokenStorage->getToken()->getUser());
+        $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
+        $order->setPriceSolution($priceSolution);
+        $order->setChart($chart);
+        $this->em->persist($chart);
+        $this->em->persist($order);
+        $this->em->flush();
 
-            return new RedirectResponse($extData->get('return_url'));
+        return new RedirectResponse($this->router->generate(
+            'chart_payment_pending',
+            array('chart' => $order->getChart()->getId()), true
+        ));
 
-        } else {
-            throw new \Exception('Shared workspace invoice data not found');
-        }
 
         throw new \Exception('Errors were found: ' . $form->getErrorsAsString());
     }
@@ -269,18 +240,17 @@ class SharedWorkspaceController extends Controller
         $this->em->persist($chart);
         $this->em->persist($order);
         $this->em->flush();
-        $formType = new SharedWorkspaceForm(
-            $product,
-            $this->router,
-            $this->em,
-            $this->translator,
-            $order,
-            $this->vatManager
-        );
+        $formType = new SharedWorkspaceForm($product);
         $form = $this->createForm($formType)->createView();
         $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sws);
 
-        return array('form' => $form, 'chart' => $chart, 'product' => $product, 'order' => $order, 'workspace' => $workspace);
+        return array(
+            'form' => $form,
+            'chart' => $chart,
+            'product' => $product,
+            'order' => $order,
+            'workspace' => $workspace
+        );
     }
 
     /**

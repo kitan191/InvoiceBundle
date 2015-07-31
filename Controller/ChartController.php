@@ -120,9 +120,7 @@ class ChartController extends Controller
             throw new AccessDeniedException();
         }
 
-        $instruction = $chart->getPaymentInstruction();
-        $extra = $instruction->getExtendedData();
-        $chart->setExtendedData(array('communication' => $extra->get('communication')));
+        $chart->setExtendedData(array('communication' => $this->chartManager->getCommunication()));
         $extData = $chart->getExtendedData();
         $this->em->persist($chart);
         $this->em->flush();

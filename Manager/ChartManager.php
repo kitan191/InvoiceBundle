@@ -47,4 +47,16 @@ class ChartManager
     {
         return $this->chartRepository->findByOwner($user);
     }
+
+    private function getCommunication()
+    {
+        $x = 10; // Amount of digits
+        $x--;
+        $min = pow(10, $x);
+        $max = pow(10, $x + 1) - 1;
+        $value = rand($min, $max);
+        $ctrl = $value % 97;
+        if ($ctrl < 10) $ctrl = '0' . $ctrl;
+        return "$value" . "$ctrl";
+    }
 }
