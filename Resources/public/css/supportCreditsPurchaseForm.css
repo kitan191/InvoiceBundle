@@ -1,0 +1,11 @@
+.saving-label {
+    font-size: 100%;
+}
+
+.product-panel-selected {
+    border-color: #53acf4;
+}
+
+.product-panel-selected > .panel-heading {
+    background-color: #53acf4;
+}
