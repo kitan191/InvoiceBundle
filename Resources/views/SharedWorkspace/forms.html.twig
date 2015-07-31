@@ -25,33 +25,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                {% for form in forms %}
-                <div class="col-md-{{ 12//forms|length }}">
-                    {% if hasFreeTest %}
-                    <a class="btn btn-primary" href="{{ path('formalibre_free_test_workspace', {'product': form['product'].getId()}) }}"> {{ 'free_test'|trans({}, 'invoice') }} </a>
-                    </br>
-                    </br>
-                    {% endif %}
-                    <div class="well">
-                        {{
-                            'SHARE_WS_DESCRIPTION'|trans(
-                                {
-                                    '%code%': form['product'].getCode()|trans({}, 'invoice'),
-                                    '%users%': form['product'].details.max_users,
-                                    '%storage%': form['product'].details.max_storage,
-                                    '%resources%': form['product'].details.max_resources
-                                },
-                                'invoice'
-                            )|raw
-                        }}
-                    </div>
-                    <form action="{{ path('workspace_product_payment_submit', {'chart': form['order'].getChart().getId(), 'product': form['product'].getId(), 'order': form['order'].getId() }) }}" method="post">
-                        {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
-                        {{ form_widget(form['form']) }}
-                        <input type="submit" class="btn btn-primary" value="{{'buy'|trans({}, 'invoice')}}"/>
-                    </form>
-                </div>
-                {% endfor %}
+                {{ render(controller("FormaLibreInvoiceBundle:SharedWorkspace:iframeForms")) }}
             </div>
         </div>
     </div>

@@ -8,6 +8,7 @@
                 <li> {{ key|trans({}, 'invoice') ~ ': ' ~ value }} </l>
             {% endfor %}
         <ul>
+        <a class="edit-product" data-product-id="{{ product.id}}" href="#"> {{ 'edit'|trans({}, 'platform') }} </a>
     </td>
     <td>
         <ul id='price-list-{{ product.id }}'>

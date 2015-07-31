@@ -345,6 +345,66 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
+     *      "/product/{product}/form/edit",
+     *      name="formalibre_product_edit_form",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function editProductFormAction(Product $product)
+    {
+        $type = $product->getType();
+        $form = $this->createForm($this->productManager->getEditFormByType($type));
+
+        return array('form' => $form->createView(), 'product' => $product);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/product/{product}/edit",
+     *      name="formalibre_product_edit",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function editProductAction(Product $product)
+    {
+        $type = $product->getType();
+        $form = $this->createForm($this->productManager->getEditFormByType($type));
+        $form->handleRequest($this->get('request'));
+
+        if ($form->isValid()) {
+            //do some stuff
+            $details = $product->getDetails();
+            $details['pretty_name'] = $form->get('pretty_name')->getData();
+            $product->setDetails($details);
+            $this->productManager->persist($product);
+
+            return new JsonResponse(
+                array(
+                    'id' => $product->getId(),
+                    'code' => $product->getCode(),
+                    'type' => $product->getType(),
+                    'details' => $product->getDetails(),
+                    'priceSolutions' => array()
+                )
+            );
+        }
+
+       return $this->render(
+           'FormaLibreInvoiceBundle:Administration:editProductForm.html.twig',
+           array('form' => $form->createView(), 'product' => $product)
+       );
+    }
+
+    /**
+     * @EXT\Route(
      *      "/product/{type}/create",
      *      name="formalibre_product_create",
      *      options = {"expose"=true}
@@ -353,7 +413,7 @@ class AdministrationController extends Controller
      *
      * @return Response
      */
-    public function addProductForm($type)
+    public function addProductAction($type)
     {
         $form = $this->createForm($this->productManager->getFormByType($type));
         $form->handleRequest($this->get('request'));

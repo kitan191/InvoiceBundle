@@ -77,7 +77,7 @@ class SharedWorkspaceForm extends AbstractType
                         ->join('ps.product', 'p')
                         ->where('p.id = ' . $product->getId());
                 },
-                'expanded' => true,
+                'expanded' => false,
                 'multiple' => false
             )
         );
@@ -87,25 +87,13 @@ class SharedWorkspaceForm extends AbstractType
                 'payment',
                 'jms_choose_payment_method',
                 array(
-                    'label' => ' ', //fuck you label
+                    'label' => ' ',
                     'amount'   => 0,
                     'currency' => 'EUR',
                     'allowed_methods' => array('bank_transfer', 'paypal_express_checkout'),
-                    'default_method' => 'payment_paypal',
+                    'default_method' => 'bank_transfer',
+                    'attr' => array('style' => 'display:none'),
                     'predefined_data' => array(
-                        'label' => 'test',
-                        'paypal_express_checkout' => array(
-                            'label' => '',
-                            'return_url' => $returnSuccessUrl,
-                            'cancel_url' => $this->router->generate('chart_payment_cancel', array(
-                                'chart' => $this->order->getChart(),
-                            ), true),
-                            'checkout_params' => array(
-                                //'L_PAYMENTREQUEST_0_AMT0' => 0,
-                                'L_PAYMENTREQUEST_0_DESC0' => $detailsInfo,
-                                'L_PAYMENTREQUEST_0_QTY0' => '1'
-                            )
-                        ),
                         'bank_transfer' => array(
                             'return_url' => $returnSuccessUrl,
                             'pending_url' => $pendingUrl,
@@ -118,33 +106,7 @@ class SharedWorkspaceForm extends AbstractType
                 )
             );
 
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, array($this, 'onPreSubmit'));
         $builder->addEventListener(FormEvents::PRE_SET_DATA, array($this, 'onPreSetData'));
-    }
-
-    public function onPreSubmit(FormEvent $event)
-    {
-        $form = $event->getForm();
-        $data = $event->getData();
-        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($data['price']);
-        $amount = $priceSolution->getPrice();
-        $vatNumber = $this->order->getChart()->getOwner() ? $this->vatManager->getVatFromOwner($this->order->getChart()->getOwner()): null;
-        $vat = !$this->vatManager->isValid($vatNumber) ? $this->vatManager->getVat($amount): 0;
-        $totalAmount = $amount + $vat;
-        $options = $form->get('payment')->getConfig()->getOptions();
-        $options['amount'] = $totalAmount;
-
-        $options['predefined_data']['paypal_express_checkout']['checkout_params']['L_PAYMENTREQUEST_0_AMT0'] = $amount;
-        $options['predefined_data']['paypal_express_checkout']['checkout_params']['PAYMENTREQUEST_0_ITEMAMT'] = $amount;
-        $options['predefined_data']['paypal_express_checkout']['checkout_params']['PAYMENTREQUEST_0_TAXAMT'] = $vat;
-        $options['predefined_data']['paypal_express_checkout']['checkout_params']['PAYMENTREQUEST_0_AMT'] = $totalAmount;
-
-        $form->remove('payment');
-        $form->add(
-            'payment',
-            'jms_choose_payment_method',
-            $options
-        );
     }
 
     public function onPreSetData(FormEvent $event)

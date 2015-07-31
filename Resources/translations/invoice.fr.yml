@@ -84,3 +84,5 @@ details: Détails
 remove_price_confirm: Êtes-vous sûr de vouloir supprimer le prix %id% ?
 rename_workspace: Renommer l'espace d'activités
 upgrade: Upgrade
+subscribe: Souscrire
+pretty_name: Nom

@@ -10,6 +10,7 @@ use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use FormaLibre\InvoiceBundle\Form\SharedWorkspaceCreationForm;
+use FormaLibre\InvoiceBundle\Form\SharedWorkspaceEditForm;
 use FormaLibre\InvoiceBundle\Form\CreditSupportType;
 use FormaLibre\InvoiceBundle\Form\SupportTechType;
 
@@ -89,6 +90,17 @@ class ProductManager
         return $form;
     }
 
+    public function getEditFormByType($type)
+    {
+        switch ($type) {
+            case 'SHARED_WS':
+                $form = new SharedWorkspaceEditForm(); break;
+            default: throw new \Exception('Unknown type.');
+        }
+
+        return $form;
+    }
+
     public function createFromFormByType($form, $type)
     {
         $code = $form->get('code')->getData();
@@ -107,6 +119,12 @@ class ProductManager
     public function remove(Product $product)
     {
         $this->om->remove($product);
+        $this->om->flush();
+    }
+
+    public function persist(Product $product)
+    {
+        $this->om->persist($product);
         $this->om->flush();
     }
 }

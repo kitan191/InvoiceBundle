@@ -49,3 +49,5 @@ price: Price
 details: Details
 rename_workspace: Rename workspace
 upgrade: Upgrade
+subscribe: Subscribe
+pretty_name: Name

@@ -24,6 +24,17 @@ class SharedWorkspaceCreationForm extends AbstractType
             )
         );
         $builder->add(
+            'pretty_name',
+            'text',
+            array(
+                'required' => true,
+                'label' => 'pretty_name',
+                'constraints' => array(
+                    new NotBlank()
+                )
+            )
+        );
+        $builder->add(
             'max_users',
             'number',
             array(
