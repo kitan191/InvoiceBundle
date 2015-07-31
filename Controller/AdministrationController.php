@@ -140,9 +140,6 @@ class AdministrationController extends Controller
             throw new \AccessDeniedException();
         }
 
-        $payments = $invoice->getChart()->getPaymentInstruction()->getPayments();
-        $payment = $payments[0];
-        $this->ppc->approve($payment, $invoice->getTotalAmount());
         $this->invoiceManager->validate($invoice);
         $route = $this->router->generate('admin_invoice_open_pending');
 

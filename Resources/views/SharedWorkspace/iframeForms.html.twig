@@ -37,7 +37,7 @@
                         'invoice'
                     )|raw
                 }}
-                <form action="{{ path('workspace_product_payment_submit', {'chart': form['order'].getChart().getId(), 'product': form['product'].getId(), 'order': form['order'].getId() }) }}" method="post">
+                <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId() }) }}" method="post">
                     {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
                     {{ form_widget(form['form']) }}
                     <input type="submit" class="btn btn-primary" value="{{'subscribe'|trans({}, 'invoice')}}"/>

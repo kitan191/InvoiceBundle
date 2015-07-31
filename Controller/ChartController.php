@@ -32,37 +32,6 @@ class ChartController extends Controller
     /** @DI\Inject("router") */
     private $router;
 
-    /**
-     * @EXT\Route(
-     *      "/payment_complete/chart/{chart}",
-     *      name="chart_payment_complete"
-     * )
-     * @return Response
-     */
-    public function completePaymentAction(Chart $chart)
-    {
-        if (
-            $chart->getOwner() !== $this->tokenStorage->getToken()->getUser()
-            && $this->authorization->isGranted('ROLE_ADMIN') === false
-        ) {
-            throw new AccessDeniedException();
-        }
-
-        $invoice = $chart->getInvoice();
-        
-        try {
-            $this->invoiceManager->validate($invoice);
-            $this->invoiceManager->send($invoice);
-        } catch (PaymentHandlingFailedException $e) {
-            $content = $this->renderView(
-                'FormaLibreInvoiceBundle:errors:paymentHandlingFailedException.html.twig'
-            );
-
-            return new Response($content);
-        }
-
-        return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
-    }
 
     /**
      * @EXT\Route(
@@ -82,6 +51,7 @@ class ChartController extends Controller
         $chart->setExtendedData(array('communication' => $this->chartManager->getCommunication()));
         $extData = $chart->getExtendedData();
         $invoice = $this->invoiceManager->create($chart);
+        $this->invoiceManager->send($invoice);
         $this->em->persist($chart);
         $this->em->flush();
 
@@ -89,19 +59,5 @@ class ChartController extends Controller
             'communication' => $extData['communication'],
             'chart' => $chart
         );
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/payment_cancel",
-     *      name="chart_payment_cancel"
-     * )
-     * @EXT\Template
-     *
-     * @return Response
-     */
-    public function cancelAction(Chart $chart)
-    {
-        return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }
 }

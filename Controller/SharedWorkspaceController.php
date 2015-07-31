@@ -112,12 +112,6 @@ class SharedWorkspaceController extends Controller
             $hasFreeTest = false;
         }
 
-        $order = new Order();
-        $chart = new Chart();
-        $order->setChart($chart);
-        $this->em->persist($chart);
-        $this->em->persist($order);
-        $this->em->flush();
         $products = $this->get('formalibre.manager.product_manager')
             ->getProductsBy(array('type' => 'SHARED_WS', 'isActivated' => true));
         $forms = array();
@@ -127,8 +121,7 @@ class SharedWorkspaceController extends Controller
             $form = $this->createForm(new SharedWorkspaceForm($product));
             $forms[] = array(
                 'form' => $form->createView(),
-                'product' => $product,
-                'order' => $order
+                'product' => $product
             );
         }
 
@@ -145,7 +138,7 @@ class SharedWorkspaceController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/payment/workspace/submit/{product}/Order/{order}/chart/{chart}",
+     *      "/payment/workspace/submit/{product}",
      *      name="workspace_product_payment_submit"
      * )
      *
@@ -153,7 +146,7 @@ class SharedWorkspaceController extends Controller
      * @param $chartId the chartId if it already exists (otherwise, if it's 0, we'll create a new one)
      * @return Response
      */
-    public function addOrderToChartAction(Product $product, Order $order, Chart $chart)
+    public function addOrderToChartAction(Product $product)
     {
         //check it wasn't already submitted
         if (false) {
@@ -190,6 +183,9 @@ class SharedWorkspaceController extends Controller
             $priceSolution = $form->get('price')->getData();
         }
 
+        $order = new Order();
+        $chart = new Chart();
+        $order->setChart($chart);
         $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
         $order->setProduct($product);
         $chart->setOwner($this->tokenStorage->getToken()->getUser());
