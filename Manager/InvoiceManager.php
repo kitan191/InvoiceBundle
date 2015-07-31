@@ -76,9 +76,7 @@ class InvoiceManager
         $invoice->setVatAmount($netTotal * $vatRate);
         $invoice->setTotalAmount($netTotal + $netTotal * $vatRate);
         $invoice->setInvoiceNumber($this->getInvoiceCode());
-        $chart->getPaymentInstruction() ?
-            $invoice->setPaymentSystemName($chart->getPaymentInstruction()->getPaymentSystemName()):
-            $invoice->setPaymentSystemName('none (free)');
+        $invoice->setPaymentSystemName('bank_transfer');
         $chart->setInvoice($invoice);
         $this->om->persist($chart);
         $this->om->persist($invoice);

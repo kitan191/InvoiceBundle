@@ -297,6 +297,9 @@ class SharedWorkspaceController extends Controller
         $this->sharedWorkspaceManager->useFreeTestMonth($user);
         $invoice = $this->invoiceManager->create($chart);
         $this->invoiceManager->validate($invoice);
+        $invoice->setPaymentSystemName('none');
+        $this->em->persist($invoice);
+        $this->em->flush();
 
         return new RedirectResponse($this->router->generate('claro_desktop_open', array()));
     }

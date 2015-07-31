@@ -20,9 +20,6 @@ class ChartController extends Controller
     /** @DI\Inject("doctrine.orm.entity_manager") */
     private $em;
 
-    /** @DI\Inject("payment.plugin_controller") */
-    private $ppc;
-
     /** @DI\Inject("security.token_storage") */
     private $tokenStorage;
 
@@ -51,46 +48,8 @@ class ChartController extends Controller
             throw new AccessDeniedException();
         }
 
-        $instruction = $chart->getPaymentInstruction();
-        $invoice = $this->invoiceManager->create($chart);
-
-        if (null === $pendingTransaction = $instruction->getPendingTransaction()) {
-            $payment = $this->ppc->createPayment(
-                $instruction->getId(),
-                $instruction->getAmount() - $instruction->getDepositedAmount()
-            );
-        } else {
-            $payment = $pendingTransaction->getPayment();
-        }
-
-        $result = $this->ppc->approveAndDeposit($payment->getId(), $payment->getTargetAmount());
-
-        if (Result::STATUS_PENDING === $result->getStatus()) {
-            $ex = $result->getPluginException();
-
-            if ($ex instanceof ActionRequiredException) {
-                $action = $ex->getAction();
-                if ($action instanceof VisitUrl) {
-                    //if it's a bank transfer, we send the invoice here
-                    if ($instruction->getPaymentSystemName() === 'bank_transfer') {
-                        $this->invoiceManager->send($invoice);
-                    }
-
-                    return new RedirectResponse($action->getUrl());
-                }
-                throw $ex;
-            }
-
-            $content = $this->renderView(
-                'FormaLibreInvoiceBundle:errors:paymentPendingException.html.twig'
-            );
-
-            return new Response($content);
-
-        } else if (Result::STATUS_SUCCESS !== $result->getStatus()) {
-            throw new \RuntimeException('Transaction was not successful: '. $result->getReasonCode());
-        }
-
+        $invoice = $chart->getInvoice();
+        
         try {
             $this->invoiceManager->validate($invoice);
             $this->invoiceManager->send($invoice);
@@ -122,6 +81,7 @@ class ChartController extends Controller
 
         $chart->setExtendedData(array('communication' => $this->chartManager->getCommunication()));
         $extData = $chart->getExtendedData();
+        $invoice = $this->invoiceManager->create($chart);
         $this->em->persist($chart);
         $this->em->flush();
 

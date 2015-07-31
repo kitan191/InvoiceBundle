@@ -48,7 +48,7 @@ class ChartManager
         return $this->chartRepository->findByOwner($user);
     }
 
-    private function getCommunication()
+    public function getCommunication()
     {
         $x = 10; // Amount of digits
         $x--;
