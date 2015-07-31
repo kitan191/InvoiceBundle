@@ -21,66 +21,69 @@ use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 */
 class SharedWorkspaceManager
 {
-    private $om;
-    private $productRepository;
-    private $targetPlatformUrl;
-    private $logger;
-    private $vatManager;
+    private $apiManager;
     private $ch;
     private $container;
-    private $mailManager;
-    private $templating;
-    private $mailer;
-    private $translator;
     private $formFactory;
+    private $logger;
+    private $mailManager;
+    private $oauthManager;
+    private $om;
+    private $templating;
+    private $translator;
+    private $vatManager;
+
+    private $friendRepo;
+    private $productRepo;
+    private $sharedWorkspaceRepo;
+    private $targetPlatformUrl;
 
     /**
      * @DI\InjectParams({
-     *     "om"           = @DI\Inject("claroline.persistence.object_manager"),
-     *     "vatManager"   = @DI\Inject("formalibre.manager.vat_manager"),
-     *     "logger"       = @DI\Inject("logger"),
+     *     "apiManager"   = @DI\Inject("claroline.manager.api_manager"),
      *     "ch"           = @DI\Inject("claroline.config.platform_config_handler"),
      *     "container"    = @DI\Inject("service_container"),
+     *     "formFactory"  = @DI\Inject("form.factory"),
+     *     "logger"       = @DI\Inject("logger"),
      *     "mailManager"  = @DI\Inject("claroline.manager.mail_manager"),
-     *     "templating"   = @DI\Inject("templating"),
-     *     "mailer"       = @DI\Inject("claroline.manager.mail_manager"),
-     *     "translator"   = @DI\Inject("translator"),
      *     "oauthManager" = @DI\Inject("claroline.manager.oauth_manager"),
-     *     "apiManager"   = @DI\Inject("claroline.manager.api_manager"),
-     *     "formFactory"  = @DI\Inject("form.factory")
+     *     "om"           = @DI\Inject("claroline.persistence.object_manager"),
+     *     "templating"   = @DI\Inject("templating"),
+     *     "translator"   = @DI\Inject("translator"),
+     *     "vatManager"   = @DI\Inject("formalibre.manager.vat_manager")
      * })
      */
     public function __construct(
-        ObjectManager $om,
-        VATManager $vatManager,
-        $logger,
+        ApiManager $apiManager,
         $ch,
         $container,
+        $formFactory,
+        $logger,
         MailManager $mailManager,
-        $templating,
-        MailManager $mailManager,
-        $translator,
         OauthManager $oauthManager,
-        ApiManager $apiManager,
-        $formFactory
+        ObjectManager $om,
+        $templating,
+        $translator,
+        VATManager $vatManager
     )
     {
-        $this->om                        = $om;
-        $this->productRepository         = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
-        $this->sharedWorkspaceRepository = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
-        $this->logger                    = $logger;
-        $this->vatManager                = $vatManager;
-        $this->ch                        = $ch;
-        $this->container                 = $container;
-        $this->mailManager               = $mailManager;
-        $this->templating                = $templating;
-        $this->mailManager               = $mailManager;
-        $this->translator                = $translator;
-        $this->oauthManager              = $oauthManager;
-        $this->apiManager                = $apiManager;
-        $this->friendRepo                = $this->om->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
-        $this->campusPlatform            = $this->friendRepo->findOneByName($ch->getParameter('campusName'));
-        $this->formFactory               = $formFactory;
+        $this->apiManager          = $apiManager;
+        $this->formFactory         = $formFactory;
+        $this->om                  = $om;
+        $this->logger              = $logger;
+        $this->ch                  = $ch;
+        $this->container           = $container;
+        $this->mailManager         = $mailManager;
+        $this->templating          = $templating;
+        $this->mailManager         = $mailManager;
+        $this->translator          = $translator;
+        $this->oauthManager        = $oauthManager;
+        $this->vatManager          = $vatManager;
+
+        $this->friendRepo          = $this->om->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
+        $this->productRepo         = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
+        $this->sharedWorkspaceRepo = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
+        $this->targetPlatformUrl   = $this->friendRepo->findOneByName($ch->getParameter('campusName'));
     }
 
     public function executeOrder($order)
@@ -152,7 +155,7 @@ class SharedWorkspaceManager
             'profile_form_creation[plainPassword][second]' => $tmppw,
         );
 
-        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
         $data = json_decode($serverOutput, true);
 
         if ($data === null || isset($data['errors'])) {
@@ -170,7 +173,7 @@ class SharedWorkspaceManager
             'workspace_form[endDate]' => $sws->getExpDate()->format('d-m-Y')
         );
 
-        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
         $workspace = json_decode($serverOutput);
 
         if ($workspace === null || isset($workspace['errors'])) {
@@ -190,13 +193,13 @@ class SharedWorkspaceManager
 
     public function getSharedWorkspaceByUser(User $user)
     {
-        return $this->sharedWorkspaceRepository->findByOwner($user);
+        return $this->sharedWorkspaceRepo->findByOwner($user);
     }
 
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '.json';
-        $serverOutput = $this->apiManager->url($this->campusPlatform, $url);
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -204,7 +207,7 @@ class SharedWorkspaceManager
     public function getWorkspaceAdditionalDatas(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '/additional/datas.json';
-        $serverOutput = $this->apiManager->url($this->campusPlatform, $url);
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -234,7 +237,7 @@ class SharedWorkspaceManager
         $payload = $this->apiManager->formEncode($workspace, $form, $workspaceType);
         $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
         $url = 'api/workspaces/' . $sws->getRemoteId() . '/users/' . $user->getUsername() . '.json';
-        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'PUT');
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'PUT');
         $workspace = json_decode($serverOutput);
 
         //add date here
@@ -266,7 +269,7 @@ class SharedWorkspaceManager
         $payload['workspace_form[name]'] = $workspaceName;
         $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
         $url = 'api/workspaces/' . $workspace['id'] . '/users/' . $workspace['creator']['username'] . '.json';
-        $serverOutput = $this->apiManager->url($this->campusPlatform, $url, $payload, 'PUT');
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'PUT');
         $workspace = json_decode($serverOutput, true);
 
         if (is_null($workspace) || isset($workspace['errors'])) {
