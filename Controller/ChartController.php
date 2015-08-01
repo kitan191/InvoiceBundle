@@ -100,7 +100,7 @@ class ChartController extends Controller
             $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
         }
 
-        $form = $this->createForm(new SharedWorkspaceForm($product    ));
+        $form = $this->createForm(new SharedWorkspaceForm($product));
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
@@ -119,9 +119,7 @@ class ChartController extends Controller
             }
 
             $priceSolution = $form->get('price')->getData();
-        } else {
-            throw new \Exception('The shared workspace form was somehow not valid: ' . $form->getErrorsAsString());
-        }
+        } 
 
         $order->setChart($chart);
         $order->setProduct($product);
