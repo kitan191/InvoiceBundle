@@ -37,6 +37,8 @@ class SharedWorkspaceForm extends AbstractType
                 'multiple' => false
             )
         );
+        
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, array($this, 'onPreSetData'));
     }
 
     public function onPreSetData(FormEvent $event)
