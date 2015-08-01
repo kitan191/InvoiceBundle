@@ -140,7 +140,7 @@ class InvoiceManager
             WHERE i.isPayed = true
             AND (
                 i.paymentSystemName = 'bank_transfer'
-                OR i.paymentSystemName = 'paypal'
+                OR i.paymentSystemName = 'paypal_express_checkout'
             )
         ";
 
