@@ -138,11 +138,35 @@ class InvoiceManager
         $dql = "
             SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
             WHERE i.isPayed = true
+            AND (
+                i.paymentSystemName = 'bank_transfer'
+                OR i.paymentSystemName = 'paypal'
+            )
         ";
 
         $query = $this->em->createQuery($dql);
 
         return ($getQuery) ? $query: $query->getResult();
+    }
+    
+    public function getPayedByUser(User $user, $getQuery = false)
+    {
+        $dql = "
+            SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
+            JOIN i.chart chart
+            JOIN chart.owner user
+            WHERE i.isPayed = true
+            AND (
+                i.paymentSystemName = 'bank_transfer'
+                OR i.paymentSystemName = 'paypal'
+            )
+            AND user.id = {$user->getId()}
+        ";
+
+        $query = $this->em->createQuery($dql);
+        
+        return ($getQuery) ? $query: $query->getResult();
+
     }
 
     public function validate(Invoice $invoice)
@@ -215,6 +239,10 @@ class InvoiceManager
             JOIN i.chart chart
             JOIN chart.owner owner
             WHERE i.isPayed = :isPayed
+            AND (
+                i.paymentSystemName = 'bank_transfer'
+                OR i.paymentSystemName = 'paypal'
+            )
             AND chart.validationDate BETWEEN :from and :to
         ";
 

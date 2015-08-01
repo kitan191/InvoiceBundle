@@ -32,7 +32,6 @@ class SharedWorkspaceManager
     private $templating;
     private $translator;
     private $vatManager;
-
     private $friendRepo;
     private $productRepo;
     private $sharedWorkspaceRepo;

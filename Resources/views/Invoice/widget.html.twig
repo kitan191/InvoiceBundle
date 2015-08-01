@@ -8,10 +8,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% for chart in charts %}
+                {% for invoice in invoices %}
                     <tr>
-                        <th> {{ chart.getInvoice().getInvoiceNumber()}} </th>
-                        <th> <a href="{{ path('admin_invoice_show', {'invoice': chart.getInvoice().getId()} ) }}"> {{ 'display'|trans({}, 'platform') }} </a> </th>
+                        <th> {{ invoice.getInvoiceNumber()}} </th>
+                        <th> <a href="{{ path('admin_invoice_show', {'invoice': invoice.getId()} ) }}"> {{ 'display'|trans({}, 'platform') }} </a> </th>
                     </tr>
                 {% endfor %}
             </tbody>

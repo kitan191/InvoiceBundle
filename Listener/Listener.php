@@ -93,12 +93,12 @@ class Listener
 
     private function getDisplayedInvoice()
     {
-        $charts = $this->container->get('formalibre.manager.chart_manager')
-            ->getByUser($this->tokenStorage->getToken()->getUser());
+        $invoices = $this->container->get('formalibre.manager.invoiceManager')
+            ->getPayedByUser($this->tokenStorage->getToken()->getUser());
 
         $content = $this->container->get('templating')->render(
             'FormaLibreInvoiceBundle:Invoice:widget.html.twig',
-            array('charts' => $charts)
+            array('invoices' => $invoices)
         );
 
         return $content;
