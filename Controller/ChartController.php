@@ -101,6 +101,7 @@ class ChartController extends Controller
 
         $form = $this->createForm(new SharedWorkspaceForm($product    ));
         $form->handleRequest($this->request);
+        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
 
         if ($form->isValid()) {
                 //do that stuff here
@@ -118,10 +119,11 @@ class ChartController extends Controller
             }
 
             $priceSolution = $form->get('price')->getData();
+        } else {
+            throw new \Exception('The shared workspace form was somehow not valid');
         }
 
         $order->setChart($chart);
-        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
         $order->setProduct($product);
         $chart->setOwner($this->tokenStorage->getToken()->getUser());
         $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
