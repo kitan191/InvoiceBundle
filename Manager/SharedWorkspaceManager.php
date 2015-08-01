@@ -158,7 +158,7 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
         $data = json_decode($serverOutput, true);
 
-        if ($data === null || isset($data['errors'])) {
+        if ($data === null) {
             $this->handleError($sws, $serverOutput, $url);
         }
 
@@ -174,14 +174,14 @@ class SharedWorkspaceManager
         );
 
         $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
-        $workspace = json_decode($serverOutput);
+        $workspace = json_decode($serverOutput, true);
 
         if ($workspace === null || isset($workspace['errors'])) {
             $this->handleError($sws, $serverOutput, $url);
         }
 
-        if (property_exists($workspace, 'id')) {
-            $sws->setRemoteId($workspace->id);
+        if (array_key_exists('id', $workspace)) {
+            $sws->setRemoteId($workspace['id']);
             $this->om->persist($sws);
             $this->om->flush();
 
@@ -238,7 +238,7 @@ class SharedWorkspaceManager
         $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
         $url = 'api/workspaces/' . $sws->getRemoteId() . '/users/' . $user->getUsername() . '.json';
         $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'PUT');
-        $workspace = json_decode($serverOutput);
+        $workspace = json_decode($serverOutput, true);
 
         //add date here
 

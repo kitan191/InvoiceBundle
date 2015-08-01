@@ -36,7 +36,7 @@
                         )|raw
                     }}
                 </div>
-                {% set action = path('workspace_product_payment_submit', {'chart': chart.getId(), 'product': product.getId(), 'order': order.getId() }) %}
+                {% set action = path('workspace_product_payment_submit', {'product': product.getId(), 'order': order.getId() }) %}
                 <form action="{{ action }}" method="post">
                     {% form_theme form 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
                     {{ form_widget (form) }}

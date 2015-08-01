@@ -55,7 +55,7 @@ class InvoiceManager
         $this->container = $container;
     }
 
-    public function create(Chart $chart)
+    public function create(Chart $chart, $paymentSystem = 'bank_transfer')
     {
         //if it already has an invoice, we don't create an other one...
         if ($chart->getInvoice()) return $chart->getInvoice();
@@ -76,7 +76,7 @@ class InvoiceManager
         $invoice->setVatAmount($netTotal * $vatRate);
         $invoice->setTotalAmount($netTotal + $netTotal * $vatRate);
         $invoice->setInvoiceNumber($this->getInvoiceCode());
-        $invoice->setPaymentSystemName('bank_transfer');
+        $invoice->setPaymentSystemName($paymentSystem);
         $chart->setInvoice($invoice);
         $this->om->persist($chart);
         $this->om->persist($invoice);
@@ -125,7 +125,7 @@ class InvoiceManager
         $dql = "
             SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
             WHERE i.isPayed = false
-            and i.paymentSystemName = 'bank_transfer'
+            AND i.paymentSystemName = 'bank_transfer'
         ";
 
         $query = $this->em->createQuery($dql);

@@ -32,7 +32,6 @@ class SharedWorkspaceController extends Controller
     private $productManager;
     private $request;
     private $router;
-    private $session;
     private $sharedWorkspaceManager;
     private $tokenStorage;
     private $translator;
@@ -51,7 +50,6 @@ class SharedWorkspaceController extends Controller
      *     "productManager"         = @DI\Inject("formalibre.manager.product_manager"),
      *     "request"                = @DI\Inject("request"),
      *     "router"                 = @DI\Inject("router"),
-     *     "session"                = @DI\Inject("session"),
      *     "sharedWorkspaceManager" = @DI\Inject("formalibre.manager.shared_workspace_manager"),
      *     "tokenStorage"           = @DI\Inject("security.token_storage"),
      *     "translator"             = @DI\Inject("translator"),
@@ -68,7 +66,6 @@ class SharedWorkspaceController extends Controller
         $productManager,
         $request,
         $router,
-        $session,
         $sharedWorkspaceManager,
         $tokenStorage,
         $translator,
@@ -84,7 +81,6 @@ class SharedWorkspaceController extends Controller
         $this->productManager = $productManager;
         $this->request = $request;
         $this->router = $router;
-        $this->session = $session;
         $this->sharedWorkspaceManager = $sharedWorkspaceManager;
         $this->tokenStorage = $tokenStorage;
         $this->translator = $translator;
@@ -115,17 +111,24 @@ class SharedWorkspaceController extends Controller
         $products = $this->get('formalibre.manager.product_manager')
             ->getProductsBy(array('type' => 'SHARED_WS', 'isActivated' => true));
         $forms = array();
+        
+        $order = new Order();
+        $chart = new Chart();
+        $order->setChart($chart);
+        $this->em->persist($order);
+        $this->em->persist($chart);
+        $this->em->flush();
 
         foreach ($products as $product) {
             //now we generate the forms !
             $form = $this->createForm(new SharedWorkspaceForm($product));
             $forms[] = array(
                 'form' => $form->createView(),
-                'product' => $product
+                'product' => $product,
             );
         }
 
-        return array('forms' => $forms, 'hasFreeTest' => $hasFreeTest);
+        return array('forms' => $forms, 'hasFreeTest' => $hasFreeTest, 'order' => $order);
     }
 
     /**
@@ -134,75 +137,6 @@ class SharedWorkspaceController extends Controller
     public function iframeFormsAction()
     {
         return $this->formsAction();
-    }
-
-    /**
-     * @EXT\Route(
-     *      "/payment/workspace/submit/{product}",
-     *      name="workspace_product_payment_submit"
-     * )
-     *
-     * @param $swsId the sharedWorkspaceId if it already exists (otherwise, if it's 0, we'll create a new one)
-     * @param $chartId the chartId if it already exists (otherwise, if it's 0, we'll create a new one)
-     * @return Response
-     */
-    public function addOrderToChartAction(Product $product)
-    {
-        //check it wasn't already submitted
-        if (false) {
-            $content = $this->renderView(
-                'FormaLibreInvoiceBundle:errors:orderAlreadySubmitedException.html.twig'
-            );
-
-            return new Response($content);
-        }
-
-        if ($this->session->has('form_price_data')) {
-            $priceSolution = $this->session->get('form_price_data');
-            $this->session->remove('form_price_data');
-        }
-
-        $form = $this->createForm(new SharedWorkspaceForm($product    ));
-        $form->handleRequest($this->request);
-
-        if ($form->isValid()) {
-                //do that stuff here
-            if (!$this->authorization->isGranted('ROLE_USER')) {
-                $this->session->set('form_price_data', $form->get('price')->getData());
-                $redirectRoute =  $this->router->generate('workspace_product_payment_submit', array(
-                    'order' => $order->getId(),
-                    'product' => $product->getId(),
-                    'chart' => $chart->getId()
-                ));
-                $this->session->set('redirect_route', $redirectRoute);
-                $route = $this->router->generate('claro_security_login', array());
-
-                return new RedirectResponse($route);
-            }
-
-            $priceSolution = $form->get('price')->getData();
-        }
-
-        $order = new Order();
-        $chart = new Chart();
-        $order->setChart($chart);
-        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
-        $order->setProduct($product);
-        $chart->setOwner($this->tokenStorage->getToken()->getUser());
-        $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
-        $order->setPriceSolution($priceSolution);
-        $order->setChart($chart);
-        $this->em->persist($chart);
-        $this->em->persist($order);
-        $this->em->flush();
-
-        return new RedirectResponse($this->router->generate(
-            'chart_payment_pending',
-            array('chart' => $order->getChart()->getId()), true
-        ));
-
-
-        throw new \Exception('Errors were found: ' . $form->getErrorsAsString());
     }
 
     /**
@@ -291,7 +225,7 @@ class SharedWorkspaceController extends Controller
         $this->em->persist($order);
         $this->em->persist($chart);
         $this->sharedWorkspaceManager->useFreeTestMonth($user);
-        $invoice = $this->invoiceManager->create($chart);
+        $invoice = $this->invoiceManager->create($chart, 'free');
         $this->invoiceManager->validate($invoice);
         $invoice->setPaymentSystemName('none');
         $this->em->persist($invoice);
