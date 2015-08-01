@@ -38,6 +38,7 @@ class SharedWorkspaceController extends Controller
     private $vatManager;
     private $friendRepo;
     private $campusPlatform;
+    private $session;
 
     /**
      * @DI\InjectParams({
@@ -53,7 +54,8 @@ class SharedWorkspaceController extends Controller
      *     "sharedWorkspaceManager" = @DI\Inject("formalibre.manager.shared_workspace_manager"),
      *     "tokenStorage"           = @DI\Inject("security.token_storage"),
      *     "translator"             = @DI\Inject("translator"),
-     *     "vatManager"             = @DI\Inject("formalibre.manager.vat_manager")
+     *     "vatManager"             = @DI\Inject("formalibre.manager.vat_manager"),
+     *     "session"                = @DI\Inject("session")
      * })
      */
     public function __construct(
@@ -69,7 +71,8 @@ class SharedWorkspaceController extends Controller
         $sharedWorkspaceManager,
         $tokenStorage,
         $translator,
-        $vatManager
+        $vatManager,
+        $session
     )
     {
         $this->authorization = $authorization;
@@ -87,6 +90,7 @@ class SharedWorkspaceController extends Controller
         $this->vatManager = $vatManager;
         $this->friendRepo = $this->em->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
         $this->campusPlatform = $this->friendRepo->findOneByName($this->ch->getParameter('campusName'));
+        $this->session = $session;
     }
 
     /**
