@@ -97,11 +97,11 @@ class ChartController extends Controller
         if ($this->session->has('form_price_data')) {
             $priceSolution = $this->session->get('form_price_data');
             $this->session->remove('form_price_data');
+            $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
         }
 
         $form = $this->createForm(new SharedWorkspaceForm($product    ));
         $form->handleRequest($this->request);
-        $priceSolution = $this->em->getRepository('FormaLibreInvoiceBundle:PriceSolution')->find($priceSolution->getId());
 
         if ($form->isValid()) {
                 //do that stuff here
