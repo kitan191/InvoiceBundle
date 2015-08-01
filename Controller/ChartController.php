@@ -120,7 +120,7 @@ class ChartController extends Controller
 
             $priceSolution = $form->get('price')->getData();
         } else {
-            throw new \Exception('The shared workspace form was somehow not valid');
+            throw new \Exception('The shared workspace form was somehow not valid: ' . $form->getErrorsAsString());
         }
 
         $order->setChart($chart);
