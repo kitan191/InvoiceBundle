@@ -8,81 +8,98 @@
 
 {% block content %}
     <div class="panel panel-default" id="support-credit-purchase-form">
-        <div class="panel-heading">
-            <h3 class="panel-title">
-                {{ 'support_credit_purchase'|trans({}, 'invoice') }}
-            </h3>
-        </div>
+        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/Banner.jpg') }}"
+             class="img-responsive"
+             alt="Responsive image"
+        >
         <br>
         <form action="{{ path('formalibre_support_credits_products_purchase') }}" 
               method="POST"
               novalidate
         >
             <div class="panel-body">
-                <input type="hidden"
-                       id="support_credit_purchase_form_product"
-                       name="support_credit_purchase_form[product]"
-                       value="-1"
-                >
+                <div class="row">
+                    <input type="hidden"
+                           id="support_credit_purchase_form_product"
+                           name="support_credit_purchase_form[product]"
+                           value="-1"
+                    >
 
-                {% for product in products %}
-                    {% set details = product.getDetails() %}
-                    {% set prices = product.getPriceSolutions() %}
-                    <div class="col-md-{{ 12//products|length }}">
-                        <div class="panel panel-default pointer-hand product-panel"
-                             id="product-panel-{{ product.getId() }}"
-                             data-product-id="{{ product.getId() }}"
-                        >
-                            <div class="panel-heading">
-                                <h3 class="panel-title text-center">
-                                    {% if details['name'] is defined %}
-                                        {{ details['name'] }}
-                                    {% else %}
-                                        ???
-                                    {% endif %}
-                                </h3>
-                            </div>
-                            <div class="panel-body text-center">
-                                <p>
-                                    {{ 'nb_credits'|trans({}, 'invoice') }} :
-                                    
-                                    {% if details['nb_credits'] is defined %}
-                                        {{ details['nb_credits'] }}
-                                        
-                                        {% if details['nb_hours'] is defined %}
-                                            (
-                                            =
-                                            {{ details['nb_hours'] }}
-                                            {{ 'hours'|trans({}, 'invoice') }}
-                                            )
+                    {% for product in products %}
+                        {% set productId = product.getId() %}
+                        {% set details = product.getDetails() %}
+                        {% set prices = product.getPriceSolutions() %}
+                        <div class="col-md-{{ 12//products|length }}">
+                            <div class="panel panel-default pointer-hand product-panel"
+                                 id="product-panel-{{ productId }}"
+                                 data-product-id="{{ productId }}"
+                            >
+                                <div class="panel-heading">
+                                    <h3 class="panel-title text-center">
+                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/Pack_' ~ details['nb_credits'] ~ '.jpg') }}"
+                                             class="img-responsive credits-img unselected-img unselected-img-{{ productId }}"
+                                             alt="Responsive image"
+                                             width="40px"
+                                        >
+                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/Pack_' ~ details['nb_credits'] ~ '_selected.jpg') }}"
+                                             class="img-responsive credits-img selected-img selected-img-{{ productId }} hidden"
+                                             alt="Responsive image"
+                                             width="40px"
+                                        >
+                                        {% if details['name'] is defined %}
+                                            {{ details['name'] }}
+                                        {% else %}
+                                            ???
                                         {% endif %}
+                                    </h3>
+                                </div>
+                                <div class="panel-body text-center">
+                                    <p>
+                                        {{ 'nb_credits'|trans({}, 'invoice') }} :
+
+                                        {% if details['nb_credits'] is defined %}
+                                            {{ details['nb_credits'] }}
+
+                                            {% if details['nb_hours'] is defined %}
+                                                (
+                                                =
+                                                {{ details['nb_hours'] }}
+                                                {{ 'hours'|trans({}, 'invoice') }}
+                                                )
+                                            {% endif %}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </p>
+
+                                    {% if prices|length > 0 %}
+                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/eurogris.jpg') }}"
+                                             class="img-responsive credits-img"
+                                             alt="Responsive image"
+                                             width="15px"
+                                        >
+                                        :
+                                        {{ prices[0].getPrice() }} €
                                     {% else %}
-                                        0
+                                        -
                                     {% endif %}
-                                </p>
-                                
-                                {% if prices|length > 0 %}
-                                    <i class="fa fa-money"></i> :
-                                    {{ prices[0].getPrice() }} €
-                                {% else %}
-                                    -
-                                {% endif %}
-                                <br>
-                                <br>
-                                <p>
-                                    {% if details['saving'] is defined and details['saving'] > 0 %}
-                                        <span class="label label-success saving-label">
-                                            {{ 'saving'|trans({}, 'invoice') }} :
-                                            {{ details['saving'] }} €
-                                        </span>
-                                    {% else %}
-                                        &nbsp;
-                                    {% endif %}
-                                </p>
+                                    <br>
+                                    <br>
+                                    <p>
+                                        {% if details['saving'] is defined and details['saving'] > 0 %}
+                                            <span class="label label-success saving-label">
+                                                {{ 'saving'|trans({}, 'invoice') }} :
+                                                {{ details['saving'] }} €
+                                            </span>
+                                        {% else %}
+                                            &nbsp;
+                                        {% endif %}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
                 <br>
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary disabled" id="buy-btn">

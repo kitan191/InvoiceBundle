@@ -8,5 +8,9 @@
         $(this).addClass('product-panel-selected');
         $('#buy-btn').removeClass('disabled');
         $('#support_credit_purchase_form_product').val(parseInt(productId));
+        $('.selected-img').addClass('hidden');
+        $('.unselected-img').removeClass('hidden');
+        $('.unselected-img-' + productId).addClass('hidden');
+        $('.selected-img-' + productId).removeClass('hidden');
     });
 })();
