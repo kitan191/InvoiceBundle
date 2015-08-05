@@ -36,13 +36,8 @@
                             >
                                 <div class="panel-heading">
                                     <h3 class="panel-title text-center">
-                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/Pack_' ~ details['nb_credits'] ~ '.jpg') }}"
-                                             class="img-responsive credits-img unselected-img unselected-img-{{ productId }}"
-                                             alt="Responsive image"
-                                             width="40px"
-                                        >
-                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/Pack_' ~ details['nb_credits'] ~ '_selected.jpg') }}"
-                                             class="img-responsive credits-img selected-img selected-img-{{ productId }} hidden"
+                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/Pack_' ~ details['nb_credits'] ~ '.png') }}"
+                                             class="img-responsive credits-img"
                                              alt="Responsive image"
                                              width="40px"
                                         >
@@ -73,7 +68,7 @@
                                     </p>
 
                                     {% if prices|length > 0 %}
-                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/eurogris.jpg') }}"
+                                        <img src="{{ asset('bundles/formalibreinvoice/images/supportCreditsPurchase/eurogris.png') }}"
                                              class="img-responsive credits-img"
                                              alt="Responsive image"
                                              width="15px"

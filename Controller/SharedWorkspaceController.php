@@ -161,7 +161,9 @@ class SharedWorkspaceController extends Controller
             throw new \Exception('unknown remote id');
         }
 
-        if ($this->tokenStorage->getToken()->getUser() !== $sws->getOwner()) {
+        if (!$this->authorization->isGranted('ROLE_ADMIN') &&
+            $this->tokenStorage->getToken()->getUser() !== $sws->getOwner()) {
+
             throw new AccessDeniedException();
         }
 
@@ -333,7 +335,7 @@ class SharedWorkspaceController extends Controller
 
         if ($form->isValid()) {
             $workspaceName = $form->get('name')->getData();
-            $datas = $this->sharedWorkspaceManager->editShareWorkspaceRemoteName(
+            $datas = $this->sharedWorkspaceManager->editSharedWorkspaceRemoteName(
                 $workspace,
                 $workspaceName
             );
@@ -353,7 +355,9 @@ class SharedWorkspaceController extends Controller
         SharedWorkspace $sharedWorkspace
     )
     {
-        if ($user->getId() !== $sharedWorkspace->getOwner()->getId()) {
+        $isAdmin = $this->authorization->isGranted('ROLE_ADMIN');
+
+        if (!$isAdmin && $user->getId() !== $sharedWorkspace->getOwner()->getId()) {
 
             throw new AccessDeniedException();
         }
