@@ -163,12 +163,11 @@ class AdminSharedWorkspacesController extends Controller
             array('code' => 'ASC')
         );
         $product = (count($products) > 0) ? $products[0] : null;
+        $workspaces = $this->sharedWorkspaceManager->getNonPersonalRemoteWorkspacesDatas();
         $form = $this->formFactory->create(
-            new SharedWorkspaceType($this->translator, $product),
+            new SharedWorkspaceType($this->translator, $product, $workspaces),
             new SharedWorkspace()
         );
-//        $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
-//        $form = $this->formFactory->create(new WorkspaceNameEditType($workspace['name']));
 
         return array('form' => $form->createView());
     }
@@ -189,9 +188,10 @@ class AdminSharedWorkspacesController extends Controller
             array('code' => 'ASC')
         );
         $product = (count($products) > 0) ? $products[0] : null;
+        $workspaces = $this->sharedWorkspaceManager->getNonPersonalRemoteWorkspacesDatas();
         $sharedWorkspace = new SharedWorkspace();
         $form = $this->formFactory->create(
-            new SharedWorkspaceType($this->translator, $product),
+            new SharedWorkspaceType($this->translator, $product, $workspaces),
             $sharedWorkspace
         );
         $form->handleRequest($this->request);
@@ -204,14 +204,22 @@ class AdminSharedWorkspacesController extends Controller
 
                 $remoteUser = $this->sharedWorkspaceManager->createRemoteUser($owner);
             }
-            $name = $form->get('name')->getData();
-            $code = $form->get('code')->getData();
-            $datas = $this->sharedWorkspaceManager->createRemoteWorkspace(
-                $sharedWorkspace,
-                $owner,
-                $name,
-                $code
-            );
+            $remoteWorkspaceId = $form->get('remoteWorkspace')->getData();
+
+            if (!is_null($remoteWorkspaceId)) {
+                $sharedWorkspace->setRemoteId($remoteWorkspaceId);
+                $this->om->persist($sharedWorkspace);
+                $datas = 'success';
+            } else {
+                $name = $form->get('name')->getData();
+                $code = $form->get('code')->getData();
+                $datas = $this->sharedWorkspaceManager->createRemoteWorkspace(
+                    $sharedWorkspace,
+                    $owner,
+                    $name,
+                    $code
+                );
+            }
 
             if ($datas === 'success') {
                 $product = $form->get('product')->getData();

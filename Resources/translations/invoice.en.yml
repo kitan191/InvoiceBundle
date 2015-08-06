@@ -62,6 +62,7 @@ formula: Formula
 months : months
 probably_invalid_code: The code is probably invalid
 product: Product
+remote_workspace: Remote workspace
 select_owner: Select the owner
 shared_workspace_creation: Shared workspace creation
 storage: Storage

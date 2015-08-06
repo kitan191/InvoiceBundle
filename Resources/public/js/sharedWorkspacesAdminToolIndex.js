@@ -28,14 +28,6 @@
         var userPicker = new UserPicker();
         userPicker.configure(pickerOptions, changeOwner);
         userPicker.open();
-//        window.Claroline.Modal.displayForm(
-//            Routing.generate(
-//                'formalibre_shared_workspace_name_edit_form',
-//                {'sharedWorkspace': sharedWorkspaceId}
-//            ),
-//            reloadPage,
-//            function() {}
-//        );
     });
     
     var changeOwner = function (userId) {

@@ -14,16 +14,29 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 class SharedWorkspaceType extends AbstractType
 {
     private $product;
+    private $remoteWorkspaces = array();
     private $translator;
+    private $workspaces;
 
-    public function __construct(TranslatorInterface $translator, Product $product = null)
+    public function __construct(
+        TranslatorInterface $translator,
+        Product $product = null,
+        array $workspaces = array()
+    )
     {
         $this->product = $product;
         $this->translator = $translator;
+        $this->workspaces = $workspaces;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        foreach ($this->workspaces as $workspace) {
+            $this->remoteWorkspaces[$workspace['id']] = $workspace['name'] .
+                ' [' .
+                $workspace['code'] .
+                ']';
+        }
         $priceSolutions = is_null($this->product) ? array() : $this->product->getPriceSolutions();
         $details = is_null($this->product) ? array() : $this->product->getDetails();
         $pricesDatas = array();
@@ -72,6 +85,16 @@ class SharedWorkspaceType extends AbstractType
                 'constraints' => array(
                     new NotBlank()
                 )
+            )
+        );
+        $builder->add(
+            'remoteWorkspace',
+            'choice',
+            array(
+                'required' => false,
+                'mapped' => false,
+                'choices' => $this->remoteWorkspaces,
+                'label' => 'remote_workspace'
             )
         );
         $builder->add(

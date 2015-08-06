@@ -97,6 +97,7 @@ formula: Formule
 months : mois
 probably_invalid_code: Le code est probablement incorrect
 product: Produit
+remote_workspace: Espace d'activités distant
 select_owner: Choisissez le propriétaire
 shared_workspace_creation: Création d'un espace d'activités partagés
 storage: Stockage

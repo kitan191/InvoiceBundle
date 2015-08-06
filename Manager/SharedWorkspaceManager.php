@@ -228,6 +228,22 @@ class SharedWorkspaceManager
         return $this->sharedWorkspaceRepo->findAll();
     }
 
+    public function getAllRemoteWorkspacesDatas()
+    {
+        $url = 'api/workspaces.json';
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+
+        return json_decode($serverOutput, true);
+    }
+
+    public function getNonPersonalRemoteWorkspacesDatas()
+    {
+        $url = 'api/non/personal/workspaces.json';
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+
+        return json_decode($serverOutput, true);
+    }
+
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '.json';
