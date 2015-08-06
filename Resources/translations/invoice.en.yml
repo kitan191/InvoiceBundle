@@ -57,3 +57,13 @@ return_to_home_page: Return to home page
 thanks_for_your_purchase: Thanks for your purchase.
 subscribe: Subscribe
 pretty_name: Name
+change_owner: Change owner
+formula: Formula
+months : months
+probably_invalid_code: The code is probably invalid
+product: Product
+remote_workspace: Remote workspace
+select_owner: Select the owner
+shared_workspace_creation: Shared workspace creation
+storage: Storage
+workspace_name_edition: Workspace name edition

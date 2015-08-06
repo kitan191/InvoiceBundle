@@ -98,6 +98,16 @@ class SharedWorkspace
         return $this->maxSize;
     }
 
+    public function setMaxSize($maxSize)
+    {
+        $this->maxSize = $maxSize;
+    }
+
+    public function getMaxSize()
+    {
+        return $this->maxSize;
+    }
+
     public function setMaxUser($maxUser)
     {
         $this->maxUser = $maxUser;

@@ -92,3 +92,13 @@ return_to_home_page: Retourner à la page d'accueil
 thanks_for_your_purchase: Merci pour votre achat.
 subscribe: Souscrire
 pretty_name: Nom
+change_owner: Modifier le propriétaire
+formula: Formule
+months : mois
+probably_invalid_code: Le code est probablement incorrect
+product: Produit
+remote_workspace: Espace d'activités distant
+select_owner: Choisissez le propriétaire
+shared_workspace_creation: Création d'un espace d'activités partagés
+storage: Stockage
+workspace_name_edition: Renommage de l'espace d'activités

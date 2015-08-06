@@ -25,5 +25,8 @@ plugin:
         - name: formalibre_product_creator
           class: cart-plus
 
+        - name: formalibre_shared_workspaces_admin_tool
+          class: book
+
     themes:
         - name: "Formalibre"

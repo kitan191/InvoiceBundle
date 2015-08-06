@@ -159,4 +159,17 @@ class Listener
         $event->setContent($response->getContent());
         $event->stopPropagation();
     }
+
+    /**
+    * @DI\Observe("administration_tool_formalibre_shared_workspaces_admin_tool")
+    *
+    * @param OpenAdministrationToolEvent $event
+    */
+    public function onSharedWorkspacesAdminToolOpen(OpenAdministrationToolEvent $event)
+    {
+        $params = array('_controller' => 'FormaLibreInvoiceBundle:AdminSharedWorkspaces:sharedWorkspacesAdminToolIndex');
+        $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+        $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        $event->setResponse($response);
+    }
 }
