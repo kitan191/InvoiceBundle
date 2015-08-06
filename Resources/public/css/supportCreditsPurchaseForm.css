@@ -3,9 +3,13 @@
 }
 
 .product-panel-selected {
-    border-color: #53acf4;
+    border-color: #69CAFF;
 }
 
 .product-panel-selected > .panel-heading {
-    background-color: #53acf4;
+    background-color: #69CAFF;
+}
+
+.credits-img {
+    display: inline-block;
 }

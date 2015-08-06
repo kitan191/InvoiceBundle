@@ -27,3 +27,8 @@ support_credit_controller:
     resource: "@FormaLibreInvoiceBundle/Controller/SupportCreditController.php"
     type: annotation
     prefix: /credit/
+
+admin_shared_workspaces_controller:
+    resource: "@FormaLibreInvoiceBundle/Controller/AdminSharedWorkspacesController.php"
+    type: annotation
+    prefix: /admin/shared/workspaces

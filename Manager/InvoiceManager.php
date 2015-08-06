@@ -55,7 +55,7 @@ class InvoiceManager
         $this->container = $container;
     }
 
-    public function create(Chart $chart, $paymentSystem = 'bank_transfer')
+    public function create(Chart $chart, $paymentSystem = 'bank_transfer', $isPaid = false)
     {
         //if it already has an invoice, we don't create an other one...
         if ($chart->getInvoice()) return $chart->getInvoice();
@@ -77,6 +77,7 @@ class InvoiceManager
         $invoice->setTotalAmount($netTotal + $netTotal * $vatRate);
         $invoice->setInvoiceNumber($this->getInvoiceCode());
         $invoice->setPaymentSystemName($paymentSystem);
+        $invoice->setIsPayed($isPaid);
         $chart->setInvoice($invoice);
         $this->om->persist($chart);
         $this->om->persist($invoice);

@@ -190,9 +190,58 @@ class SharedWorkspaceManager
         $this->handleError($sws, $serverOutput, $url);
     }
 
+    public function createRemoteWorkspace(SharedWorkspace $sws, User $user, $name, $code)
+    {
+        $url = 'api/workspaces/' . $user->getUsername() . '/users.json';
+
+        $payload = array(
+            'workspace_form[name]' => $name,
+            'workspace_form[code]' => $code,
+            'workspace_form[maxStorageSize]' => $sws->getMaxStorage(),
+            'workspace_form[maxUsers]' => $sws->getMaxUser(),
+            'workspace_form[maxUploadResources]' => $sws->getMaxRes(),
+            'workspace_form[endDate]' => $sws->getExpDate()->format('d-m-Y')
+        );
+
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
+        $datas = json_decode($serverOutput, true);
+
+        if (array_key_exists('id', $datas)) {
+            $sws->setRemoteId($datas['id']);
+            $this->om->persist($sws);
+            $this->om->flush();
+
+            return 'success';
+        } else {
+
+            return $datas;
+        }
+    }
+
     public function getSharedWorkspaceByUser(User $user)
     {
         return $this->sharedWorkspaceRepo->findByOwner($user);
+    }
+
+    public function getAllSharedWorkspaces()
+    {
+        return $this->sharedWorkspaceRepo->findAll();
+    }
+
+    public function getAllRemoteWorkspacesDatas()
+    {
+        $url = 'api/workspaces.json';
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+
+        return json_decode($serverOutput, true);
+    }
+
+    public function getNonPersonalRemoteWorkspacesDatas()
+    {
+        $url = 'api/non/personal/workspaces.json';
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+
+        return json_decode($serverOutput, true);
     }
 
     public function getWorkspaceData(SharedWorkspace $sws)
@@ -258,7 +307,7 @@ class SharedWorkspaceManager
         $this->handleError($sws, $serverOutput, $url);
     }
 
-    public function editShareWorkspaceRemoteName(array $workspace, $workspaceName)
+    public function editSharedWorkspaceRemoteName(array $workspace, $workspaceName)
     {
         $workspaceType = new WorkspaceType();
         $workspaceType->enableApi();
@@ -269,14 +318,44 @@ class SharedWorkspaceManager
         $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
         $url = 'api/workspaces/' . $workspace['id'] . '/users/' . $workspace['creator']['username'] . '.json';
         $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'PUT');
-        $workspace = json_decode($serverOutput, true);
+        $datas = json_decode($serverOutput, true);
 
-        if (is_null($workspace) || isset($workspace['errors'])) {
+        if (is_null($datas) || isset($datas['errors'])) {
 
             throw new \Exception($serverOutput);
         }
 
-        return $workspace;
+        return $datas;
+    }
+
+    public function editSharedWorkspaceOwner(SharedWorkspace $sharedWorkspace, User $owner)
+    {
+        $remoteUser = $this->getRemoteUser($owner->getUsername());
+        $remoteWorkspace = $this->getWorkspaceData($sharedWorkspace);
+
+        if (isset($remoteUser['error']['code']) && $remoteUser['error']['code'] === 404) {
+
+            $remoteUser = $this->createRemoteUser($owner);
+        }
+
+        if (isset($remoteUser['id']) && isset($remoteWorkspace['id'])) {
+            $url = 'api/workspaces/' . $remoteWorkspace['id'] . '/owners/' . $remoteUser['id'] . '.json';
+            $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, array(), 'PUT');
+            $datas = json_decode($serverOutput, true);
+
+            if (is_null($datas) || isset($datas['errors'])) {
+
+                throw new \Exception($serverOutput);
+            }
+            $sharedWorkspace->setOwner($owner);
+            $this->om->persist($sharedWorkspace);
+            $this->om->flush();
+
+            return $datas;
+        } else {
+
+            return null;
+        }
     }
 
     public function hasFreeTestMonth($user)
@@ -331,6 +410,34 @@ class SharedWorkspaceManager
         );
 
         $this->mailManager->send($subject, $body, array($sws->getOwner()));
+    }
+
+    public function getRemoteUser($username)
+    {
+        $url = 'api/users/' . $username . '.json';
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+
+        return json_decode($serverOutput, true);
+    }
+
+    public function createRemoteUser(User $user)
+    {
+        $url    = 'api/users.json';
+        $tmppw  = uniqid();
+
+        $payload = array(
+            'profile_form_creation[username]' => $user->getUsername(),
+            'profile_form_creation[firstName]' => $user->getFirstName(),
+            'profile_form_creation[lastName]' => $user->getLastName(),
+            'profile_form_creation[mail]' => $user->getMail(),
+            'profile_form_creation[administrativeCode]' => $user->getUsername(),
+            'profile_form_creation[plainPassword][first]' => $tmppw,
+            'profile_form_creation[plainPassword][second]' => $tmppw,
+        );
+        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
+        $datas = json_decode($serverOutput, true);
+
+        return $datas;
     }
 
     /**************************************************************************/

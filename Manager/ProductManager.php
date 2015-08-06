@@ -53,14 +53,19 @@ class ProductManager
         return $this->priceSolutionRepository->findOneBy(array('product' => $product, 'monthDuration' => $duration));
     }
 
-    public function getProductsBy(array $array)
+    public function getProductsBy(array $array, array $orderBy = null)
     {
-        return $this->productRepository->findBy($array);
+        return $this->productRepository->findBy($array, $orderBy);
     }
 
     public function getProductById($productId)
     {
         return $this->productRepository->findOneById($productId);
+    }
+
+    public function getPriceSolutionById($priceSolutionId)
+    {
+        return $this->priceSolutionRepository->findOneById($priceSolutionId);
     }
 
     //there is no const array yet in php =/ maybe it's 5.5 or so. I don't rememeber.
