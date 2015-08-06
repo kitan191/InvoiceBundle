@@ -85,11 +85,14 @@
                         <th>
                             {{ 'username'|trans({}, 'platform') }}
                         </th>
+                        <th>
+                            {{ 'delete'|trans({}, 'platform') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for invoice in pager.currentPageResults %}
-                    <tr>
+                    <tr id="invoice-row-{{ invoice.getId() }}">
                         <td>
                             {% if invoice.getChart().getExtendedData().communication is defined %}
                                 {{ invoice.getChart().getExtendedData().communication|format_structured_communication()}}
@@ -99,6 +102,15 @@
                         <td> <a href="{{ path('formalibre_validate_bank_transfer', {'invoice': invoice.getId()})}}"> {{ 'validate'|trans({}, 'platform')}}</a> </td>
                         <td> {{ invoice.getChart().getCreationDate()|intl_date_format() }} </td>
                         <td> {{ invoice.getChart().getOwner().getUsername() }}</td>
+                        <th>
+                            <div class="btn-group">
+                                <button class="btn btn-danger delete-invoice-btn"
+                                        data-invoice-id="{{ invoice.getId() }}"
+                                >
+                                    <i class="fa fa-trash" data-invoice-id="{{ invoice.getId() }}"></i>
+                                </button>
+                            </div>
+                        </th>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -123,5 +135,26 @@
         parameters.route.normal = {"route": "admin_invoice_open_pending", "parameters": {} };
         parameters.route.search = {"route": "admin_invoice_open_pending_search", "parameters": {} };
         Claroline.Table.initialize(parameters);
+
+        var modal = window.Claroline.Modal;
+
+        var removeInvoiceRow = function (event, invoiceid) {
+            $('#invoice-row-' + invoiceid).remove();
+        };
+
+        $('.delete-invoice-btn').on('click', function(event) {
+            var invoiceid = $(event.target).attr('data-invoice-id');
+
+            modal.confirmRequest(
+                Routing.generate(
+                    'formalibre_invoice_remove',
+                    {'invoice': invoiceid}
+                ),
+                removeInvoiceRow,
+                invoiceid,
+                Translator.trans('remove_invoice_message', {}, 'invoice'),
+                Translator.trans('remove_invoice', {}, 'invoice')
+            );
+        });
     </script>
 {% endblock %}

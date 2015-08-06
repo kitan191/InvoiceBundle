@@ -1,48 +1,61 @@
-{% if hasFreeTest %}
+<link rel="stylesheet"
+      href="{{ asset('bundles/formalibreinvoice/css/sharedWorkspaceForm.css') }}"
+      type="text/css"
+/>
 <div class="container">
-    <div class="span12" style="text-align:center;">
-        <a class="btn btn-primary" href="{{ path('formalibre_free_test_workspace', {'product': forms[0]['product'].getId()}) }}">Essayer gratuitement
-            <img href="{{ asset('') }}"></img>
-        </a>
+    <div class="row banner-row">
+        <img class="img-responsive" src='{{ asset('bundles/formalibreinvoice/images/shared_workspace/banner.jpg') }}'></img>
     </div>
-</div>
-{% endif %}
-</br>
-
-{% for key, form in forms %}
-    {% if key % 2 == 0 %}
-        {% set offset = 'col-md-offset-1' %}
-    {% else %}
-        {% set offset = 'col-md-offset-2' %}
-    {% endif %}
-    <div class="col-md-4 {{ offset }}">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                {% if form['product'].details.pretty_name is defined %}
-                    {% set prettyName = form['product'].details.pretty_name|trans({}, 'invoice') %}
-                {% else %}
-                    {% set prettyName = form['product'].getCode() %}
-                {% endif %}
-                <h3> {{ prettyName }} </h3>
-            </div>
-            <div class="panel-body">
-                {{
-                    'SHARE_WS_DESCRIPTION'|trans(
-                        {
-                            '%code%': form['product'].getCode()|trans({}, 'invoice'),
-                            '%users%': form['product'].details.max_users,
-                            '%storage%': form['product'].details.max_storage,
-                            '%resources%': form['product'].details.max_resources
-                        },
-                        'invoice'
-                    )|raw
-                }}
-                <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId(), 'order': order.getId() }) }}" method="post">
-                    {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
-                    {{ form_widget(form['form']) }}
-                    <input type="submit" class="btn btn-primary" value="{{'subscribe'|trans({}, 'invoice')}}"/>
-                </form>
-            </div>
+    </br>
+    {% if hasFreeTest %}
+    <div class="container">
+        <div class="span12" style="text-align:center;">
+            <a class="btn btn-primary" href="{{ path('formalibre_free_test_workspace', {'product': forms[0]['product'].getId()}) }}">Essayer gratuitement
+                <img href="{{ asset('') }}"></img>
+            </a>
         </div>
     </div>
-{% endfor %}
+    {% endif %}
+    </br>
+
+    {% for key, form in forms %}
+        {% if key % 2 == 0 %}
+            {% set offset = 'col-md-offset-1' %}
+        {% else %}
+            {% set offset = 'col-md-offset-2' %}
+        {% endif %}
+        <div class="col-md-4 {{ offset }}">
+            <div class="panel panel-default">
+                <div class="panel-heading workspace-title">
+                    {% if form['product'].details.pretty_name is defined %}
+                        {% set prettyName = form['product'].details.pretty_name|trans({}, 'invoice') %}
+                    {% else %}
+                        {% set prettyName = form['product'].getCode() %}
+                    {% endif %}
+                    <h3> {{ prettyName }} </h3>
+                </div>
+                <div class="panel-body">
+                    <li class="clean-li">
+                        <ul>
+                            <img class="form-display-icon" src='{{ asset('bundles/formalibreinvoice/images/shared_workspace/user.jpg') }}'></img>
+                            {{ form['product'].details.max_users }} {{ 'users'|trans({}, 'invoice')}}
+                        </ul>
+                        <ul>
+                            <img class="form-display-icon" src='{{ asset('bundles/formalibreinvoice/images/shared_workspace/cloud.jpg') }}'></img>
+                            {{ form['product'].details.max_storage }}
+                        </ul>
+                        <ul>
+                            <img class="form-display-icon" src='{{ asset('bundles/formalibreinvoice/images/shared_workspace/file.jpg') }}'></img>
+                            {{ form['product'].details.max_resources }} {{ 'resources'|trans({}, 'invoice') }}
+                        </ul>
+                    </li>
+                    <form action="{{ path('workspace_product_payment_submit', {'product': form['product'].getId(), 'order': order.getId() }) }}" method="post">
+                        {% form_theme form['form'] 'FormaLibreInvoiceBundle::form_theme_payment.html.twig' %}
+                        {{ form_widget(form['form']) }}
+                        <input type="submit" class="btn btn-primary" value="{{'subscribe'|trans({}, 'invoice')}}"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

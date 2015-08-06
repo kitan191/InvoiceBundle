@@ -148,7 +148,7 @@ class InvoiceManager
 
         return ($getQuery) ? $query: $query->getResult();
     }
-    
+
     public function getPayedByUser(User $user, $getQuery = false)
     {
         $dql = "
@@ -164,7 +164,7 @@ class InvoiceManager
         ";
 
         $query = $this->em->createQuery($dql);
-        
+
         return ($getQuery) ? $query: $query->getResult();
 
     }
@@ -264,6 +264,49 @@ class InvoiceManager
         $toTime->setTimeStamp($to);
         $query = $this->em->createQuery($dql);
         $query->setParameter('isPayed', $isPayed);
+        $query->setParameter('from', $fromTime);
+        $query->setParameter('to', $toTime);
+        if ($search) $query->setParameter('search', "%{$search}%");
+
+        return $getQuery ? $query: $query->getResult();
+    }
+
+    public function remove(Invoice $invoice)
+    {
+        $this->om->remove($invoice);
+        $this->om->flush($invoice);
+    }
+
+    public function getFree($search = '', $from = 0, $to = 2147483647, $getQuery = false)
+    {
+        $dql = "
+            SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
+            JOIN i.chart chart
+            JOIN chart.owner owner
+            WHERE (
+                i.paymentSystemName = 'free'
+                OR i.paymentSystemName = 'none'
+            )
+            AND chart.validationDate BETWEEN :from and :to
+        ";
+
+        if ($search) {
+            $search = strtoupper($search);
+            $dql .= '
+                AND (
+                    UPPER(owner.mail) LIKE :search OR
+                    UPPER(owner.firstName) LIKE :search OR
+                    UPPER(owner.lastName) like :search OR
+                    UPPER(i.invoiceNumber) like :search
+                )
+            ';
+        }
+
+        $fromTime = new \DateTime();
+        $fromTime->setTimeStamp($from);
+        $toTime = new \DateTime();
+        $toTime->setTimeStamp($to);
+        $query = $this->em->createQuery($dql);
         $query->setParameter('from', $fromTime);
         $query->setParameter('to', $toTime);
         if ($search) $query->setParameter('search', "%{$search}%");

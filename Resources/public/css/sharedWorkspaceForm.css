@@ -1,0 +1,16 @@
+/* this class is awfull to watch */
+
+.workspace-title {
+    background-color: #1992af !important;
+    color: white !important;
+}
+
+.clean-li {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.form-display-icon {
+    height: 25px;
+    background-color: white;
+}

@@ -7,22 +7,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class CreditSupportType extends AbstractType
+class CreditSupportEditType extends AbstractType
 {
     //{"name":"Pack 100","nb_credits":100,"nb_hours":20,"saving":250}
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add(
-            'code',
-            'text',
-            array(
-                'required' => true,
-                'label' => 'code',
-                'constraints' => array(
-                    new NotBlank()
-                )
-            )
-        );
         $builder->add(
             'name',
             'text',

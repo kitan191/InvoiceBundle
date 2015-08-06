@@ -93,30 +93,32 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/open/invoice/{page}/isPayed/{isPayed}/from/{from}/to/{to}",
+     *      "/admin/open/invoice/{page}/isFree/{isFree}/from/{from}/to/{to}",
      *      name="admin_invoice_open_invoice",
-     *      defaults={"page"=1, "search"="", "isPayed"="true", "from": "1420153200", "to": "1451689200"},
+     *      defaults={"page"=1, "search"="", "isFree"="false", "from": "1420153200", "to": "1451689200"},
      *      options = {"expose"=true}
      * )
      * @EXT\Route(
-     *      "/admin/open/invoice/{page}/search/{search}/{isPayed}/from/{from}/to/{to}",
+     *      "/admin/open/invoice/{page}/search/{search}/{isFree}/from/{from}/to/{to}",
      *      name="admin_invoice_open_invoice_search",
-     *      defaults={"page"=1, "isPayed"="true", "from": "1420153200", "to": "1451689200"},
+     *      defaults={"page"=1, "isFree"="false", "from": "1420153200", "to": "1451689200"},
      *      options = {"expose"=true}
      * )
      * @EXT\Template
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function showInvoicesAction($page, $search, $isPayed, $from, $to)
+    public function showInvoicesAction($page, $search, $isFree, $from, $to)
     {
-        $boolPayed = $isPayed === "true" ? true: false;
-        $query = $this->invoiceManager->getInvoices($boolPayed, $search, $from, $to, true);
+        $boolFree = $isFree === "true" ? true: false;
+        $query = $boolFree ?
+            $this->invoiceManager->getInvoices(true, $search, $from, $to, true):
+            $this->invoiceManager->getFree($search, $from, $to, true);
         $pager = $this->pagerFactory->createPager($query, $page, 25);
 
         return array(
             'pager' => $pager,
             'search' => $search,
-            'isPayed' => $isPayed,
+            'isFree' => $isFree,
             'page' => $page,
             'from' => $from,
             'to' => $to
@@ -148,7 +150,7 @@ class AdministrationController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/export/{format}/from/{from}/to/{to}/isPayed/{isPayed}/search/{search}",
+     *      "/export/{format}/from/{from}/to/{to}/isFree/{isFree}/search/{search}",
      *      name="formalibre_export_invoice",
      *      defaults={"format"="xls", "search" = ""}
      * )
@@ -156,16 +158,18 @@ class AdministrationController extends Controller
      *
      * @return Response
      */
-    public function exportAction($format, $search, $isPayed, $from, $to)
+    public function exportAction($format, $search, $isFree, $from, $to)
     {
-        $boolPayed = $isPayed === "true" ? true: false;
-
         //the admin is the only one able to do this.
         if (!$this->authorization->isGranted('ROLE_ADMIN')) {
             throw new \AccessDeniedException();
         }
 
-        $invoices = $this->invoiceManager->getInvoices($boolPayed, $search, $from, $to, false);
+        $boolFree = $isFree === "true" ? true: false;
+        $invoices = $boolFree ?
+        $this->invoiceManager->getInvoices(true, $search, $from, $to, false):
+        $this->invoiceManager->getFree($search, $from, $to, false);
+
         $file = $this->invoiceManager->export(
             $invoices, $this->container->get('claroline.exporter.' . $format)
         );
@@ -376,7 +380,12 @@ class AdministrationController extends Controller
         if ($form->isValid()) {
             //do some stuff
             $details = $product->getDetails();
-            $details['pretty_name'] = $form->get('pretty_name')->getData();
+
+            foreach ($form->getIterator() as $el) {
+                //var_dump($el);
+                $details[$el->getName()] = $form->get($el->getName())->getData();
+            }
+
             $product->setDetails($details);
             $this->productManager->persist($product);
 
@@ -439,12 +448,27 @@ class AdministrationController extends Controller
      *      options = {"expose"=true}
      * )
      * @Security("has_role('ROLE_ADMIN')")
-
      * @return Response
      */
     public function removeProduct(Product $product)
     {
         $this->productManager->remove($product);
+
+        return new Response('success');
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/invoice/{invoice}/remove",
+     *      name="formalibre_invoice_remove",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @return Response
+     */
+    public function removeInvoice(Invoice $invoice)
+    {
+        $this->invoiceManager->remove($invoice);
 
         return new Response('success');
     }

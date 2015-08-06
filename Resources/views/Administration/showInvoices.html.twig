@@ -1,4 +1,4 @@
-{% macro renderPager(search, pager, isPayed, from, to) %}
+{% macro renderPager(search, pager, isFree, from, to) %}
     {% if search == '' %}
     {{
         pagerfanta(
@@ -7,7 +7,7 @@
             {
                 'proximity' : 1,
                 'routeName': 'admin_invoice_open_invoice',
-                'routeParams': {'isPayed': isPayed, 'from': from, 'to': to}
+                'routeParams': {'isFree': isFree, 'from': from, 'to': to}
             }
         )
     }}
@@ -19,7 +19,7 @@
                 {
                     'proximity' : 1,
                     'routeName': 'admin_invoice_open_invoice_search',
-                    'routeParams': {'search': search, 'isPayed': isPayed, 'from': from, 'to': to}
+                    'routeParams': {'search': search, 'isFree': isFree, 'from': from, 'to': to}
                 }
             )
         }}
@@ -54,10 +54,10 @@
     <div class="panel-heading">
         <h3 class="panel-title">{{ 'invoices'|trans({}, 'invoice') }}</h3>
     </div>
-    {% if isPayed == 'true' %}
-        {% set invertPayed = 'false' %}
+    {% if isFree == 'true' %}
+        {% set invertFree = 'false' %}
     {% else %}
-        {% set invertPayed = 'true' %}
+        {% set invertFree = 'true' %}
     {% endif %}
     <div class="panel-body">
         <div class="row">
@@ -78,15 +78,15 @@
             </div>
             <div class="col-md-4">
                 {% if search != '' %}
-                    {% set parameters = {'isPayed': isPayed, 'search': search, 'from': from, 'to': to} %}
+                    {% set parameters = {'isFree': isFree, 'search': search, 'from': from, 'to': to} %}
                 {% else %}
-                    {% set parameters = {'isPayed': isPayed, 'search': search, 'from': from, 'to': to} %}
+                    {% set parameters = {'isFree': isFree, 'search': search, 'from': from, 'to': to} %}
                 {% endif %}
                 <a class="btn btn-primary" href="{{ path('formalibre_export_invoice', parameters) }}">
                     {{ 'export'|trans({}, 'platform') }}
                 </a>
-                <a class="btn btn-primary" href="{{ path('admin_invoice_open_invoice', {'page': page, 'isPayed': invertPayed, 'search': search}) }}">
-                    {% if isPayed == 'false' %}
+                <a class="btn btn-primary" href="{{ path('admin_invoice_open_invoice', {'page': page, 'isFree': invertFree, 'search': search}) }}">
+                    {% if isFree == 'false' %}
                         {{ 'show_payed'|trans({}, 'invoice') }}
                     {% else %}
                         {{ 'show_free'|trans({}, 'invoice') }}
@@ -126,11 +126,14 @@
                         <th>
                             {{ 'invoice'|trans({}, 'invoice') }}
                         </th>
+                        <th>
+                            {{ 'delete'|trans({}, 'platform') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for invoice in pager.currentPageResults %}
-                    <tr>
+                    <tr id="invoice-row-{{ invoice.getId() }}">
                         <td> {{ invoice.getInvoiceNumber() }} </td>
                         <td> {{ invoice.getChart().getCreationDate()|intl_date_format() }} </td>
                         <td> {{ invoice.getTotalAmount() }}
@@ -140,6 +143,15 @@
                         <th> {{ get_facet_value(invoice.getChart().getOwner(), 'formalibre_vat') }} </th>
                         <th> {{ get_facet_value(invoice.getChart().getOwner(), 'formalibre_company_name') }} </th>
                         <th> <a href="{{ path('admin_invoice_show', {'invoice': invoice.getId() })}}"> {{ 'invoice'|trans({}, 'invoice') }} </a>
+                        <th>
+                            <div class="btn-group">
+                                <button class="btn btn-danger delete-invoice-btn"
+                                        data-invoice-id="{{ invoice.getId() }}"
+                                >
+                                    <i class="fa fa-trash" data-invoice-id="{{ invoice.getId() }}"></i>
+                                </button>
+                            </div>
+                        </th>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -147,7 +159,7 @@
         </div>
     </div>
     {% if pager.getNbPages() > 1 %}
-         {{ renderPager(search, pager, isPayed, from, to) }}
+         {{ renderPager(search, pager, isFree, from, to) }}
     {% endif %}
     <div class="panel-footer">
 
@@ -164,9 +176,14 @@
         parameters = {};
         parameters.route = {};
         parameters.route.action = {};
-        parameters.route.normal = {"route": "admin_invoice_open_invoice", "parameters": {'isPayed': {{ isPayed }}, 'from': from, 'to': to } };
-        parameters.route.search = {"route": "admin_invoice_open_invoice_search", "parameters": {'isPayed': {{ isPayed }}, 'to': to, 'from': from } };
+        parameters.route.normal = {"route": "admin_invoice_open_invoice", "parameters": {'isFree': {{ isFree }}, 'from': from, 'to': to } };
+        parameters.route.search = {"route": "admin_invoice_open_invoice_search", "parameters": {'isFree': {{ isFree }}, 'to': to, 'from': from } };
         Claroline.Table.initialize(parameters);
+        var modal = window.Claroline.Modal;
+
+        var removeInvoiceRow = function (event, invoiceid) {
+            $('#invoice-row-' + invoiceid).remove();
+        };
 
         var format = Translator.trans('date_form_datepicker_format', {}, 'platform');
         var options = {
@@ -175,16 +192,30 @@
         $('#date-from').datepicker(options).on('changeDate', function(e) {
             var val = $('#date-from').val();
             from = moment(val, format.toUpperCase()).unix();
-            parameters.route.normal = {"route": "admin_invoice_open_invoice", "parameters": {'isPayed': {{ isPayed }}, 'from': from, 'to': to } };
-            parameters.route.search = {"route": "admin_invoice_open_invoice_search", "parameters": {'isPayed': {{ isPayed }}, 'to': to, 'from': from } };
+            parameters.route.normal = {"route": "admin_invoice_open_invoice", "parameters": {'isFree': {{ isFree }}, 'from': from, 'to': to } };
+            parameters.route.search = {"route": "admin_invoice_open_invoice_search", "parameters": {'isFree': {{ isFree }}, 'to': to, 'from': from } };
             Claroline.Table.initialize(parameters);
         });
         $('#date-to').datepicker(options).on('changeDate', function(e) {
             var val = $('#date-to').val();
             to = moment(val, format.toUpperCase()).unix();
-            parameters.route.normal = {"route": "admin_invoice_open_invoice", "parameters": {'isPayed': {{ isPayed }}, 'from': from, 'to': to } };
-            parameters.route.search = {"route": "admin_invoice_open_invoice_search", "parameters": {'isPayed': {{ isPayed }}, 'to': to, 'from': from } };
+            parameters.route.normal = {"route": "admin_invoice_open_invoice", "parameters": {'isFree': {{ isFree }}, 'from': from, 'to': to } };
+            parameters.route.search = {"route": "admin_invoice_open_invoice_search", "parameters": {'isFree': {{ isFree }}, 'to': to, 'from': from } };
             Claroline.Table.initialize(parameters);
+        });
+        $('.delete-invoice-btn').on('click', function(event) {
+            var invoiceid = $(event.target).attr('data-invoice-id');
+
+            modal.confirmRequest(
+                Routing.generate(
+                    'formalibre_invoice_remove',
+                    {'invoice': invoiceid}
+                ),
+                removeInvoiceRow,
+                invoiceid,
+                Translator.trans('remove_invoice_message', {}, 'invoice'),
+                Translator.trans('remove_invoice', {}, 'invoice')
+            );
         });
 
     </script>

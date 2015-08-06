@@ -11,6 +11,7 @@ use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Manager\Exception\PaymentHandlingFailedException;
 use FormaLibre\InvoiceBundle\Form\SharedWorkspaceCreationForm;
 use FormaLibre\InvoiceBundle\Form\SharedWorkspaceEditForm;
+use FormaLibre\InvoiceBundle\Form\CreditSupportEditType;
 use FormaLibre\InvoiceBundle\Form\CreditSupportType;
 use FormaLibre\InvoiceBundle\Form\SupportTechType;
 
@@ -68,7 +69,7 @@ class ProductManager
         return array(
             'SHARED_WS' => 'shared_workspace',
             'TRAINING' => 'training',
-            'CREDIT_SUPPORT' => 'credit_support',
+            'SUPPORT_CREDITS' => 'credit_support',
             'TECHNICAL_SUPPORT' => 'technical_support'
         );
     }
@@ -85,7 +86,7 @@ class ProductManager
         switch ($type) {
             case 'SHARED_WS':
                 $form = new SharedWorkspaceCreationForm(); break;
-            case 'CREDIT_SUPPORT':
+            case 'SUPPORT_CREDITS':
                 $form = new CreditSupportType(); break;
             case 'TECHNICAL_SUPPORT':
                 $form = new SupportTechType(); break;
@@ -100,6 +101,8 @@ class ProductManager
         switch ($type) {
             case 'SHARED_WS':
                 $form = new SharedWorkspaceEditForm(); break;
+            case 'SUPPORT_CREDITS':
+                $form = new CreditSupportEditType(); break;
             default: throw new \Exception('Unknown type.');
         }
 
