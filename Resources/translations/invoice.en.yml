@@ -67,3 +67,10 @@ select_owner: Select the owner
 shared_workspace_creation: Shared workspace creation
 storage: Storage
 workspace_name_edition: Workspace name edition
+my_orders: My orders
+order: Order
+orders: Orders
+order_number: Order number
+order_date: Order date
+invoice_ask: Ask invoice
+invoice_request_done: invoice_request_done

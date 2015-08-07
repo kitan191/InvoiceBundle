@@ -35,7 +35,7 @@ class SharedWorkspaceManager
     private $friendRepo;
     private $productRepo;
     private $sharedWorkspaceRepo;
-    private $targetPlatformUrl;
+    private $targetFriend;
 
     /**
      * @DI\InjectParams({
@@ -82,7 +82,7 @@ class SharedWorkspaceManager
         $this->friendRepo          = $this->om->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
         $this->productRepo         = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
         $this->sharedWorkspaceRepo = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace');
-        $this->targetPlatformUrl   = $this->friendRepo->findOneByName($ch->getParameter('campusName'));
+        $this->targetFriend   = $this->friendRepo->findOneByName($ch->getParameter('campusName'));
     }
 
     public function executeOrder($order)
@@ -154,7 +154,7 @@ class SharedWorkspaceManager
             'profile_form_creation[plainPassword][second]' => $tmppw,
         );
 
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url, $payload, 'POST');
         $data = json_decode($serverOutput, true);
 
         if ($data === null) {
@@ -172,7 +172,7 @@ class SharedWorkspaceManager
             'workspace_form[endDate]' => $sws->getExpDate()->format('d-m-Y')
         );
 
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url, $payload, 'POST');
         $workspace = json_decode($serverOutput, true);
 
         if ($workspace === null || isset($workspace['errors'])) {
@@ -203,7 +203,7 @@ class SharedWorkspaceManager
             'workspace_form[endDate]' => $sws->getExpDate()->format('d-m-Y')
         );
 
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url, $payload, 'POST');
         $datas = json_decode($serverOutput, true);
 
         if (array_key_exists('id', $datas)) {
@@ -231,7 +231,7 @@ class SharedWorkspaceManager
     public function getAllRemoteWorkspacesDatas()
     {
         $url = 'api/workspaces.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -239,7 +239,7 @@ class SharedWorkspaceManager
     public function getNonPersonalRemoteWorkspacesDatas()
     {
         $url = 'api/non/personal/workspaces.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -247,17 +247,25 @@ class SharedWorkspaceManager
     public function getWorkspaceData(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url);
+        $workspace = json_decode($serverOutput, true);
 
-        return json_decode($serverOutput, true);
+        if ($workspace === null || array_key_exists('error', $workspace)) {
+            //throw new \Exception($serverOutput);
+            return array();
+        }
     }
 
     public function getWorkspaceAdditionalDatas(SharedWorkspace $sws)
     {
         $url = 'api/workspaces/' . $sws->getRemoteId() . '/additional/datas.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url);
+        $workspace = json_decode($serverOutput, true);
 
-        return json_decode($serverOutput, true);
+        if ($workspace === null || array_key_exists('error', $workspace)) {
+            //throw new \Exception($serverOutput);
+            return array();
+        }
     }
 
     public function addRemoteWorkspaceExpDate(Order $order)
@@ -285,7 +293,7 @@ class SharedWorkspaceManager
         $payload = $this->apiManager->formEncode($workspace, $form, $workspaceType);
         $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
         $url = 'api/workspaces/' . $sws->getRemoteId() . '/users/' . $user->getUsername() . '.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'PUT');
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url, $payload, 'PUT');
         $workspace = json_decode($serverOutput, true);
 
         //add date here
@@ -317,7 +325,7 @@ class SharedWorkspaceManager
         $payload['workspace_form[name]'] = $workspaceName;
         $payload['workspace_form[endDate]'] = $expDate->format('d-m-Y');
         $url = 'api/workspaces/' . $workspace['id'] . '/users/' . $workspace['creator']['username'] . '.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'PUT');
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url, $payload, 'PUT');
         $datas = json_decode($serverOutput, true);
 
         if (is_null($datas) || isset($datas['errors'])) {
@@ -340,7 +348,7 @@ class SharedWorkspaceManager
 
         if (isset($remoteUser['id']) && isset($remoteWorkspace['id'])) {
             $url = 'api/workspaces/' . $remoteWorkspace['id'] . '/owners/' . $remoteUser['id'] . '.json';
-            $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, array(), 'PUT');
+            $serverOutput = $this->apiManager->url($this->targetFriend, $url, array(), 'PUT');
             $datas = json_decode($serverOutput, true);
 
             if (is_null($datas) || isset($datas['errors'])) {
@@ -415,7 +423,7 @@ class SharedWorkspaceManager
     public function getRemoteUser($username)
     {
         $url = 'api/users/' . $username . '.json';
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url);
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url);
 
         return json_decode($serverOutput, true);
     }
@@ -434,7 +442,7 @@ class SharedWorkspaceManager
             'profile_form_creation[plainPassword][first]' => $tmppw,
             'profile_form_creation[plainPassword][second]' => $tmppw,
         );
-        $serverOutput = $this->apiManager->url($this->targetPlatformUrl, $url, $payload, 'POST');
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url, $payload, 'POST');
         $datas = json_decode($serverOutput, true);
 
         return $datas;

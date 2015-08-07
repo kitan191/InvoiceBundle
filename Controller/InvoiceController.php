@@ -8,6 +8,7 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use FormaLibre\InvoiceBundle\Entity\Invoice;
 
 class InvoiceController extends Controller
@@ -74,7 +75,33 @@ class InvoiceController extends Controller
         $response->headers->set('Content-Disposition', 'attachment; filename=invoice-' . $invoice->getInvoiceNumber() . '.pdf');
         $response->headers->set('Content-Type', 'application/pdf');
         $response->headers->set('Connection', 'close');
+        $response->send();
 
-        return $response;
+        return new Response();
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/ask/invoice/{invoice}",
+     *      name="invoice_ask"
+     * )
+     *
+     * @return Response
+     */
+    public function askInvoiceAction(Invoice $invoice)
+    {
+        $user = $this->tokenStorage->getToken()->getUser();
+
+        if ($invoice->getChart()->getOwner() !== $user &&
+            !$this->authorization->isGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedException();
+        }
+
+        $this->invoiceManager->ask($invoice);
+        $this->get('request')->getSession()
+            ->getFlashBag()
+            ->add('success', $this->get('translator')->trans('invoice_request_done', array(), 'invoice'));
+
+        return new RedirectResponse($this->get('router')->generate('claro_desktop_open'));
     }
 }

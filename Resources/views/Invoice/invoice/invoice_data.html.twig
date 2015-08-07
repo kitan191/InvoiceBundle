@@ -13,8 +13,8 @@
         </td>
         <td width="20%">
             <ul style="list-style-type: none; padding-left:0;">
-                <li> {{ 'invoice_number'|trans({}, 'invoice') }}: {{ chart.getInvoice().getInvoiceNumber() }} </li>
-                <li> {{ 'invoice_date'|trans({}, 'invoice' ) }}: {{ chart.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
+                <li> {{ 'order_number'|trans({}, 'invoice') }}: {{ chart.getInvoice().getInvoiceNumber() }} </li>
+                <li> {{ 'order_date'|trans({}, 'invoice' ) }}: {{ chart.getCreationDate().getTimeStamp()|date('d/m/Y') }} </li>
                 <li> {{ chart.getOwner().getLastName() }} {{ chart.getOwner().getFirstName() }} </li>
                 <li> {{ 'payment_method'|trans({}, 'invoice') }}: {{ chart.getInvoice().getPaymentSystemName()|trans({}, 'invoice') }} </li>
                 {{ func.li(chart, 'formalibre_street') }}

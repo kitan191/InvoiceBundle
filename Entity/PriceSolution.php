@@ -68,6 +68,7 @@ class PriceSolution
 
     public function __toString()
     {
-        return $this->monthDuration . ' mois (' . $this->getPrice() . ' €)';
+        //do the english translation here
+        return $this->monthDuration . ' mois HTVA (' . $this->getPrice() . ' €)';
     }
 }

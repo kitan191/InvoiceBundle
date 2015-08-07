@@ -314,4 +314,18 @@ class InvoiceManager
 
         return $getQuery ? $query: $query->getResult();
     }
+
+    public function ask(Invoice $invoice)
+    {
+        $body = "L'utilisateur {$invoice->getChart()->getOwner()->getUsername()} ({$invoice->getChart()->getOwner()->getMail()})
+            a demandé une facture pour la commande {$invoice->getInvoiceNumber()}";
+
+        $this->mailManager->send(
+            'Demande de facture',
+            $body,
+            array(),
+            null,
+            array('to' => array('compta@claroline.com'))
+        );
+    }
 }

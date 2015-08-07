@@ -70,6 +70,8 @@ product_name: Nom du produit
 campus_connection_message: Vous pouvez vous connecter au campus en cliquant sur <a href="%baseurl%/login"> ce lien </a>. Votre nom d'utilisateur est %username%.
 forgot_password_message: Vous pouvez changer votre mot de passe pour le campus en cliquant <a href="%baseurl%/reset"> ici </a>
 invoice: Facture
+order: Commande
+orders: Commandes
 show_free: Montrer gratuits
 show_payed: Montrer payants
 invoices: Factures
@@ -102,3 +104,8 @@ select_owner: Choisissez le propriétaire
 shared_workspace_creation: Création d'un espace d'activités partagés
 storage: Stockage
 workspace_name_edition: Renommage de l'espace d'activités
+my_orders: Mes commandes
+order_number: Numéro de commande
+order_date: Date de la commande
+invoice_ask: Demander une facture
+invoice_request_done: Votre demande de facture a bien été enregistrée. Une facture vous sera bientôt envoyé à votre adresse email.
