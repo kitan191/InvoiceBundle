@@ -64,7 +64,7 @@ booking_thanks: Merci de votre Réservation
 booking_confirm: Nous vous confirmons la réservation de votre espace d'activité. Vous trouverez une copie des informations relatives à votre achat en pièce jointe.
 order_thanks: Merci de votre commande FormaLibre
 workpace_confirm: |
-    Votre espace d'activité se nome %name% (%code%).
+    Votre espace d'activité se nomme %name% (%code%).
     Il expirera le %expiration_date%
 product_name: Nom du produit
 campus_connection_message: Vous pouvez vous connecter au campus en cliquant sur <a href="%baseurl%/login"> ce lien </a>. Votre nom d'utilisateur est %username%.
