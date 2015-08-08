@@ -254,6 +254,8 @@ class SharedWorkspaceManager
             //throw new \Exception($serverOutput);
             return array();
         }
+        
+        return $workspace;
     }
 
     public function getWorkspaceAdditionalDatas(SharedWorkspace $sws)
