@@ -6,13 +6,13 @@
             <a href="{{ path('invoice_download', {'invoice': chart.getInvoice().getId()}) }}" class="btn btn-default btn pull-right"> {{ 'download'|trans({}, 'platform') }} </a>
         </div>
     </div>
-    {% include 'FormaLibreInvoiceBundle:Invoice:invoice\\invoice_data.html.twig'
+    {% include 'FormaLibreInvoiceBundle:Invoice:templates\\be\\invoice\\invoice_data.html.twig'
         with {'chart': chart}
     %}
-    {% include 'FormaLibreInvoiceBundle:Invoice:invoice\\chart_data.html.twig'
+    {% include 'FormaLibreInvoiceBundle:Invoice:templates\\be\\invoice\\chart_data.html.twig'
         with {'chart': chart}
     %}
-    {% include 'FormaLibreInvoiceBundle:Invoice:invoice\\footer.html.twig'
+    {% include 'FormaLibreInvoiceBundle:Invoice:templates\\be\\invoice\\footer.html.twig'
         with {'communication': communication, 'chart': chart}
     %}
 </div>

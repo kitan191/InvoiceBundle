@@ -39,18 +39,18 @@ class InvoiceExtension extends \Twig_Extension
     {
         return array(
             new \Twig_SimpleFilter('format_structured_communication', array($this, 'formatCommunication')),
-            new \Twig_SimpleFilter('format_price', array($this, 'formatPrice')),
-            new \Twig_SimpleFunction('get_facet_value', array($this, 'getFieldValue'))
+            new \Twig_SimpleFilter('format_price', array($this, 'formatPrice'))
         );
     }
-
-    /**
+    
+    /*
      * {@inheritdoc}
      */
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('get_facet_value', array($this, 'getFieldValue'))
+            new \Twig_SimpleFunction('get_facet_value', array($this, 'getFieldValue')),
+            new \Twig_SimpleFunction('get_invoice_locale', array($this, 'getInvoiceLocale'))
         );
     }
 
@@ -86,6 +86,13 @@ class InvoiceExtension extends \Twig_Extension
         }
 
         return null;
+    }
+
+    public function getInvoiceLocale(User $user)
+    {
+        $invoiceManager = $this->container->get('formalibre.manager.invoice_manager');
+
+        return $invoiceManager->getInvoiceLocale($user);
     }
 
     /**

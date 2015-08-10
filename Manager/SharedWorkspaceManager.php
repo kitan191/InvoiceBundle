@@ -278,11 +278,8 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->targetFriend, $url);
         $workspace = json_decode($serverOutput, true);
 
-        if ($workspace === null || array_key_exists('error', $workspace)) {
-            //throw new \Exception($serverOutput);
-            return array();
-        }
-        
+        if ($workspace === null || array_key_exists('error', $workspace)) return array();
+
         return $workspace;
     }
 
@@ -292,10 +289,9 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->targetFriend, $url);
         $workspace = json_decode($serverOutput, true);
 
-        if ($workspace === null || array_key_exists('error', $workspace)) {
-            //throw new \Exception($serverOutput);
-            return array();
-        }
+        if ($workspace === null || array_key_exists('error', $workspace)) return array();
+
+        return $workspace;
     }
 
     public function addRemoteWorkspaceExpDate(Order $order)

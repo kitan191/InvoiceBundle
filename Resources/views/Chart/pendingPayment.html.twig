@@ -28,7 +28,8 @@
 <div class="section-content">
     <div class="panel panel-default">
         <div class="panel-body">
-            {% include 'FormaLibreInvoiceBundle:Invoice:invoice.html.twig'
+            {% set locale = get_invoice_locale(chart.getOwner()) %}
+            {% include 'FormaLibreInvoiceBundle:Invoice:templates\\' ~ locale ~ '\\invoice.html.twig'
                 with {'communication': communication, 'chart': chart}
             %}
         </div>

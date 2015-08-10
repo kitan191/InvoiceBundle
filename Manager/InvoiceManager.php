@@ -109,7 +109,9 @@ class InvoiceManager
         $communication = isset($extra['communication']) ? $extra['communication']: null;
 
         $view = $this->templating->render(
-            'FormaLibreInvoiceBundle:pdf:invoice.html.twig',
+            'FormaLibreInvoiceBundle:Invoice:templates\\' .
+                $this->getInvoiceLocale($invoice->getChart()->getOwner()) .
+                '\\pdf.html.twig',
             array(
                 'chart' => $invoice->getChart(),
                 'communication' => $communication
@@ -327,5 +329,38 @@ class InvoiceManager
             null,
             array('to' => array('compta@claroline.com'))
         );
+    }
+
+    public function getInvoiceLocale(User $user)
+    {
+        $invExt = $this->container->get('forma_libre.invoice_bundle.twig.invoice_extension');
+        $ch = $this->container->get('claroline.config.platform_config_handler');
+        $country = $invExt->getFieldValue($user, 'formalibre_country');
+        $default = $ch->getParameter('formalibre_default_locale');
+
+        //if we can't find a country, we use the default value because we obv need one
+        if (!$country) return $default;
+
+        $locales = $this->getAvailableLocales();
+
+        foreach ($locales as $locale) {
+            if (strtolower($country) === $locale) return $locale;
+        }
+
+        return $default;
+    }
+
+    private function getAvailableLocales()
+    {
+        //this is dirty but kernel -> localeResource doesn't work on directories
+        $rootPath = realpath(__DIR__ . '/../Resources/views/Invoice/templates');
+        $iterator = new \DirectoryIterator($rootPath);
+        $locales = array();
+
+        foreach ($iterator as $el) {
+            if ($el->isDir() && !$el->isDot()) $locales[] = $el->getFilename();
+        }
+
+        return $locales;
     }
 }
