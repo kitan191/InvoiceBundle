@@ -9,6 +9,7 @@ use Claroline\CoreBundle\Manager\MailManager;
 use Claroline\CoreBundle\Manager\OauthManager;
 use Claroline\CoreBundle\Manager\ApiManager;
 use Claroline\CoreBundle\Form\WorkspaceType;
+use Claroline\CoreBundle\Pager\PagerFactory;
 use FormaLibre\InvoiceBundle\Entity\Product\SharedWorkspace;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
@@ -36,6 +37,7 @@ class SharedWorkspaceManager
     private $productRepo;
     private $sharedWorkspaceRepo;
     private $targetFriend;
+    private $pagerFactory;
 
     /**
      * @DI\InjectParams({
@@ -47,6 +49,7 @@ class SharedWorkspaceManager
      *     "mailManager"  = @DI\Inject("claroline.manager.mail_manager"),
      *     "oauthManager" = @DI\Inject("claroline.manager.oauth_manager"),
      *     "om"           = @DI\Inject("claroline.persistence.object_manager"),
+     *     "pagerFactory" = @DI\Inject("claroline.pager.pager_factory"),
      *     "templating"   = @DI\Inject("templating"),
      *     "translator"   = @DI\Inject("translator"),
      *     "vatManager"   = @DI\Inject("formalibre.manager.vat_manager")
@@ -61,6 +64,7 @@ class SharedWorkspaceManager
         MailManager $mailManager,
         OauthManager $oauthManager,
         ObjectManager $om,
+        PagerFactory $pagerFactory,
         $templating,
         $translator,
         VATManager $vatManager
@@ -78,6 +82,7 @@ class SharedWorkspaceManager
         $this->translator          = $translator;
         $this->oauthManager        = $oauthManager;
         $this->vatManager          = $vatManager;
+        $this->pagerFactory        = $pagerFactory;
 
         $this->friendRepo          = $this->om->getRepository('Claroline\CoreBundle\Entity\Oauth\FriendRequest');
         $this->productRepo         = $this->om->getRepository('FormaLibre\InvoiceBundle\Entity\Product');
@@ -218,6 +223,15 @@ class SharedWorkspaceManager
         }
     }
 
+    public function getSharedWorkspaces($withPager = true, $page = 1, $max = 20)
+    {
+        $sharedWorkspaces = $this->sharedWorkspaceRepo->findAll();
+
+        return $withPager ?
+            $this->pagerFactory->createPagerFromArray($sharedWorkspaces, $page, $max) :
+            $users;
+    }
+
     public function getSharedWorkspaceByUser(User $user)
     {
         return $this->sharedWorkspaceRepo->findByOwner($user);
@@ -242,6 +256,20 @@ class SharedWorkspaceManager
         $serverOutput = $this->apiManager->url($this->targetFriend, $url);
 
         return json_decode($serverOutput, true);
+    }
+
+    public function getAllWorkspacesDatas()
+    {
+        $url = 'api/workspaces.json';
+        $serverOutput = $this->apiManager->url($this->targetFriend, $url);
+        $workspace = json_decode($serverOutput, true);
+
+        if ($workspace === null || array_key_exists('error', $workspace)) {
+
+            return array();
+        }
+
+        return $workspace;
     }
 
     public function getWorkspaceData(SharedWorkspace $sws)

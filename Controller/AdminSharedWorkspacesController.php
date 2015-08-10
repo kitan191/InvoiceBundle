@@ -82,36 +82,33 @@ class AdminSharedWorkspacesController extends Controller
 
     /**
      * @EXT\Route(
-     *      "/admin/tool/index",
-     *      name="formalibre_admin_shared_workspaces_admin_tool_index"
+     *     "/admin/tool/index/page/{page}/max/{max}",
+     *     name="formalibre_admin_shared_workspaces_admin_tool_index",
+     *     defaults={"page"=1, "max"=20},
      * )
      * @EXT\Template
      */
-    public function sharedWorkspacesAdminToolIndexAction()
+    public function sharedWorkspacesAdminToolIndexAction($page = 1, $max = 20)
     {
-        $sharedWorkspaces = $this->sharedWorkspaceManager->getAllSharedWorkspaces();
+        $sharedWorkspaces = $this->sharedWorkspaceManager->getSharedWorkspaces(true, $page, $max);
+        $tempWorkspaces = $this->sharedWorkspaceManager->getAllWorkspacesDatas();
+        $workspaces = array();
         $workspaceDatas = array();
+
+        foreach ($tempWorkspaces as $workspace) {
+            $id = $workspace['id'];
+            $workspaces[$id] = $workspace;
+        }
 
         foreach ($sharedWorkspaces as $sharedWorkspace) {
             $el = array();
-            $workspace = $this->sharedWorkspaceManager->getWorkspaceData($sharedWorkspace);
-            $additionalDatas = $this->sharedWorkspaceManager->getWorkspaceAdditionalDatas($sharedWorkspace);
+            $remoteId = $sharedWorkspace->getRemoteId();
             $el['shared_workspace'] = $sharedWorkspace;
 
-            if ($workspace) {
-                $el['workspace'] = $workspace;
+            if (isset($workspaces[$remoteId])) {
+                $el['workspace'] = $workspaces[$remoteId];
             } else {
                 $el['workspace'] = array('code' => 0, 'name' => null, 'expiration_date' => 0);
-            }
-
-            if ($additionalDatas) {
-                $el['workspace_additional_datas'] = $additionalDatas;
-            } else {
-                $el['workspace_additional_datas'] = array(
-                    'used_storage' => -1,
-                    'nb_users' => -1,
-                    'nb_resources' => -1
-                );
             }
 
             $sws = $this->sharedWorkspaceManager->getLastOrder($sharedWorkspace);
@@ -124,8 +121,10 @@ class AdminSharedWorkspacesController extends Controller
         }
 
         return array(
+            'sharedWorkspaces' => $sharedWorkspaces,
             'workspaceDatas' => $workspaceDatas,
-            'campusPlatform' => $this->campusPlatform
+            'campusPlatform' => $this->campusPlatform,
+            'max' => $max
         );
     }
 

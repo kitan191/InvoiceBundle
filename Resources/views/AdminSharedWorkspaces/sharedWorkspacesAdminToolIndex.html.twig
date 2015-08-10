@@ -1,3 +1,19 @@
+{% macro renderPager(pager, max) %}
+    {{
+        pagerfanta(
+            pager,
+            'twitter_bootstrap_translated',
+            {
+                'proximity' : 1,
+                'routeName': 'formalibre_admin_shared_workspaces_admin_tool_index',
+                'routeParams': {'max': max}
+            }
+        )
+    }}
+{% endmacro %}
+
+{% from _self import renderPager %}
+
 {% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
 
 {% block title %}
@@ -32,105 +48,105 @@
         <br>
         <br>
 
-        <table class="table table-striped table-bordered table-condensed">
-            <thead>
-                <tr>
-                    <th>
-                        {{ 'name'|trans({}, 'platform') }}
-                    </th>
-                    <th>
-                        {{ 'code'|trans({}, 'platform') }}
-                    </th>
-                    <th>
-                        {{ 'owner'|trans({}, 'platform') }}
-                    </th>
-                    <th>
-                        {{ 'expiration_date'|trans({}, 'invoice') }}
-                    </th>
-                    <th>
-                        {{ 'storage'|trans({}, 'invoice') }}
-                    </th>
-                    <th>
-                        {{ 'users'|trans({}, 'platform') }}
-                    </th>
-                    <th>
-                        {{ 'resources'|trans({}, 'platform') }}
-                    </th>
-                    <th>
-                        {{ 'product_name'|trans({}, 'invoice') }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-               {% for datas in workspaceDatas %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
                     <tr>
-                        {% set workspaceLink = campusPlatform.getHost() ~ '/workspaces/' ~ datas['shared_workspace'].getRemoteId() ~ '/open/tool/home' %}
-                        <td>
-                            <a href="{{ workspaceLink }}">
-                                {{ datas['workspace'].name }}
-                            </a>
-                            <button class="btn btn-default btn-sm rename-workspace-btn pull-right"
-                                    data-shared-workspace-id="{{ datas['shared_workspace'].getId() }}"
-                                    data-toggle="tooltip"
-                                    data-placement="top"
-                                    title="{{ 'rename_workspace'|trans({}, 'invoice') }}"
-                            >
-                                <i class="fa fa-edit"></i>
-                            </button>
-                        </td>
-                        <td>
-                            {{ datas['workspace'].code }}
-                        </td>
-                        <td>
-                            {{ datas['shared_workspace'].getOwner().getFirstName() }}
-                            {{ datas['shared_workspace'].getOwner().getLastName() }}
-                            <button class="btn btn-default btn-sm change-owner-btn pull-right"
-                                    data-owner-id="{{ datas['shared_workspace'].getOwner().getId() }}"
-                                    data-shared-workspace-id="{{ datas['shared_workspace'].getId() }}"
-                                    data-toggle="tooltip"
-                                    data-placement="top"
-                                    title="{{ 'change_owner'|trans({}, 'invoice') }}"
-                            >
-                                <i class="fa fa-user"></i>
-                            </button>
-                        </td>
-                        <td>
-                            {{ datas['shared_workspace'].getExpDate().getTimeStamp()|date('d/m/Y') }}
-                            <a href="{{ path('renew_test_workspace', {'remoteId': datas['shared_workspace'].getRemoteId()}) }}"
-                               class="btn btn-default btn-sm pull-right"
-                               data-toggle="tooltip"
-                               data-placement="top"
-                               title="{{ 'renew'|trans({}, 'invoice') }}"
-                            >
-                                <i class="fa fa-plus-circle"></i>
-                            </a>
-                        </td>
-                        <td>
-                            {{ datas['workspace_additional_datas'].used_storage }}
-                            /
-                            {{ datas['shared_workspace'].getMaxStorage() }}
-                        </td>
-                        <td>
-                            {{ datas['workspace_additional_datas'].nb_users }}
-                            /
-                            {{ datas['shared_workspace'].getMaxUser() }}
-                        </td>
-                        <td>
-                            {{ datas['workspace_additional_datas'].nb_resources }}
-                            /
-                            {{ datas['shared_workspace'].getMaxRes() }}
-                        </td>
-                        <td>
-                            {% if datas['product'] is defined %}
-                                <a href="{{ path('show_product', {'product': datas['product'].getId()}) }}">
-                                    {{ datas['product'].getCode() }}
-                                </a>
-                            {% endif %}
-                        </td>
+                        <th>
+                            {{ 'name'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'code'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'owner'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'expiration_date'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'storage'|trans({}, 'invoice') }}
+                        </th>
+                        <th>
+                            {{ 'users'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'resources'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'product_name'|trans({}, 'invoice') }}
+                        </th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                   {% for datas in workspaceDatas %}
+                        <tr>
+                            {% set workspaceLink = campusPlatform.getHost() ~ '/workspaces/' ~ datas['shared_workspace'].getRemoteId() ~ '/open/tool/home' %}
+                            <td>
+                                <a href="{{ workspaceLink }}">
+                                    {{ datas['workspace'].name }}
+                                </a>
+                                <button class="btn btn-default btn-sm rename-workspace-btn pull-right"
+                                        data-shared-workspace-id="{{ datas['shared_workspace'].getId() }}"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="{{ 'rename_workspace'|trans({}, 'invoice') }}"
+                                >
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </td>
+                            <td>
+                                {{ datas['workspace'].code }}
+                            </td>
+                            <td>
+                                {{ datas['shared_workspace'].getOwner().getFirstName() }}
+                                {{ datas['shared_workspace'].getOwner().getLastName() }}
+                                <button class="btn btn-default btn-sm change-owner-btn pull-right"
+                                        data-owner-id="{{ datas['shared_workspace'].getOwner().getId() }}"
+                                        data-shared-workspace-id="{{ datas['shared_workspace'].getId() }}"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="{{ 'change_owner'|trans({}, 'invoice') }}"
+                                >
+                                    <i class="fa fa-user"></i>
+                                </button>
+                            </td>
+                            <td>
+                                {{ datas['shared_workspace'].getExpDate().getTimeStamp()|date('d/m/Y') }}
+                                <a href="{{ path('renew_test_workspace', {'remoteId': datas['shared_workspace'].getRemoteId()}) }}"
+                                   class="btn btn-default btn-sm pull-right"
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="{{ 'renew'|trans({}, 'invoice') }}"
+                                >
+                                    <i class="fa fa-plus-circle"></i>
+                                </a>
+                            </td>
+                            <td>
+                                {{ datas['shared_workspace'].getMaxStorage() }}
+                            </td>
+                            <td>
+                                {{ datas['shared_workspace'].getMaxUser() }}
+                            </td>
+                            <td>
+                                {{ datas['shared_workspace'].getMaxRes() }}
+                            </td>
+                            <td>
+                                {% if datas['product'] is defined %}
+                                    <a href="{{ path('show_product', {'product': datas['product'].getId()}) }}">
+                                        {{ datas['product'].getCode() }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if sharedWorkspaces.getNbPages() > 1 %}
+            {{ renderPager(sharedWorkspaces, max) }}
+        {% endif %}
     </div>
     {#<div class="list-group">
         {% for code, product in products %}
