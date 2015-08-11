@@ -82,29 +82,6 @@ class Listener
     }
 
     /**
-     * @DI\Observe("widget_formalibre_invoice")
-     *
-     * @param DisplayToolEvent $event
-     */
-    public function onDisplayInvoice(DisplayWidgetEvent $event)
-    {
-        $event->setContent($this->getDisplayedInvoice());
-    }
-
-    private function getDisplayedInvoice()
-    {
-        $invoices = $this->container->get('formalibre.manager.invoiceManager')
-            ->getPayedByUser($this->tokenStorage->getToken()->getUser());
-
-        $content = $this->container->get('templating')->render(
-            'FormaLibreInvoiceBundle:Invoice:widget.html.twig',
-            array('invoices' => $invoices)
-        );
-
-        return $content;
-    }
-
-    /**
     * @DI\Observe("widget_formalibre_campus")
     *
     * @param DisplayToolEvent $event
@@ -171,5 +148,20 @@ class Listener
         $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
         $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
         $event->setResponse($response);
+    }
+
+    /**
+     * @DI\Observe("open_tool_formalibre_my_orders")
+     *
+     * @param DisplayToolEvent $event
+     */
+    public function onMyInvoicesDesktopToolOpen(DisplayToolEvent $event)
+    {
+        $params = array();
+        $params['_controller'] = 'FormaLibreInvoiceBundle:InvoiceController:list';
+        $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+        $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        $event->setContent($response->getContent());
+        $event->stopPropagation();
     }
 }

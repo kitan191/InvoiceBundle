@@ -117,4 +117,12 @@ class Product
     {
         return $this->isActivated;
     }
+
+    public function getName()
+    {
+        if (isset($this->details['pretty_name'])) return $this->details['pretty_name'];
+        if (isset($this->details['name'])) return $this->details['name'];
+        
+        return $this->code;
+    }
 }

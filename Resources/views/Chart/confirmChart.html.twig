@@ -1,0 +1,81 @@
+{% set layout = "ClarolineCoreBundle::layout.html.twig" %}
+
+{% if isDesktop() %}
+    {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+{% endif %}
+
+{% extends layout %}
+
+{% if isDesktop() %}
+    {% block breadcrumb %}
+        {{
+            macros.desktopBreadcrumbs([
+                {
+                    'name': 'formalibre'|trans({}, 'platform'),
+                    'href': path('claro_desktop_open')
+                },
+                {
+                    'name': 'confirmation'|trans({}, 'invoice'),
+                    'href': ''
+                }
+            ])
+        }}
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+
+<div class="section-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {# copy pasted from Invoices/templates/be/invoice/chart_data.html.twig with a few differences #}
+            <div class="container">
+                <table class="table table-striped table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th> {{ 'code'|trans({}, 'invoice') }}</th>
+                            <th> {{ 'quantity'|trans({}, 'invoice')}}</th>
+                            <th> {{ 'unit_price'|trans({}, 'invoice')}}</th>
+                            <th> {{ 'total'|trans({}, 'invoice')}}</th>
+                            <th> {{ 'other'|trans({}, 'invoice') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in chart.getOrders() %}
+                        <tr>
+                            <td> {{ order.getProduct().getName() }} </td>
+                            <td> {{ order.getQuantity() }} </td>
+                            <td> {{ order.getPriceSolution().getPrice()|format_price() }} € </td>
+                            <td> {{ (order.getQuantity() * order.getPriceSolution().getPrice())|format_price() }} € </td>
+                            <td>
+                                {% if order.hasDiscount() %}
+                                    {% if order.getProduct().getCode() == 'SHARED_WS' %}
+                                        {{ 'one_free_month'|trans({}, 'invoice') }}
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pull-right panel panel-default">
+                    <div class="panel-body">
+                        <ul style="list-style-type: none;">
+                            {% set vatTotal = get_chart_net_total(chart) * get_chart_vat_rate(chart) %}
+                            <li><b>{{ 'net_total'|trans({}, 'invoice') }}: {{ get_chart_net_total(chart)|format_price() }} € </b></li>
+                            <li><b>{{ 'vat_rate'|trans({}, 'invoice') }}: {{ get_chart_vat_rate(chart) * 100 }} % </b></li>
+                            <li><b> {{ 'vat_total'|trans({}, 'invoice') }}: {{ vatTotal|format_price() }} € </b></li>
+                            <li><b> {{ 'vati_total'|trans({}, 'invoice') }}: {{ (get_chart_net_total(chart) + vatTotal)|format_price() }} € </b></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="pull-left">
+                    <a class="btn btn-primary" href="{{ path('chart_payment_pending', {'chart': chart.getId()}) }}"> {{ 'confirm'|trans({}, 'invoice') }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

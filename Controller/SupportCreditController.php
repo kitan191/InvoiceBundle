@@ -146,7 +146,7 @@ class SupportCreditController extends Controller
             $this->om->flush();
 
             return new RedirectResponse($this->router->generate(
-                'chart_payment_pending',
+                'chart_payment_confirm',
                 array('chart' => $chart->getId()), true
             ));
 

@@ -2,7 +2,7 @@
 
 {% block title %}{{ parent() ~ ' - ' ~ 'invoice' | trans({}, 'invoice') | striptags | raw }}{% endblock %}
 
-{% set title = 'invoice'|trans({}, 'invoice') ~ '#' ~ invoice.getInvoiceNumber() %}
+{% set title = 'order'|trans({}, 'invoice') ~ '#' ~ invoice.getInvoiceNumber() %}
 
 {% block breadcrumb %}
     {{

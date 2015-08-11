@@ -3,18 +3,28 @@
         <thead>
             <tr>
                 <th> {{ 'code'|trans({}, 'invoice') }}</th>
-                <th> {{ 'quantity'|trans({}, 'invoice')}}</th>
-                <th> {{ 'unit_price'|trans({}, 'invoice')}}</th>
-                <th> {{ 'total'|trans({}, 'invoice')}}</th>
+                <th> {{ 'quantity'|trans({}, 'invoice') }}</th>
+                <th> {{ 'unit_price'|trans({}, 'invoice') }}</th>
+                <th> {{ 'total'|trans({}, 'invoice') }}</th>
+                <th> {{ 'other'|trans({}, 'invoice') }}</th>
             </tr>
         </thead>
         <tbody>
             {% for order in chart.getOrders() %}
             <tr>
-                <td> {{ order.getProduct().getCode() }} </td>
+                <td> {{ order.getProduct().getName() }} </td>
                 <td> {{ order.getQuantity() }} </td>
                 <td> {{ order.getPriceSolution().getPrice()|format_price() }} € </td>
                 <td> {{ (order.getQuantity() * order.getPriceSolution().getPrice())|format_price() }} € </td>
+                <td>
+                    {% if order.hasDiscount %}
+                        {% if order.getProduct().getType() == 'SHARED_WS' %}
+                            {{ 'one_free_month'|trans({}, 'invoice') }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

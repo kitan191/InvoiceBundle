@@ -104,4 +104,21 @@ class InvoiceController extends Controller
 
         return new RedirectResponse($this->get('router')->generate('claro_desktop_open'));
     }
+
+    /**
+     * @EXT\Route(
+     *      "/orders/list",
+     *      name="formalibre_my_orders_desktop_tool_index"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function listAction()
+    {
+        return array(
+            'invoices' => $this->container->get('formalibre.manager.invoiceManager')
+                ->getByUser($this->tokenStorage->getToken()->getUser())
+        );
+    }
 }

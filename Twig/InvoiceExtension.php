@@ -12,6 +12,7 @@
 namespace FormaLibre\InvoiceBundle\Twig;
 
 use JMS\DiExtraBundle\Annotation as DI;
+use FormaLibre\InvoiceBundle\Entity\Chart;
 use Claroline\CoreBundle\Entity\User;
 
 /**
@@ -42,7 +43,7 @@ class InvoiceExtension extends \Twig_Extension
             new \Twig_SimpleFilter('format_price', array($this, 'formatPrice'))
         );
     }
-    
+
     /*
      * {@inheritdoc}
      */
@@ -50,7 +51,10 @@ class InvoiceExtension extends \Twig_Extension
     {
         return array(
             new \Twig_SimpleFunction('get_facet_value', array($this, 'getFieldValue')),
-            new \Twig_SimpleFunction('get_invoice_locale', array($this, 'getInvoiceLocale'))
+            new \Twig_SimpleFunction('get_invoice_locale', array($this, 'getInvoiceLocale')),
+            new \Twig_SimpleFunction('get_chart_net_total', array($this, 'getChartNetTotal')),
+            new \Twig_SimpleFunction('get_chart_vat_rate', array($this, 'getChartVatRate')),
+            new \Twig_SimpleFunction('has_free_workspace_month', array($this, 'hasFreeWorkspaceMonth')),
         );
     }
 
@@ -93,6 +97,32 @@ class InvoiceExtension extends \Twig_Extension
         $invoiceManager = $this->container->get('formalibre.manager.invoice_manager');
 
         return $invoiceManager->getInvoiceLocale($user);
+    }
+
+    public function getChartNetTotal(Chart $chart)
+    {
+        $netTotal = 0;
+
+        foreach ($chart->getOrders() as $order) {
+            $netTotal += $order->getPriceSolution()->getPrice() * $order->getQuantity();
+        }
+
+        return $netTotal;
+    }
+
+    public function getChartVatRate(Chart $chart)
+    {
+        $vatManager = $this->container->get('formalibre.manager.vat_manager');
+        $user = $chart->getOwner();
+        $vatRate = $vatManager->getVatFromOwner($user) ?
+            0: $vatManager->getVATRate($vatManager->getCountryCodeFromOwner($user));
+
+        return $vatRate;
+    }
+
+    public function hasFreeWorkspaceMonth(User $user)
+    {
+        return $this->container->get('formalibre.manager.shared_workspace_manager')->hasFreeTestMonth($user);
     }
 
     /**

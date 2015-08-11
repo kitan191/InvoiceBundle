@@ -169,7 +169,24 @@ class InvoiceManager
         $query = $this->em->createQuery($dql);
 
         return ($getQuery) ? $query: $query->getResult();
+    }
 
+    public function getByUser(User $user, $getQuery = false)
+    {
+        $dql = "
+            SELECT i FROM FormaLibre\InvoiceBundle\Entity\Invoice i
+            JOIN i.chart chart
+            JOIN chart.owner user
+            WHERE user.id = {$user->getId()}
+            AND (
+                i.paymentSystemName = 'bank_transfer'
+                OR i.paymentSystemName = 'paypal_express_checkout'
+            ) 
+        ";
+
+        $query = $this->em->createQuery($dql);
+
+        return ($getQuery) ? $query: $query->getResult();
     }
 
     public function validate(Invoice $invoice)

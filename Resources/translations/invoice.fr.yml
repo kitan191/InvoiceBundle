@@ -109,3 +109,9 @@ order_number: Numéro de commande
 order_date: Date de la commande
 invoice_ask: Demander une facture
 invoice_request_done: Votre demande de facture a bien été enregistrée. Une facture vous sera bientôt envoyé à votre adresse email.
+is_payed: payé ?
+confirmation: Confirmation
+confirm: Confirmer
+free_test_month_for_product: Un mois gratuit supplémentaire pour le produit %product_name%.
+other: Autre
+one_free_month: Un mois gratuit

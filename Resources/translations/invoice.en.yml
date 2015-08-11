@@ -74,3 +74,9 @@ order_number: Order number
 order_date: Order date
 invoice_ask: Ask invoice
 invoice_request_done: invoice_request_done
+is_payed: is payed ?
+confirmation: Confirmation
+confirm: Confirm
+free_test_month_for_product: One free month for the product %product_name%.
+other: Other
+one_free_month: One free month

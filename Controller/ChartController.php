@@ -32,15 +32,18 @@ class ChartController extends Controller
     /** @DI\Inject("formalibre.manager.invoice_manager") */
     private $invoiceManager;
 
+    /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
+    private $swsManager;
+
     /** @DI\Inject("router") */
     private $router;
-    
+
     /** @DI\Inject("session") */
     private $session;
-    
+
     /** @DI\Inject("request") */
     private $request;
-    
+
     /** @DI\Inject("security.authorization_checker") */
     private $authorization;
 
@@ -72,8 +75,22 @@ class ChartController extends Controller
             'chart' => $chart
         );
     }
-    
-        /**
+
+    /**
+     * @EXT\Route(
+     *      "/confirm/chart/{chart}",
+     *      name="chart_payment_confirm"
+     * )
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function confirmChartAction(Chart $chart)
+    {
+        return array('chart' => $chart);
+    }
+
+    /**
      * @EXT\Route(
      *      "/payment/workspace/submit/order/{order}/product/{product}",
      *      name="workspace_product_payment_submit"
@@ -84,7 +101,7 @@ class ChartController extends Controller
     public function addOrderToChartAction(Order $order, Product $product)
     {
         $chart = $order->getChart();
-        
+
         //check it wasn't already submitted
         if (false) {
             $content = $this->renderView(
@@ -119,7 +136,7 @@ class ChartController extends Controller
             }
 
             $priceSolution = $form->get('price')->getData();
-        } 
+        }
 
         $order->setChart($chart);
         $order->setProduct($product);
@@ -127,12 +144,18 @@ class ChartController extends Controller
         $chart->setIpAdress($_SERVER['REMOTE_ADDR']);
         $order->setPriceSolution($priceSolution);
         $order->setChart($chart);
+
+        if ($this->swsManager->hasFreeTestMonth($chart->getOwner())) {
+            $order->setHasDiscount(true);
+            $this->swsManager->useFreeTestMonth($chart->getOwner());
+        }
+
         $this->em->persist($chart);
         $this->em->persist($order);
         $this->em->flush();
 
         return new RedirectResponse($this->router->generate(
-            'chart_payment_pending',
+            'chart_payment_confirm',
             array('chart' => $order->getChart()->getId()), true
         ));
 
