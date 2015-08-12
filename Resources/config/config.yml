@@ -10,10 +10,10 @@ plugin:
           is_displayable_in_workspace: false
           is_displayable_in_desktop: true
           class: book
-         - name: formalibre_my_orders
-           is_displayable_in_workspace: false
-           is_displayable_in_desktop: true
-           class: book
+        - name: formalibre_my_orders
+          is_displayable_in_workspace: false
+          is_displayable_in_desktop: true
+          class: book
 
     widgets:
         - name: formalibre_campus
