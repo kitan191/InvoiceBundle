@@ -15,6 +15,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Claroline\CoreBundle\Event\OpenAdministrationToolEvent;
 use Claroline\CoreBundle\Event\DisplayWidgetEvent;
+use Claroline\CoreBundle\Event\GenericDatasEvent;
+use FormaLibre\InvoiceBundle\Manager\CreditSupportManager;
 
 /**
 * @DI\Service()
@@ -23,20 +25,24 @@ class Listener
 {
     private $container;
     private $httpKernel;
+    private $creditManager;
 
     /**
     * @DI\InjectParams({
-    *   "container" = @DI\Inject("service_container"),
-    *    "httpKernel" = @DI\Inject("http_kernel")
+    *     "container"     = @DI\Inject("service_container"),
+    *     "httpKernel"    = @DI\Inject("http_kernel"),
+    *     "creditManager" = @DI\Inject("formalibre.manager.credit_support_manager")
     * })
     */
     public function __construct(
         ContainerInterface $container,
-        HttpKernelInterface $httpKernel
+        HttpKernelInterface $httpKernel,
+        CreditSupportManager $creditManager
     )
     {
         $this->container = $container;
         $this->httpKernel = $httpKernel;
+        $this->creditManager = $creditManager;
         $this->tokenStorage = $this->container->get('security.token_storage');
         $this->sharedWorkspaceManager = $this->container->get('formalibre.manager.shared_workspace_manager');
     }
@@ -163,5 +169,17 @@ class Listener
         $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
         $event->setContent($response->getContent());
         $event->stopPropagation();
+    }
+
+    /**
+     * @DI\Observe("formalibre_request_nb_remaining_credits")
+     *
+     * @param GenericDatasEvent $event
+     */
+    public function onNbRemainingCreditsRequest(GenericDatasEvent $event)
+    {
+        $user = $event->getDatas();
+        $nbCredits = $this->creditManager->getNbRemainingCredits($user);
+        $event->setResponse($nbCredits);
     }
 }
