@@ -12,11 +12,13 @@ use FormaLibre\InvoiceBundle\Entity\Order;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Form\PriceSolutionForm;
+use FormaLibre\InvoiceBundle\Form\PartnerType;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use FormaLibre\InvoiceBundle\Entity\Invoice;
+use FormaLibre\InvoiceBundle\Entity\Partner;
 
 /**
 * @SEC\PreAuthorize("canOpenAdminTool('formalibre_admin_invoice')")
@@ -28,6 +30,9 @@ class AdministrationController extends Controller
 
     /** @DI\Inject("formalibre.manager.product_manager") */
     private $productManager;
+    
+    /** @DI\Inject("formalibre.manager.partner_manager") */
+    private $partnerManager;
 
     /** @DI\Inject("claroline.pager.pager_factory") */
     private $pagerFactory;
@@ -469,6 +474,113 @@ class AdministrationController extends Controller
     public function removeInvoice(Invoice $invoice)
     {
         $this->invoiceManager->remove($invoice);
+
+        return new Response('success');
+    }
+    
+    /**
+     * @EXT\Route(
+     *      "/partners/index",
+     *      name="formalibre_partners_index",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     */
+    public function partnerIndexAction()
+    {
+        $partners = $this->partnerManager->findAll();
+        
+        return array('partners' => $partners);
+    }
+    
+    /**
+     * @EXT\Route(
+     *      "/partner/form",
+     *      name="formalibre_partner_create_form",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     * @EXT\Template
+     *
+     * @return Response
+     */
+    public function addPartnerFormAction()
+    {
+        $form = $this->createForm(new PartnerType());
+
+        return array('form' => $form->createView());
+    }
+    
+    /**
+     * @EXT\Route(
+     *      "/partner/create",
+     *      name="formalibre_partner_create",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function addPartnerAction()
+    {
+        $form = $this->createForm(new PartnerType, new Partner());
+        $form->handleRequest($this->get('request'));
+
+        if ($form->isValid()) {
+            $partner = $form->getData();
+            $partner = $this->partnerManager->create($partner);
+
+            return new JsonResponse(
+                array(
+                    'id' => $partner->getId(),
+                    'code' => $partner->getCode(),
+                    'name' => $partner->getName()
+                )
+            );
+        }
+
+        return $this->render(
+            'FormaLibreInvoiceBundle:Administration:addPartnerForm.html.twig',
+            array('form' => $form->createView())
+        );
+    }
+    
+    /**
+     * @EXT\Route(
+     *      "/show/partner/{partner}/chart/{page}",
+     *      name="formalibre_admin_show_partner_charts",
+     *      defaults={"page"=1},
+     *      options = {"expose"=true}
+     * )
+     * @EXT\Template
+     */
+    public function showPartnerChartsAction(Partner $partner, $page)
+    {
+        $query = $this->partnerManager->getCharts($partner, true);
+        $pager = $this->pagerFactory->createPager($query, $page, 25);
+
+        return array(
+            'pager' => $pager,
+            'page' => $page,
+            'partner' => $partner
+        );
+    }
+    
+        /**
+     * @EXT\Route(
+     *      "/partner/{partner}/activate/{isActivated}",
+     *      name="formalibre_activate_partner",
+     *      options = {"expose"=true}
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function activatePartnerAction(Partner $partner, $isActivated)
+    {
+        $boolActivated = $isActivated === 'true' ? true: false;
+        $this->productManager->activatePartner($partner, $boolActivated);
 
         return new Response('success');
     }

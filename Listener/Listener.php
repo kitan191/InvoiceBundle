@@ -17,6 +17,9 @@ use Claroline\CoreBundle\Event\OpenAdministrationToolEvent;
 use Claroline\CoreBundle\Event\DisplayWidgetEvent;
 use Claroline\CoreBundle\Event\GenericDatasEvent;
 use FormaLibre\InvoiceBundle\Manager\CreditSupportManager;
+use Claroline\CoreBundle\Event\UserCreatedEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernel;
 
 /**
 * @DI\Service()
@@ -127,6 +130,25 @@ class Listener
 
        return $response;
     }
+    
+   /**
+    * @DI\Observe("administration_tool_formalibre_partners_admin_tool")
+    *
+    * @param DisplayToolEvent $event
+    */
+    public function onDisplayPartners(OpenAdministrationToolEvent $event)
+    {
+       $event->setResponse($this->openAdminPartners());
+    }
+    
+    private function openAdminPartners()
+    {
+       $params = array('_controller' => 'FormaLibreInvoiceBundle:Administration:partnerIndex');
+       $subRequest = $this->container->get('request')->duplicate(array(), null, $params);
+       $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+
+       return $response;
+    }
 
     /**
      * @DI\Observe("open_tool_desktop_formalibre_my_shared_workspaces_tool")
@@ -181,5 +203,47 @@ class Listener
         $user = $event->getDatas();
         $nbCredits = $this->creditManager->getNbRemainingCredits($user);
         $event->setResponse($nbCredits);
+    }
+    
+    /**
+     * @DI\Observe("user_created_event")
+     *
+     * @param UserCreatedEvent $event
+     */
+    public function onUserCreated(UserCreatedEvent $event)
+    {
+        $user = $event->getUser();
+        $session = $this->container->get('session');
+        
+        if ($session->has('partner_code')) {
+            $code = $session->get('partner_code');
+            $em = $this->container->get('doctrine.orm.entity_manager');
+            $partner = $em->getRepository('FormaLibre\InvoiceBundle\Entity\Partner')
+                ->findOneByCode('SUPER');
+            if ($partner) {
+                $partner->addUser($user);
+                $em->persist($partner);
+                $em->flush();
+            }
+        }
+    }
+    
+    /**
+     * @DI\Observe("kernel.request")
+     *
+     * Sets the platform language.
+     *
+     * @param GetResponseEvent $event
+     */
+    public function onKernelRequest(GetResponseEvent $event)
+    {
+        if (HttpKernel::MASTER_REQUEST != $event->getRequestType()) {
+            // ne rien faire si ce n'est pas la requête principale
+            return;
+        }
+        
+        $request = $event->getRequest();
+        $code = $request->query->get('partner_code');
+        $this->container->get('session')->set('partner_code', $code);
     }
 }

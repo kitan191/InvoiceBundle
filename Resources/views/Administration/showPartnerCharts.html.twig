@@ -1,0 +1,79 @@
+{% macro renderPager(pager, partner) %}
+    {{
+        pagerfanta(
+            pager,
+            'twitter_bootstrap_translated',
+            {
+                'proximity' : 1,
+                'routeName': 'formalibre_admin_show_partner_charts',
+                'routeParams': {'partner': partner.getId()}
+            }
+        )
+    }}
+{% endmacro %}
+{% from _self import renderPager %}
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block title %}{{ parent() ~ ' - ' ~ 'invoice' | trans({}, 'invoice') | striptags | raw }}{% endblock %}
+
+{% block breadcrumb %}
+    {{
+        macros.breadcrumbs([
+            {
+                'icon': 'fa fa-cog',
+                'name': 'administration'|trans({}, 'platform'),
+                'href': path('claro_admin_index')
+            },
+            {
+                'name': 'partners'|trans({}, 'invoice'),
+                'href': path('formalibre_partners_index')
+            },
+            {
+                'name': partner.getName(),
+                'href': ''
+            }
+        ])
+    }}
+{% endblock %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ 'partners'|trans({}, 'invoice') }}</h3>
+    </div>
+    <div class="panel-body">
+         <div class="table-responsive">
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>
+                            {{ 'username'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'invoice'|trans({}, 'platform') }}
+                        </th>
+                        <th>
+                            {{ 'payment_method'|trans({}, 'platform') }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chart in pager.currentPageResults %}
+                    <tr id="chart-row-{{ chart.getId() }}">
+                        <td> {{ chart.getOwner().getUsername() }} </td>
+                        <td> 
+                            <a href="{{ path('admin_invoice_show', {'invoice': chart.getInvoice().getId() }) }}"> {{ chart.getInvoice().getInvoiceNumber() }} </a>
+                        </td>
+                        <td> {{ chart.getInvoice().paymentSystemName() }} </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if pager.getNbPages() > 1 %}
+         {{ renderPager(pager, partner) }}
+    {% endif %}
+    <div class="panel-footer">
+
+    </div>
+{% endblock %}

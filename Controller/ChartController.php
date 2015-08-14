@@ -95,7 +95,7 @@ class ChartController extends Controller
      *      "/payment/workspace/submit/order/{order}/product/{product}",
      *      name="workspace_product_payment_submit"
      * )
-     *
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
      * @return Response
      */
     public function addOrderToChartAction(Order $order, Product $product)

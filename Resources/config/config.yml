@@ -28,3 +28,6 @@ plugin:
 
         - name: formalibre_shared_workspaces_admin_tool
           class: book
+
+        - name: formalibre_partners_admin_tool
+          class: book

@@ -1,0 +1,20 @@
+{% twig_js name="PartnerTableRow" %}
+
+<tr id="row-partner-{{ partner.id }}">
+    <td> {{ partner.name }} </td>
+    <td> {{ partner.code }} </td>
+    <td>             
+       <div class="btn-group">
+            <a class="btn btn-default show-charts-btn"
+                href="{{ path('formalibre_admin_show_partner_charts', {'partner': partner.id}) }}"
+            >
+                <i class="fa fa-info" data-partner-id="{{ partner.id }}"></i>
+            </a>
+            <button class="btn btn-danger delete-partner-btn"
+                    data-partner-id="{{ partner.id }}"
+            >
+                <i class="fa fa-trash" data-partner-id="{{ partner.id }}"></i>
+            </button>
+        </div>
+    </td>
+</tr>

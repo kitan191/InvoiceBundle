@@ -146,4 +146,14 @@ class Chart
     {
         $this->ipAdress = $ipAdress;
     }
+    
+    public function setPartner(Partner $partner)
+    {
+        $this->partner = $partner;
+    }
+    
+    public function getPartner()
+    {
+        return $this->partner;
+    }
 }
