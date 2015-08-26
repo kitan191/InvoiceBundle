@@ -12,6 +12,7 @@ use FormaLibre\InvoiceBundle\Entity\Partner;
 class PartnerManager
 {
     private $em;
+    private $partnerRepository;
 
     /**
      * @DI\InjectParams({
@@ -59,5 +60,15 @@ class PartnerManager
         $query->setParameter('users', $users);
 
         return ($getQuery) ? $query: $query->getResult();
+    }
+
+    public function getAllPartners()
+    {
+        return $this->partnerRepository->findAll();
+    }
+
+    public function getPartnerById($partnerId)
+    {
+        return $this->partnerRepository->findOneById($partnerId);
     }
 }
