@@ -2,6 +2,7 @@
 
 namespace FormaLibre\InvoiceBundle\Controller;
 
+use Claroline\CoreBundle\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -12,6 +13,7 @@ use FormaLibre\InvoiceBundle\Entity\Order;
 use FormaLibre\InvoiceBundle\Entity\Product;
 use FormaLibre\InvoiceBundle\Entity\PriceSolution;
 use FormaLibre\InvoiceBundle\Form\PriceSolutionForm;
+use FormaLibre\InvoiceBundle\Form\PartnerSelectType;
 use FormaLibre\InvoiceBundle\Form\PartnerType;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -43,9 +45,6 @@ class AdministrationController extends Controller
     /** @DI\Inject("security.authorization_checker") */
     private $authorization;
 
-    /** @DI\Inject("formalibre.manager.shared_workspace_manager") */
-    private $sharedWorkspaceManager;
-
     /** @DI\Inject("formalibre.manager.price_solution_manager") */
     private $priceSolutionManager;
 
@@ -54,6 +53,12 @@ class AdministrationController extends Controller
 
     /** @DI\Inject("claroline.persistence.object_manager") */
     private $om;
+
+    /** @DI\Inject("form.factory") */
+    private $formFactory;
+    
+    /** @DI\Inject("request") */
+    private $request;
 
     /**
      * @EXT\Route(
@@ -583,5 +588,123 @@ class AdministrationController extends Controller
         $this->productManager->activatePartner($partner, $boolActivated);
 
         return new Response('success');
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/admin/invoice/users/page/{page}/max/{max}/search/{search}",
+     *      name="admin_invoice_users",
+     *      defaults={"page"=1, "max"=20, "search"=""},
+     *      options = {"expose"=true}
+     * )
+     * @EXT\Template
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function invoiceUsersAction($search = '', $page = 1, $max = 20)
+    {
+        $datas = array();
+        $invoices = $this->invoiceManager->getInvoicesByUsers($search);
+
+        foreach ($invoices as $invoice) {
+            $user = $invoice->getChart()->getOwner();
+            $userId = $user->getId();
+
+            if (!isset($datas[$userId])) {
+                $datas[$userId] = array();
+                $datas[$userId]['user'] = $user;
+                $datas[$userId]['invoices'] = array();
+            }
+            $datas[$userId]['invoices']['invoices'][] = $invoice;
+        }
+        $partners = $this->partnerManager->getAllPartners();
+
+        foreach ($partners as $partner) {
+            $users = $partner->getUsers();
+
+            foreach ($users as $user) {
+                $userId = $user->getId();
+
+                if (isset($datas[$userId]) && !isset($datas[$userId]['partner'])) {
+                    $datas[$userId]['partner'] = $partner;
+                }
+            }
+        }
+
+        $pager = $this->pagerFactory->createPagerFromArray($datas, $page, $max);
+
+        return array('pager' => $pager, 'search' => $search, 'max' => $max);
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/admin/invoice/user/{user}/partner/{currentPartnerId}/select/form",
+     *      name="admin_invoice_user_partner_select_form",
+     *      options = {"expose"=true}
+     * )
+     * @EXT\Template("FormaLibreInvoiceBundle:Administration:partnerSelectModalForm.html.twig")
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function partnerSelectFormAction(User $user, $currentPartnerId)
+    {
+        $currentPartner = $this->partnerManager->getPartnerById($currentPartnerId);
+        $form = $this->formFactory->create(new PartnerSelectType($currentPartner));
+
+        return array(
+            'form' => $form->createView(),
+            'user' => $user,
+            'currentPartnerId' => $currentPartnerId
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *      "/admin/invoice/user/{user}/partner/{currentPartnerId}/select",
+     *      name="admin_invoice_user_partner_select",
+     *      options = {"expose"=true}
+     * )
+     * @EXT\Template("FormaLibreInvoiceBundle:Administration:partnerSelectModalForm.html.twig")
+     * @Security("has_role('ROLE_ADMIN')")
+     *
+     * @return Response
+     */
+    public function partnerSelectAction(User $user, $currentPartnerId)
+    {
+        $currentPartner = $this->partnerManager->getPartnerById($currentPartnerId);
+        $form = $this->formFactory->create(new PartnerSelectType($currentPartner));
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $partner = $form->get('partner')->getData();
+            $toFlush = false;
+
+            if (!is_null($currentPartner) && $currentPartner !== $partner) {
+                $currentPartner->removeUser($user);
+                $this->om->persist($currentPartner);
+                $toFlush = true;
+            }
+
+            if (!is_null($partner) && $currentPartner !== $partner) {
+                $partner->addUser($user);
+                $this->om->persist($partner);
+                $toFlush = true;
+            }
+
+            if ($toFlush) {
+                $this->om->flush();
+            }
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'user' => $user,
+                'currentPartnerId' => $currentPartnerId
+            );
+        }
     }
 }

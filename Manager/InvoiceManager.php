@@ -15,6 +15,18 @@ use Claroline\CoreBundle\Manager\MailManager;
 */
 class InvoiceManager
 {
+    private $container;
+    private $em;
+    private $invoiceRepository;
+    private $mailManager;
+    private $om;
+    private $orderManager;
+    private $pdfDir;
+    private $snappy;
+    private $templating;
+    private $translator;
+    private $vatManager;
+
     /**
      * @DI\InjectParams({
      *     "om"           = @DI\Inject("claroline.persistence.object_manager"),
@@ -379,5 +391,12 @@ class InvoiceManager
         }
 
         return $locales;
+    }
+
+    public function getInvoicesByUsers($search = '')
+    {
+        return empty($search) ?
+            $this->invoiceRepository->findAll() :
+            $this->invoiceRepository->findInvoicesBySearchedUsers($search);
     }
 }

@@ -8,7 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Table(name="formalibre__invoice")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="FormaLibre\InvoiceBundle\Repository\InvoiceRepository")
  */
 class Invoice
 {

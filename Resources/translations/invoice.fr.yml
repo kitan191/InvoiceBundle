@@ -115,3 +115,7 @@ confirm: Confirmer
 free_test_month_for_product: Un mois gratuit supplémentaire pour le produit %product_name%.
 other: Autre
 one_free_month: Un mois gratuit
+change_partner: Changer le partenaire
+partner: Partenaire
+partner_none: Aucun
+partner_selection: Sélection du partenaire
