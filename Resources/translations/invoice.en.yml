@@ -84,3 +84,5 @@ change_partner: Change partner
 partner: Partner
 partner_none: None
 partner_selection: Partner selection
+users: users
+resources: resources
